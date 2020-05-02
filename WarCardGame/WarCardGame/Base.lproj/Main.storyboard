@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina5_9" orientation="portrait" appearance="dark"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="WarCardGame" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Background" translatesAutoresizingMaskIntoConstraints="NO" id="Rkw-7q-1Z4">
+                                <rect key="frame" x="16" y="44" width="343" height="734"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="7gq-og-Lkz" userLabel="Love">
+                                <rect key="frame" x="126.66666666666669" y="124" width="122" height="67"/>
+                            </imageView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="30" translatesAutoresizingMaskIntoConstraints="NO" id="d4E-LN-p2T" userLabel="VertSVCardsButton">
+                                <rect key="frame" x="62.666666666666657" y="290.66666666666669" width="249.99999999999997" height="231.00000000000006"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleAspectFit" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="Krn-BP-h72" userLabel="HorizSVCards">
+                                        <rect key="frame" x="0.0" y="0.0" width="250" height="170"/>
+                                        <subviews>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="card14" translatesAutoresizingMaskIntoConstraints="NO" id="hsw-x9-RVG">
+                                                <rect key="frame" x="0.0" y="0.0" width="120" height="170"/>
+                                            </imageView>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="card10" translatesAutoresizingMaskIntoConstraints="NO" id="QZ7-dc-35V">
+                                                <rect key="frame" x="130" y="0.0" width="120" height="170"/>
+                                            </imageView>
+                                        </subviews>
+                                    </stackView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vNs-sU-EZy">
+                                        <rect key="frame" x="0.0" y="199.99999999999994" width="81.666666666666671" height="31"/>
+                                        <state key="normal" image="dealbutton"/>
+                                        <connections>
+                                            <action selector="dealTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hEt-hx-RgT"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="woz-rD-1gY">
+                                <rect key="frame" x="222" y="640" width="143" height="76.333333333333371"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="player" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pMV-FR-j27">
+                                        <rect key="frame" x="0.0" y="0.0" width="143" height="36"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="30"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oVh-3p-oWI">
+                                        <rect key="frame" x="0.0" y="56.000000000000007" width="143" height="20.333333333333336"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                            <stackView opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="dbQ-Kb-b8i">
+                                <rect key="frame" x="62.000000000000014" y="640" width="48.666666666666657" height="76.333333333333329"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="cpu" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QbN-oz-k3e" userLabel="cpu">
+                                        <rect key="frame" x="0.0" y="0.0" width="48.666666666666664" height="36"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="30"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vJc-yW-dkl">
+                                        <rect key="frame" x="0.0" y="56.000000000000007" width="48.666666666666664" height="20.333333333333336"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="7gq-og-Lkz" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="80" id="5wd-g7-G4b"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="woz-rD-1gY" secondAttribute="bottom" constant="126" id="BJs-z9-H80"/>
+                            <constraint firstItem="d4E-LN-p2T" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="HAJ-YU-dbT"/>
+                            <constraint firstItem="d4E-LN-p2T" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="KQI-Md-x1A"/>
+                            <constraint firstItem="woz-rD-1gY" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="596" id="Mp9-YI-dzu"/>
+                            <constraint firstItem="woz-rD-1gY" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="222" id="VhM-8k-St5"/>
+                            <constraint firstItem="Rkw-7q-1Z4" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="Vhu-yK-7wG"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="woz-rD-1gY" secondAttribute="trailing" constant="10" id="cKp-qV-Pot"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Rkw-7q-1Z4" secondAttribute="trailing" id="lFZ-IG-ZEt"/>
+                            <constraint firstItem="dbQ-Kb-b8i" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="nvN-Ue-PRg"/>
+                            <constraint firstItem="Rkw-7q-1Z4" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" id="osu-oW-gJS"/>
+                            <constraint firstAttribute="bottomMargin" secondItem="Rkw-7q-1Z4" secondAttribute="bottom" id="pTX-vG-BGC"/>
+                            <constraint firstItem="d4E-LN-p2T" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="rIR-ig-9os"/>
+                            <constraint firstItem="7gq-og-Lkz" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="zEI-61-HCU"/>
+                            <constraint firstItem="d4E-LN-p2T" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="zUm-eR-dVF"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                    </view>
+                    <connections>
+                        <outlet property="leftImageV" destination="hsw-x9-RVG" id="Try-U6-nRV"/>
+                        <outlet property="playerL" destination="oVh-3p-oWI" id="aVw-Yx-jSd"/>
+                        <outlet property="rightImageV" destination="QZ7-dc-35V" id="rGx-v1-rw4"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="113.04347826086958" y="81.696428571428569"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="Background" width="414" height="896"/>
+        <image name="card10" width="120" height="170"/>
+        <image name="card14" width="120" height="170"/>
+        <image name="dealbutton" width="81.666664123535156" height="31"/>
+        <image name="logo" width="122" height="67"/>
+    </resources>
+</document>

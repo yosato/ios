@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "iterators",
+      "kind" : "remoteSourceControl",
+      "location" : "git@github.com:atfelix/Iterators.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "e7fba45518edf8dd3e3de6d96c30c2b74ad43209"
+      }
+    }
+  ],
+  "version" : 2
+}

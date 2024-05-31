@@ -26,6 +26,8 @@ struct MatchView: View {
     @State var selection2s:Int=0
     @State private var showInputResult=false
     
+    @State var gainsLosses:[((Team,Team),Double)]=[]
+    @State private var showGains=false
 
     var bestMatchSetsOnCourt:[MatchSetOnCourt] {
         Array(goodMatchSets.orderedMatchSets[0...currentMatchSetInd]).reversed()
@@ -36,6 +38,7 @@ struct MatchView: View {
     }
     
     var comboCount:Int {goodMatchSets.orderedMatchSets.count}
+    
 
         
     private func binding(for key: Int) -> Binding<Int> {
@@ -65,19 +68,25 @@ struct MatchView: View {
             }.listStyle(InsetGroupedListStyle()).ignoresSafeArea()//list
             Button(action:{
                 if(liveMode){
-                    myPlayers.update_playerscores_matchSetResult(matchResults.results.last!)
+                    gainsLosses=myPlayers.update_playerscores_matchSetResult(matchResults.results.last!)
+                    showGains=true
                 }else{
                     myPlayers.update_playerscores_matchResults(matchResults)
                     goodMatchSets.reorder_matchsets(from:currentMatchSetInd+1)
-                    
                 }
                 currentMatchSetInd=(currentMatchSetInd+1<comboCount ? currentMatchSetInd+1 : 0)
                 
             },label:{Text("Next match")}).disabled(liveMode && (matchResults.results.count < currentMatchSetInd+1 || !matchResults.results.last!.completed))
 //            Text("There are \(comboCount) combinations (currently no. \(currentMatchSetInd+1))")
-        }
+        }.alert("\(gainsLosses2string(gainsLosses))",isPresented:$showGains){}
     }
-    
+    func gainsLosses2string(_ gainsLosses:[((Team,Team),Double)])->String{
+        var messages:[String]=[]
+        for ((team,_),gain) in gainsLosses{
+            messages.append(team.players.map{player in player.name}.joined(separator:"/")+" gained \(gain) points")
+        }
+        return messages.joined(separator:"\n")
+    }
 }
 
 

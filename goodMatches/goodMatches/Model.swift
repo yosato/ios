@@ -162,10 +162,11 @@ class PlayersOnCourt:ObservableObject{
         
     }
     
-    func update_playerscores_matchResult(_ result:MatchResult){
+    func update_playerscores_matchResult(_ result:MatchResult)->((Team,Team),Double)?{
         if(result.drawnP){
-            return
+            return nil
         }
+        
         let winningTeam=(result.scores.0>result.scores.1 ? result.match.teams.0 : result.match.teams.1)
         let losingTeam=(result.scores.0>result.scores.1 ? result.match.teams.1 : result.match.teams.0)
         
@@ -179,13 +180,19 @@ class PlayersOnCourt:ObservableObject{
             let ind=playerInd_fromID(losingPlayer.id)
             self.players[ind].score-=increment
         }
-
+        return ((winningTeam,losingTeam),increment)
     }
-    
-    func update_playerscores_matchSetResult(_ matchSetResult:MatchSetResult){
+
+    func update_playerscores_matchSetResult(_ matchSetResult:MatchSetResult)->[((Team,Team),Double)]{
+        var gainsLosses:[((Team,Team),Double)]=[]
         for matchResult in matchSetResult.matchResults{
-            self.update_playerscores_matchResult(matchResult)
+            let gainLoss=self.update_playerscores_matchResult(matchResult)
+            if(gainLoss != nil){
+                gainsLosses.append(gainLoss!)
+            }
+            
         }
+        return gainsLosses
     }
     func update_playerscores_matchResults(_ matchResults:MatchResults){
         for matchSetResult in matchResults.results{

@@ -10,10 +10,10 @@ import SwiftUI
 struct PlayerConfirmView: View {
     @EnvironmentObject var myPlayers:PlayersOnCourt
     @EnvironmentObject var goodMatchSets: GoodMatchSetsOnCourt
-    var likelyCourtCount:Int { myPlayers.players.count.quotientAndRemainder(dividingBy: 4).quotient }
-    @State private var courtCount:Int=2
+    @State var courtCount:Int=2
     @State private var inputInvalid=false
     @State private var calculationDone=false
+    @State private var liveMode=true
     var body: some View {
         NavigationStack{
             VStack{
@@ -26,6 +26,8 @@ struct PlayerConfirmView: View {
                     Stepper("How many courts?\t\t\t \(courtCount)", value:$courtCount, in:1...10)
                 }.padding()
                 
+                Toggle("Live update",isOn:$liveMode).padding()
+                
                 VStack{
                     Button(action:{
                         if(Double(myPlayers.players.count)/Double(2)<Double(courtCount)){inputInvalid=true}else{
@@ -33,7 +35,7 @@ struct PlayerConfirmView: View {
                                 Button("OK",role:.cancel){}
                             }
                     if(calculationDone){Text("... done")}
-                    NavigationLink(destination:MatchView()){if(calculationDone){Text("Show")}}
+                    NavigationLink(destination:MatchView(liveMode:liveMode)){if(calculationDone){Text("Show")}}
             }
                 Spacer()
             }
@@ -42,5 +44,5 @@ struct PlayerConfirmView: View {
 }
 
 #Preview {
-    PlayerConfirmView().environmentObject(PlayersOnCourt())
+    PlayerConfirmView(courtCount:2).environmentObject(PlayersOnCourt())
 }

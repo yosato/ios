@@ -9,14 +9,11 @@ import SwiftUI
 
 
 struct MatchView: View {
+    let liveMode: Bool
     @EnvironmentObject var myPlayers:PlayersOnCourt
     @EnvironmentObject var goodMatchSets:GoodMatchSetsOnCourt
+    @EnvironmentObject var matchResults:MatchResults
     @State var currentMatchSetInd:Int=0
-//    @State var results=[((Team,Team),(Int,Int))]()
-//    @State var resultDict=[Team:Int]()
-//    @State var resultDict0:[Int:Int]=[0:0]
-//    @State var matchResultsD=[Int:MatchResult]()
-    @StateObject var matchResults=MatchResults()
     @State var result:Int=0
     var values1d:[Int]=Array(0...6)
     var values2d:[Int]=Array(0...6)
@@ -28,6 +25,7 @@ struct MatchView: View {
     @State var selection1s:Int=0
     @State var selection2s:Int=0
     @State private var showInputResult=false
+    
 
     var bestMatchSetsOnCourt:[MatchSetOnCourt] {
         Array(goodMatchSets.orderedMatchSets[0...currentMatchSetInd]).reversed()
@@ -52,8 +50,8 @@ struct MatchView: View {
             List{
                 ForEach(indexedBestMatchSetsOnCourt,id:\.1){ (matchSetInd, matchSet) in
                     VStack{
-                        Text("MatchSet \(matchSetInd+1)")
-                        MatchUp(matchSetInd: matchSetInd, matchResults: matchResults)
+                        Text("goodMatches \(matchSetInd+1)")
+                        MatchUp(matchSetInd: matchSetInd)
                         if (matchSet.restingPlayers.count != 0){
                             HStack{
                                 Text("Resting: ").font(.headline.smallCaps())
@@ -66,12 +64,17 @@ struct MatchView: View {
                 
             }.listStyle(InsetGroupedListStyle()).ignoresSafeArea()//list
             Button(action:{
-                myPlayers.update_scores(Array(matchResults.results))
-                
+                if(liveMode){
+                    myPlayers.update_playerscores_matchSetResult(matchResults.results.last!)
+                }else{
+                    myPlayers.update_playerscores_matchResults(matchResults)
+                    goodMatchSets.reorder_matchsets(from:currentMatchSetInd+1)
+                    
+                }
                 currentMatchSetInd=(currentMatchSetInd+1<comboCount ? currentMatchSetInd+1 : 0)
                 
-            },label:{Text("Next match")})
-            Text("There are \(comboCount) combinations (currently no. \(currentMatchSetInd+1))")
+            },label:{Text("Next match")}).disabled(liveMode && (matchResults.results.count < currentMatchSetInd+1 || !matchResults.results.last!.completed))
+//            Text("There are \(comboCount) combinations (currently no. \(currentMatchSetInd+1))")
         }
     }
     
@@ -82,8 +85,9 @@ struct MatchUp:View{
     let matchSetInd:Int
     //    let matchSet:[Match]
     @EnvironmentObject var goodMatchSets:GoodMatchSetsOnCourt
-    var matchSet:[Match] { goodMatchSets.orderedMatchSets[matchSetInd].matchesOnCourt }
-    @ObservedObject var matchResults:MatchResults
+    var matchSetOnCourt:MatchSetOnCourt {goodMatchSets.orderedMatchSets[matchSetInd]}
+    var matchSet:[Match] { matchSetOnCourt.matchesOnCourt }
+    @EnvironmentObject var matchResults:MatchResults
     @State var currentMatch:Match? = nil
     @State var matchInd:Int=0
     //        @State var showInputResult=false
@@ -101,23 +105,24 @@ struct MatchUp:View{
                         HStack{
                             Spacer()
                             if (!matchResults.results.isEmpty){
-                                //                                    let teamsScores=matchResults.get_result_byID([team1,team2])
-                                //                                    if !teamsScores.isEmpty{
-                                //                                        Text("\(teamsScores[team1]!)-\(teamsScores[team2]!)")
+                                let matchID=match.id+"__"+String(matchSetInd)
+                                if let matchResult=matchResults.get_matchresult_byID(matchID){
+                                    Text("\(matchResult.scores.0)-\(matchResult.scores.1)")
+                                }
                             }
-                        }
-                        Spacer()
-                        Button("Input/correct result"){
-                            //showInputResult=true
-                            currentMatch=match
-                            matchInd=index
+                            Spacer()
+                            Button("Input/correct result"){
+                                //showInputResult=true
+                                currentMatch=match
+                                matchInd=index
+                            }
                         }
                     }
                 }
             }
             
             .sheet(item:$currentMatch){aMatch in
-                InputResultView(matchSetInd:matchSetInd, match:matchSet[matchInd])
+                InputResultView(matchSetInd:matchSetInd, sizedCourtCounts:matchSetOnCourt.sizedCourtCounts, match:matchSet[matchInd]).environmentObject(matchResults)
             }
         }//ForEach
         
@@ -147,5 +152,5 @@ struct MatchUp_sub:View{
 
 
 #Preview {
-    MatchView().environmentObject(PlayersOnCourt()).environmentObject(GoodMatchSetsOnCourt())
+    MatchView(liveMode:true).environmentObject(PlayersOnCourt()).environmentObject(GoodMatchSetsOnCourt())
 }

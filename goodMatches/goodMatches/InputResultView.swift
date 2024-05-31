@@ -10,6 +10,7 @@ import SwiftUI
 struct InputResultView: View {
     @Environment(\.dismiss) var dismiss
     let matchSetInd:Int
+    let sizedCourtCounts:[Int:Int]
     let match:Match
     @EnvironmentObject var matchResults:MatchResults
     @State var selection1:Int=0
@@ -26,7 +27,7 @@ struct InputResultView: View {
                 let matchResult =
                 get_matchresult(matchSetInd:matchSetInd,match:match,scores:(selection1,selection2))
                 if(matchResult.scores==(0,0)){zeroAlertOn=true}else{
-                    matchResults.results.append(matchResult)
+                    matchResults.add_matchResult(matchResult,sizedCourtCounts:sizedCourtCounts)
                     dismiss()
                 }
             }.alert("0-0 is an invalid input",isPresented:$zeroAlertOn){

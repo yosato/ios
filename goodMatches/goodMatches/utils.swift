@@ -6,7 +6,48 @@
 //
 
 import Foundation
+import SwiftUI
 import Iterators
+
+func checkConnection() {
+if let url = URL(string: "https://www.xxxxxxxxxxxxxxxxxxxxx") {
+    var request = URLRequest(url: url)
+    request.httpMethod = "HEAD"
+    URLSession(configuration: .default)
+      .dataTask(with: request) { (_, response, error) -> Void in
+        guard error == nil else {
+          print("Error:", error ?? "")
+          return
+        }
+
+        guard (response as? HTTPURLResponse)?
+          .statusCode == 200 else {
+            print("down")
+
+            return
+        }
+
+        print("up")
+
+        
+        
+      }
+      .resume()
+  }
+}
+
+func verifyUrl (urlString: String?) -> Bool {
+    if let urlString = urlString {
+        if let url = URL(string: urlString) {
+            do {let myBool=try url.checkResourceIsReachable()
+                return myBool
+            }catch{
+             return false
+            }
+        }
+    }
+    return false
+}
 
 func sum<T:Numeric>(_ aList:[T])-> T{
     aList.reduce(0){$0+$1}

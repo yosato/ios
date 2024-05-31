@@ -9,6 +9,7 @@ import SwiftUI
 
 
 struct ContentView: View {
+    @StateObject var playerDataHandler=PlayerDataHandler()
     var body: some View {
         NavigationStack {
             Spacer()
@@ -18,7 +19,7 @@ struct ContentView: View {
             
 //            MultiPicker(selection1:$selection1,selection2:$selection2,values1:values1,values2:values2)
             
-            NavigationLink(destination:PlayerView()){
+            NavigationLink(destination:PlayerView(playerDataHandler:playerDataHandler)){
                 Text("Pick players").font(.headline)}
             Spacer()
             Spacer()
@@ -27,7 +28,6 @@ struct ContentView: View {
         .padding()
     }
     
-
     
 }
 

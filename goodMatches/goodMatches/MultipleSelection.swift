@@ -15,6 +15,7 @@ struct MultipleSelection: View {
         var body: some View {
             Button(action: self.action) {
                 HStack {
+                    Button{}label:{Image(systemName:"square.and.pencil")}.imageScale(.small).foregroundColor(.gray)
                     Text(self.title)
                     if self.isSelected {
                         Spacer()

@@ -57,13 +57,6 @@ struct PlayerRegisterView: View {
         return nameAbbr+"_"+clubAbbr
 
     }
-    func loadData(){
-        if(verifyUrl(urlString: "http://127.0.0.1/players")){
-            Task{await playerDataHandler.loadData_remote()}
-        }else{
-            playerDataHandler.loadData_local()
-        }
-    }
 
     
     func register_player() async {
@@ -77,8 +70,8 @@ struct PlayerRegisterView: View {
         default: score=45.0
         }
         let player=Player(name:newPlayerName, score:score, gender:gender.rawValue, club:currentClub)
-        await playerDataHandler.add_player_remote(player)
-        playerDataHandler.add_player(player)
+        //await playerDataHandler.add_player_remote(player)
+        await playerDataHandler.add_player(player)
     }
 }
 //#Preview {

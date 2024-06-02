@@ -8,15 +8,17 @@
 import Foundation
 
 func get_elo_prob(favourite:Team, against:Team, n:Double=400.0)-> Double{
-    let scoreDiff=Double(against.meanScore-favourite.meanScore)
+    let scoreDiff=Double(favourite.meanScore-against.meanScore)
     let divisor=1.0+pow(10.0,scoreDiff/n)
     return Double(1.0/divisor)
 }
 
-func get_elo_update_value(winningTeam:Team, against:Team, result:(Int,Int), k:Int=8)-> Double{
-    let resultRate=Double(result.0/(result.0+result.1))
+func get_elo_update_value(winningTeam:Team, against:Team, result:(Int,Int), k:Int=6)-> Double{
+    assert(result.0>=result.1)
+    let resultRate=0.15*Double(result.0-result.1)
+    let weight=(winningTeam.players.count==4 ? 0.6 : 0.8)
     let expectedProb=get_elo_prob(favourite:winningTeam,against:against)
-    return Double(k)*expectedProb*resultRate
+    return Double(k)*expectedProb*resultRate*weight
 }
 
 class MatchResults:ObservableObject{

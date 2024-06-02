@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BC4512DC2C085FA60058BE51 /* PlayerDataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4512DB2C085FA60058BE51 /* PlayerDataHandler.swift */; };
+		BC4512DE2C085FB70058BE51 /* ResultHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4512DD2C085FB70058BE51 /* ResultHistoryView.swift */; };
+		BC4512E02C085FC90058BE51 /* ResultModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4512DF2C085FC90058BE51 /* ResultModel.swift */; };
 		BC6CE01D2BA1C7A300B05A24 /* ranking.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6CE01C2BA1C7A300B05A24 /* ranking.swift */; };
 		BC6CE0572BA4A1E000B05A24 /* PlayerRegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6CE0562BA4A1E000B05A24 /* PlayerRegisterView.swift */; };
 		BC7CDADD2B8A2FCA00A3F3CF /* MatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC7CDADC2B8A2FCA00A3F3CF /* MatchView.swift */; };
@@ -51,6 +54,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BC4512DB2C085FA60058BE51 /* PlayerDataHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerDataHandler.swift; sourceTree = "<group>"; };
+		BC4512DD2C085FB70058BE51 /* ResultHistoryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultHistoryView.swift; sourceTree = "<group>"; };
+		BC4512DF2C085FC90058BE51 /* ResultModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultModel.swift; sourceTree = "<group>"; };
 		BC6CE01C2BA1C7A300B05A24 /* ranking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ranking.swift; sourceTree = "<group>"; };
 		BC6CE0562BA4A1E000B05A24 /* PlayerRegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerRegisterView.swift; sourceTree = "<group>"; };
 		BC7CDADC2B8A2FCA00A3F3CF /* MatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchView.swift; sourceTree = "<group>"; };
@@ -138,13 +144,16 @@
 				BC7CDBAA2B95F6BC00A3F3CF /* examples.swift */,
 				BCF91AD72C04D8C00092A901 /* readData.swift */,
 				BCAA1DF22B8A2D09005221E6 /* ContentView.swift */,
+				BC4512DB2C085FA60058BE51 /* PlayerDataHandler.swift */,
 				BC7CDADC2B8A2FCA00A3F3CF /* MatchView.swift */,
 				BCB39CC72BCF700700DD37C8 /* InputResultView.swift */,
 				BC7CDBA62B933D1C00A3F3CF /* MultipleSelection.swift */,
 				BC6CE0562BA4A1E000B05A24 /* PlayerRegisterView.swift */,
 				BCF91AD92C04D8D40092A901 /* ranking.swift */,
+				BC4512DF2C085FC90058BE51 /* ResultModel.swift */,
 				BCB39C552BC7743C00DD37C8 /* PickerComponent.swift */,
 				BCB39C512BC7738D00DD37C8 /* MultiPicker.swift */,
+				BC4512DD2C085FB70058BE51 /* ResultHistoryView.swift */,
 				BCAA1DF42B8A2D0A005221E6 /* Assets.xcassets */,
 				BC7CDAED2B8BB3EA00A3F3CF /* players.json */,
 				BCAA1DF62B8A2D0A005221E6 /* Preview Content */,
@@ -315,12 +324,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				BC7CDAF02B8BE9FF00A3F3CF /* PlayerConfirmView.swift in Sources */,
+				BC4512DE2C085FB70058BE51 /* ResultHistoryView.swift in Sources */,
 				BCAA1DF32B8A2D09005221E6 /* ContentView.swift in Sources */,
 				BC6CE01D2BA1C7A300B05A24 /* ranking.swift in Sources */,
 				BC7CDADD2B8A2FCA00A3F3CF /* MatchView.swift in Sources */,
 				BC7CDBA92B933E7A00A3F3CF /* test.swift in Sources */,
 				BCB39C522BC7738D00DD37C8 /* MultiPicker.swift in Sources */,
 				BC7CDBA72B933D1C00A3F3CF /* MultipleSelection.swift in Sources */,
+				BC4512E02C085FC90058BE51 /* ResultModel.swift in Sources */,
 				BCF91AD82C04D8C00092A901 /* readData.swift in Sources */,
 				BCF91ADA2C04D8D40092A901 /* ranking.swift in Sources */,
 				BCB39C562BC7743C00DD37C8 /* PickerComponent.swift in Sources */,
@@ -329,6 +340,7 @@
 				BCB39CC82BCF700700DD37C8 /* InputResultView.swift in Sources */,
 				BC6CE0572BA4A1E000B05A24 /* PlayerRegisterView.swift in Sources */,
 				BC7CDADF2B8A303A00A3F3CF /* Model.swift in Sources */,
+				BC4512DC2C085FA60058BE51 /* PlayerDataHandler.swift in Sources */,
 				BC7CDBAB2B95F6BC00A3F3CF /* examples.swift in Sources */,
 				BC7CDBA02B90D10000A3F3CF /* utils.swift in Sources */,
 			);

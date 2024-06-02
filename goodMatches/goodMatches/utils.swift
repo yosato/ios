@@ -36,19 +36,26 @@ if let url = URL(string: "https://www.xxxxxxxxxxxxxxxxxxxxx") {
   }
 }
 
-func verifyUrl (urlString: String?) -> Bool {
-    if let urlString = urlString {
-        if let url = URL(string: urlString) {
-            do {let myBool=try url.checkResourceIsReachable()
-                return myBool
-            }catch{
-             return false
-            }
-        }
+func verifyUrl (urlString: String) -> Bool {
+    if let url = URL(string: urlString) {
+        var result: Bool!
+        
+        let semaphore = DispatchSemaphore(value: 0)  //1. create a counting semaphore
+        
+        let session = URLSession.shared
+        session.dataTask(with: url, completionHandler: { (data, response, error) in
+            result = true  //or false in case
+            semaphore.signal()  //3. count it up
+        }).resume()
+        
+        semaphore.wait()  //2. wait for finished counting
+        
+        return result
     }
+    
     return false
 }
-
+    
 func sum<T:Numeric>(_ aList:[T])-> T{
     aList.reduce(0){$0+$1}
 }

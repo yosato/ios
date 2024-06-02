@@ -169,8 +169,9 @@ class PlayersOnCourt:ObservableObject{
         
         let winningTeam=(result.scores.0>result.scores.1 ? result.match.teams.0 : result.match.teams.1)
         let losingTeam=(result.scores.0>result.scores.1 ? result.match.teams.1 : result.match.teams.0)
+        let scores=(result.scores.0>result.scores.1 ? result.scores : (result.scores.1,result.scores.0))
         
-        let increment=get_elo_update_value(winningTeam:winningTeam,against:losingTeam,result:result.scores)
+        let increment=round(1000.0*get_elo_update_value(winningTeam:winningTeam,against:losingTeam,result:scores))/1000.0
             
         for winningPlayer in winningTeam.players{
             let ind=playerInd_fromID(winningPlayer.id)

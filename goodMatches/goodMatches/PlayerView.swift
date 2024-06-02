@@ -12,6 +12,7 @@ struct PlayerView: View {
     @StateObject var playerDataHandler=PlayerDataHandler()
     @EnvironmentObject var myPlayers:PlayersOnCourt
     @EnvironmentObject var goodMatches:GoodMatchSetsOnCourt
+    @EnvironmentObject var matchResults:MatchResults
     @State private var playersConfirmedP=false
     @State private var inputInvalid=false
     @State private var selectedPlayers=Set<Player>()
@@ -63,20 +64,17 @@ struct PlayerView: View {
                 Text("Confirm")}.disabled(selectedPlayers.count<4)
             
             
-        }.onAppear{loadData()}
+        }.onAppear{loadData();matchResults.results=[]}
     }
     
     func delete(at offsets: IndexSet) {
         let players2remove:[Player]=registeredPlayers.enumerated().filter{(ind,_) in offsets.contains(ind)}.map{(_,player) in player }
-        Task{await playerDataHandler.delete_players_remote(players2remove)}
+        Task{await playerDataHandler.delete_players(players2remove)}
     }
     
     func loadData(){
-        if(verifyUrl(urlString: "http://127.0.0.1:5000/players")){
-            Task{await playerDataHandler.loadData_remote()}
-        }else{
-            playerDataHandler.loadData_local()
-        }
+        Task{await playerDataHandler.loadData_remote()}
+            //playerDataHandler.loadData_local()
     }
 
 }

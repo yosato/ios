@@ -76,14 +76,14 @@ struct MatchView: View {
                 }
                 currentMatchSetInd=(currentMatchSetInd+1<comboCount ? currentMatchSetInd+1 : 0)
                 
-            },label:{Text("Next match")}).disabled(liveMode && (matchResults.results.count < currentMatchSetInd+1 || !matchResults.results.last!.completed))
+            },label:{Text(liveMode ? "Update and go next" : "Next Match")}).disabled(liveMode && (matchResults.results.count < currentMatchSetInd+1 || !matchResults.results.last!.completed))
 //            Text("There are \(comboCount) combinations (currently no. \(currentMatchSetInd+1))")
         }.alert("\(gainsLosses2string(gainsLosses))",isPresented:$showGains){}
     }
     func gainsLosses2string(_ gainsLosses:[((Team,Team),Double)])->String{
         var messages:[String]=[]
         for ((team,_),gain) in gainsLosses{
-            messages.append(team.players.map{player in player.name}.joined(separator:"/")+" gained \(gain) points")
+            messages.append(team.players.map{player in player.name}.joined(separator:"/")+" gained "+String(format:"%.1f",gain)+" points"+(team.players.count==2 ? " each" : ""))
         }
         return messages.joined(separator:"\n")
     }

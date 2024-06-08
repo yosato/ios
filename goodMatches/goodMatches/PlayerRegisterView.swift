@@ -9,10 +9,10 @@ import SwiftUI
 
 struct PlayerRegisterView: View {
     @Environment(\.dismiss) var dismiss
-
-    var playerDataHandler:PlayerDataHandler
+    @State var registeredPlayersForClub:[Player]
+    @EnvironmentObject var playerDataHandler:PlayerDataHandler
  //   @EnvironmentObject var myPlayers:PlayersOnCourt
-    @State var newPlayerName:String=""
+    @State var playerName:String=""
     var initLevels=["Beginner","Improver","Intermediate","Upper intermediate","Advanced"]
     var genders=[Gender.male,Gender.female]
     @State var initLevel="Intermediate"
@@ -29,22 +29,25 @@ struct PlayerRegisterView: View {
         NavigationStack{
             
             Form{
-                TextField("Name",text:$newPlayerName)
+                TextField("Name",text:$playerName)
                 Picker("Proposed initial level",selection:$initLevel){
                     ForEach(initLevels,id:\.self){level in Text(level)}
                 }
                 Picker("Gender",selection:$gender){
-                    Text(Gender.male.rawValue)
-                    Text(Gender.female.rawValue)
+                    ForEach(genders, id:\.self){ gender in
+                        Text("\(gender)")
+                    }
                 }
                 Picker("Club",selection:$currentClub){
                     ForEach(clubs,id:\.self){club in Text(club)}
                 }
-            }.frame(maxWidth:.infinity,maxHeight:300).toolbar{Button("Register"){
-                if(playerDataHandler.players.map{player in player.id}.contains( nameClub2id(name:newPlayerName,club:currentClub))){playerAlreadyExists=true}else{
-                    Task{await register_player()}}
+            }.frame(maxWidth:.infinity,maxHeight:300).toolbar{Button("Save"){
+                if(registeredPlayersForClub.map{player in player.id}.contains( nameClub2id(name:playerName,club:currentClub))){playerAlreadyExists=true}else{
+                    Task{let player=await register_player()
+                        registeredPlayersForClub.append(player)}
+                }
                 dismiss()
-            }.disabled(newPlayerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }.disabled(playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 
             }
         }.alert("Name already taken, use a different one", isPresented: $playerAlreadyExists){Button("OK"){}}
@@ -59,7 +62,7 @@ struct PlayerRegisterView: View {
     }
 
     
-    func register_player() async {
+    func register_player() async -> Player{
         let score:Double
         switch initLevel{
         case "Advanced": score=70.0
@@ -69,11 +72,12 @@ struct PlayerRegisterView: View {
         case "Beginner": score=30.0
         default: score=45.0
         }
-        let player=Player(name:newPlayerName, score:score, gender:gender.rawValue, club:currentClub)
+        let player=Player(name:playerName, score:score, gender:gender.rawValue, club:currentClub)
         //await playerDataHandler.add_player_remote(player)
-        await playerDataHandler.add_player(player)
+        await playerDataHandler.add_player_remote(player)
+        return player
     }
 }
 //#Preview {
-//    PlayerRegisterView(currentClub:"").environmentObject(ReadData())
+//    PlayerRegisterView(playerDataHandler:PlayerDataHandler(), $currentClub="", $clubs=[])
 //}

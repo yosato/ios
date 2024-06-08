@@ -8,33 +8,51 @@
 import Foundation
 import SwiftUI
 import Iterators
+import Network
 
-func checkConnection() {
-if let url = URL(string: "https://www.xxxxxxxxxxxxxxxxxxxxx") {
-    var request = URLRequest(url: url)
-    request.httpMethod = "HEAD"
-    URLSession(configuration: .default)
-      .dataTask(with: request) { (_, response, error) -> Void in
-        guard error == nil else {
-          print("Error:", error ?? "")
-          return
+
+//@Observable
+final class NetworkMonitor: ObservableObject {
+    @Published var isConnected = false
+    @Published var reachable = false
+    
+    private let networkMonitor = NWPathMonitor()
+    private let workerQueue = DispatchQueue(label: "Monitor")
+    
+    init() {
+        networkMonitor.pathUpdateHandler = { path in
+            self.isConnected = path.status == .satisfied
         }
+        networkMonitor.start(queue: workerQueue)
+    }
+    
+    func checkConnection(urlString:String) {
+    if let url = URL(string: urlString) {
+        var request = URLRequest(url: url)
+        request.httpMethod = "HEAD"
+        URLSession(configuration: .default)
+          .dataTask(with: request) { (_, response, error) -> Void in
+            guard error == nil else {
+              print("Error:", error ?? "")
+              return
+            }
 
-        guard (response as? HTTPURLResponse)?
-          .statusCode == 200 else {
-            print("down")
+            guard (response as? HTTPURLResponse)?
+              .statusCode == 200 else {
+                print("down")
 
-            return
-        }
+                return
+            }
 
-        print("up")
-
-        
-        
+              self.reachable=true
+            
+          }
+          .resume()
       }
-      .resume()
-  }
+    }
+
 }
+
 
 func verifyUrl (urlString: String) -> Bool {
     if let url = URL(string: urlString) {

@@ -8,8 +8,16 @@
 import SwiftUI
 
 struct ResultHistoryView: View {
+    @EnvironmentObject var  matchResults:MatchResults
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        List {
+            ForEach(matchResults.results){matchSetResult in
+                ForEach(matchSetResult.matchResults){matchResult in Text(matchResult.prettystring()+" (MatchSet  \(matchSetResult.matchSetInd!+1))")
+                    
+                }
+                
+            }
+        }
     }
 }
 

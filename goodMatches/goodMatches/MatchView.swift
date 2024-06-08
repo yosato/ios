@@ -28,6 +28,8 @@ struct MatchView: View {
     
     @State var gainsLosses:[((Team,Team),Double)]=[]
     @State private var showGains=false
+    
+    var debug:Bool
 
     var bestMatchSetsOnCourt:[MatchSetOnCourt] {
         Array(goodMatchSets.orderedMatchSets[0...currentMatchSetInd]).reversed()
@@ -53,8 +55,8 @@ struct MatchView: View {
             List{
                 ForEach(indexedBestMatchSetsOnCourt,id:\.1){ (matchSetInd, matchSet) in
                     VStack{
-                        Text("goodMatches \(matchSetInd+1)")
-                        MatchUp(matchSetInd: matchSetInd)
+                        Text("goodMatches \(matchSetInd+1)"+(!debug ? "" : "  "+String(format:"%.2f",matchSet.totalScoreDiff)))
+                        MatchUp(matchSetInd: matchSetInd, debug:debug)
                         if (matchSet.restingPlayers.count != 0){
                             HStack{
                                 Text("Resting: ").font(.headline.smallCaps())
@@ -70,20 +72,19 @@ struct MatchView: View {
                 if(liveMode){
                     gainsLosses=myPlayers.update_playerscores_matchSetResult(matchResults.results.last!)
                     showGains=true
-                }else{
-                    myPlayers.update_playerscores_matchResults(matchResults)
                     goodMatchSets.reorder_matchsets(from:currentMatchSetInd+1)
                 }
                 currentMatchSetInd=(currentMatchSetInd+1<comboCount ? currentMatchSetInd+1 : 0)
                 
-            },label:{Text(liveMode ? "Update and go next" : "Next Match")}).disabled(liveMode && (matchResults.results.count < currentMatchSetInd+1 || !matchResults.results.last!.completed))
+            },label:{Text(liveMode ? "Update and go next" : "Next Match")}).padding().disabled(liveMode && (matchResults.results.count < currentMatchSetInd+1 || !matchResults.results.last!.completed))
 //            Text("There are \(comboCount) combinations (currently no. \(currentMatchSetInd+1))")
         }.alert("\(gainsLosses2string(gainsLosses))",isPresented:$showGains){}
+        
     }
     func gainsLosses2string(_ gainsLosses:[((Team,Team),Double)])->String{
         var messages:[String]=[]
         for ((team,_),gain) in gainsLosses{
-            messages.append(team.players.map{player in player.name}.joined(separator:"/")+" gained "+String(format:"%.1f",gain)+" points"+(team.players.count==2 ? " each" : ""))
+            messages.append(team.players.map{player in player.name}.joined(separator:"/")+" gained "+String(format:"%.2f",gain)+" points"+(team.players.count==2 ? " each" : ""))
         }
         return messages.joined(separator:"\n")
     }
@@ -99,6 +100,7 @@ struct MatchUp:View{
     @EnvironmentObject var matchResults:MatchResults
     @State var currentMatch:Match? = nil
     @State var matchInd:Int=0
+    var debug:Bool
     //        @State var showInputResult=false
     
     var body: some View{
@@ -110,7 +112,14 @@ struct MatchUp:View{
                 HStack(alignment: .top){    Text((isDoubles ? "D" : "S")).font(.headline.smallCaps()).padding(0.5)
                     
                     VStack{
-                        MatchUp_sub(match:match).padding()
+                        HStack{
+                            VStack{ForEach(match.pairOfPlayers.0,id:\.self){Text($0.name+(!debug ? "" : " \($0.score)"))}}
+                                Spacer()
+                                Text("vs")
+                                Spacer()
+                                VStack{ForEach(match.pairOfPlayers.1,id:\.self){Text($0.name+(!debug ? "" : " \($0.score)"))}}
+                            if(debug){Text(String(format:"%.2f",match.scoreDiff))}
+                        }.padding()
                         HStack{
                             Spacer()
                             if (!matchResults.results.isEmpty){
@@ -143,7 +152,7 @@ struct MatchUp:View{
 struct MatchUp_sub:View{
     let match:Match
     var body: some View{
-            HStack{
+        HStack{
 
                 VStack{ForEach(match.pairOfPlayers.0,id:\.self){Text($0.name)}
                 }
@@ -154,12 +163,13 @@ struct MatchUp_sub:View{
                 Spacer()
                 VStack{ForEach(match.pairOfPlayers.1,id:\.self){Text($0.name)}}
             }
-        
+    
         }
 }
 
 
 
 #Preview {
-    MatchView(liveMode:true).environmentObject(PlayersOnCourt()).environmentObject(GoodMatchSetsOnCourt())
+    MatchView(liveMode:true,debug:false).environmentObject(PlayersOnCourt()).environmentObject(GoodMatchSetsOnCourt())
+        .environmentObject(MatchResults())
 }

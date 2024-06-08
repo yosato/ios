@@ -9,7 +9,8 @@ import SwiftUI
 
 struct PlayerView: View {
     //    @Environment(\.editMode) var editMode
-    @StateObject var playerDataHandler=PlayerDataHandler()
+    @State var registeredPlayers:[Player]
+    @EnvironmentObject var playerDataHandler:PlayerDataHandler
     @EnvironmentObject var myPlayers:PlayersOnCourt
     @EnvironmentObject var goodMatches:GoodMatchSetsOnCourt
     @EnvironmentObject var matchResults:MatchResults
@@ -19,8 +20,9 @@ struct PlayerView: View {
     @State var currentClub="MY Wimbledon London"
     @State var clubs=["MY Wimbledon London","MY Wimbledon Tokyo","Funabashi Tennis Freaks"]
     @State var registerSheet=false
+    @Binding var debug:Bool
     
-    var registeredPlayers:[Player] { playerDataHandler.players.filter{player in player.club==currentClub}.sorted(by:{$0.name < $1.name})
+    var registeredPlayersForClub:[Player] { registeredPlayers.filter{player in player.club==currentClub}.sorted(by:{$0.name < $1.name})
     }
     
     var likelyCourtCount:Int { myPlayers.players.count/3 }
@@ -39,51 +41,81 @@ struct PlayerView: View {
                 }
             }
             Text("Pick players and confirm").padding(0.2)
-                Button("Register a new player"){registerSheet=true}
+            Button("Register a new player"){registerSheet=true}
             List{
-                ForEach(registeredPlayers){player in
-                    MultipleSelection(title:player.name, isSelected:self.selectedPlayers.contains(player)){
+                ForEach(registeredPlayersForClub){player in
+                    MultipleSelection(name:player.name, club:$currentClub, clubs:$clubs, isSelected:self.selectedPlayers.contains(player)){
                         if self.selectedPlayers.contains(player){
                             self.selectedPlayers.remove(player)
                         }else{
                             self.selectedPlayers.insert(player)}
-                    }
+                    }.environmentObject(playerDataHandler)
                 }.onDelete(perform:delete)                //                Text("\($0.name)"
                 
                 
                 //                )
-            }.sheet(isPresented:$registerSheet){            PlayerRegisterView(playerDataHandler:playerDataHandler, currentClub:$currentClub, clubs: $clubs)}
-            .navigationTitle("Registered players")
-            .navigationBarTitleDisplayMode(.inline)
+            }.sheet(isPresented:$registerSheet){
+                PlayerRegisterView(registeredPlayersForClub:registeredPlayersForClub, currentClub:$currentClub, clubs: $clubs)
+            }
+                .navigationTitle("Registered players")
+                .navigationBarTitleDisplayMode(.inline)
             Text("\(selectedPlayers.count) players selected")
             
-            NavigationLink(destination:PlayerConfirmView().environmentObject(myPlayers).onAppear{
+            NavigationLink(destination:PlayerConfirmView(registeredPlayers:$registeredPlayers,debug:debug).environmentObject(myPlayers).onAppear{
                 myPlayers.delete_all_players()
                 myPlayers.add_players(Array(selectedPlayers))
             }){
                 Text("Confirm")}.disabled(selectedPlayers.count<4)
             
             
-        }.onAppear{loadData();matchResults.results=[]}
+        }.onAppear{matchResults.results=[]}
+        
     }
     
     func delete(at offsets: IndexSet) {
-        let players2remove:[Player]=registeredPlayers.enumerated().filter{(ind,_) in offsets.contains(ind)}.map{(_,player) in player }
-        Task{await playerDataHandler.delete_players(players2remove)}
+        var players2remove:[Player]=[]
+        for offset in offsets{
+            players2remove.append(registeredPlayersForClub[offset])
+        }
+        Task{
+            await playerDataHandler.delete_players_remote(players2remove)
+        }
+        registeredPlayers.remove(atOffsets: offsets)
     }
     
-    func loadData(){
-        Task{await playerDataHandler.loadData_remote()}
-            //playerDataHandler.loadData_local()
-    }
 
 }
 
+struct MultipleSelection: View {
+        var name: String
+    @Binding var club:String
+    @Binding var clubs:[String]
+        var isSelected: Bool
+        var action: () -> Void
+    @State var showSheet=false
+    @EnvironmentObject var playerDataHandler:PlayerDataHandler
 
+
+        var body: some View {
+            Button(action: self.action) {
+                HStack {
+                    Button{showSheet=true}label:{Image(systemName:"square.and.pencil")}.imageScale(.small).foregroundColor(.gray)
+                    Text(self.name)
+                    if self.isSelected {
+                        Spacer()
+                        Image(systemName: "checkmark")
+                    }
+                }
+            }.sheet(isPresented:$showSheet){
+                //PlayerRegisterView(registeredPlayersForClub:registeredPlayers,playerDataHandler:playerDataHandler,playerName:name,currentClub:$club,clubs:$clubs)
+            }
+        }
+}
+    
 
 
 
 
 //#Preview {
-//    PlayerView().environmentObject(PlayersOnCourt())
+//    PlayerView(playerDataHandler: <#T##PlayerDataHandler#>).environmentObject(PlayersOnCourt())
 //}

@@ -1,0 +1,812 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BC14354F2C722B40008BD25D /* MessageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC14354E2C722B40008BD25D /* MessageListView.swift */; };
+		BC1435512C722C2F008BD25D /* ChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1435502C722C2F008BD25D /* ChatBubble.swift */; };
+		BC14358A2C723536008BD25D /* jankenModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC1435872C723525008BD25D /* jankenModels.framework */; };
+		BC14358B2C723536008BD25D /* jankenModels.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = BC1435872C723525008BD25D /* jankenModels.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		BC347AB02C62891D0084EE1E /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = BC347AAF2C62891D0084EE1E /* FirebaseFirestore */; };
+		BC347AB42C628B700084EE1E /* LogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347AB32C628B700084EE1E /* LogoView.swift */; };
+		BC347AB62C636CC70084EE1E /* LiveSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347AB52C636CC70084EE1E /* LiveSessionView.swift */; };
+		BC347AB82C636D570084EE1E /* PickOpponentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347AB72C636D570084EE1E /* PickOpponentsView.swift */; };
+		BC347ABA2C636E900084EE1E /* dataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347AB92C636E900084EE1E /* dataHandler.swift */; };
+		BC347ABE2C6372B50084EE1E /* AccountCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347ABD2C6372B50084EE1E /* AccountCreationView.swift */; };
+		BC347AC02C63A3690084EE1E /* OrganizeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347ABF2C63A3690084EE1E /* OrganizeView.swift */; };
+		BC347AC22C63A4550084EE1E /* ParticipateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347AC12C63A4550084EE1E /* ParticipateView.swift */; };
+		BC347AC42C63AB730084EE1E /* JankenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347AC32C63AB730084EE1E /* JankenView.swift */; };
+		BC347B372C6E19340084EE1E /* ComputerDelegatedSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347B362C6E19340084EE1E /* ComputerDelegatedSessionView.swift */; };
+		BC347B762C6E5C4A0084EE1E /* JankenSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347B752C6E5C4A0084EE1E /* JankenSessionView.swift */; };
+		BCA4A1082C5A928E005FB360 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA4A1072C5A928E005FB360 /* WelcomeView.swift */; };
+		BCA4A10E2C5B9412005FB360 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = BCA4A10D2C5B9412005FB360 /* FirebaseAuth */; };
+		BCA4A1102C5BE191005FB360 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA4A10F2C5BE191005FB360 /* LoginView.swift */; };
+		BCB1EB602C5A83370075ED3E /* onlineJankenApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB1EB5F2C5A83370075ED3E /* onlineJankenApp.swift */; };
+		BCB1EB622C5A83370075ED3E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB1EB612C5A83370075ED3E /* ContentView.swift */; };
+		BCB1EB642C5A833B0075ED3E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BCB1EB632C5A833B0075ED3E /* Assets.xcassets */; };
+		BCB1EB672C5A833B0075ED3E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BCB1EB662C5A833B0075ED3E /* Preview Assets.xcassets */; };
+		BCB1EB712C5A833B0075ED3E /* onlineJankenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB1EB702C5A833B0075ED3E /* onlineJankenTests.swift */; };
+		BCB1EB7B2C5A833B0075ED3E /* onlineJankenUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB1EB7A2C5A833B0075ED3E /* onlineJankenUITests.swift */; };
+		BCB1EB7D2C5A833B0075ED3E /* onlineJankenUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB1EB7C2C5A833B0075ED3E /* onlineJankenUITestsLaunchTests.swift */; };
+		BCB1EB8A2C5A85950075ED3E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = BCB1EB892C5A85940075ED3E /* GoogleService-Info.plist */; };
+		BCB1EB8D2C5A87A60075ED3E /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = BCB1EB8C2C5A87A60075ED3E /* FirebaseAnalytics */; };
+		BCC4A2372C78BB77000028C9 /* SwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A2362C78BB77000028C9 /* SwiftUIView.swift */; };
+		BCC4A2392C78BC85000028C9 /* testDelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A2382C78BC85000028C9 /* testDelay.swift */; };
+		BCC4A23B2C78BE3F000028C9 /* RoundResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A23A2C78BE3F000028C9 /* RoundResultView.swift */; };
+		BCC4A23D2C78F088000028C9 /* SeriesResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A23C2C78F088000028C9 /* SeriesResultView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BC1435862C723525008BD25D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BC1435812C723525008BD25D /* jankenModels.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = BC1435672C7233ED008BD25D;
+			remoteInfo = jankenModels;
+		};
+		BC1435882C723525008BD25D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BC1435812C723525008BD25D /* jankenModels.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = BC14356F2C7233ED008BD25D;
+			remoteInfo = jankenModelsTests;
+		};
+		BCB1EB6D2C5A833B0075ED3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BCB1EB542C5A83370075ED3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BCB1EB5B2C5A83370075ED3E;
+			remoteInfo = onlineJanken;
+		};
+		BCB1EB772C5A833B0075ED3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BCB1EB542C5A83370075ED3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BCB1EB5B2C5A83370075ED3E;
+			remoteInfo = onlineJanken;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		BC1435452C722224008BD25D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				BC14358B2C723536008BD25D /* jankenModels.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		BC14354E2C722B40008BD25D /* MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageListView.swift; sourceTree = "<group>"; };
+		BC1435502C722C2F008BD25D /* ChatBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubble.swift; sourceTree = "<group>"; };
+		BC1435812C723525008BD25D /* jankenModels.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = jankenModels.xcodeproj; path = ../jankenModels/jankenModels.xcodeproj; sourceTree = "<group>"; };
+		BC347AB32C628B700084EE1E /* LogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoView.swift; sourceTree = "<group>"; };
+		BC347AB52C636CC70084EE1E /* LiveSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveSessionView.swift; sourceTree = "<group>"; };
+		BC347AB72C636D570084EE1E /* PickOpponentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickOpponentsView.swift; sourceTree = "<group>"; };
+		BC347AB92C636E900084EE1E /* dataHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dataHandler.swift; sourceTree = "<group>"; };
+		BC347ABD2C6372B50084EE1E /* AccountCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCreationView.swift; sourceTree = "<group>"; };
+		BC347ABF2C63A3690084EE1E /* OrganizeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrganizeView.swift; sourceTree = "<group>"; };
+		BC347AC12C63A4550084EE1E /* ParticipateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipateView.swift; sourceTree = "<group>"; };
+		BC347AC32C63AB730084EE1E /* JankenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JankenView.swift; sourceTree = "<group>"; };
+		BC347B362C6E19340084EE1E /* ComputerDelegatedSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComputerDelegatedSessionView.swift; sourceTree = "<group>"; };
+		BC347B752C6E5C4A0084EE1E /* JankenSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JankenSessionView.swift; sourceTree = "<group>"; };
+		BCA4A1072C5A928E005FB360 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		BCA4A10F2C5BE191005FB360 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		BCB1EB5C2C5A83370075ED3E /* onlineJanken.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = onlineJanken.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BCB1EB5F2C5A83370075ED3E /* onlineJankenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = onlineJankenApp.swift; sourceTree = "<group>"; };
+		BCB1EB612C5A83370075ED3E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		BCB1EB632C5A833B0075ED3E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BCB1EB662C5A833B0075ED3E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		BCB1EB6C2C5A833B0075ED3E /* onlineJankenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = onlineJankenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BCB1EB702C5A833B0075ED3E /* onlineJankenTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = onlineJankenTests.swift; sourceTree = "<group>"; };
+		BCB1EB762C5A833B0075ED3E /* onlineJankenUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = onlineJankenUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BCB1EB7A2C5A833B0075ED3E /* onlineJankenUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = onlineJankenUITests.swift; sourceTree = "<group>"; };
+		BCB1EB7C2C5A833B0075ED3E /* onlineJankenUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = onlineJankenUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		BCB1EB892C5A85940075ED3E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		BCC4A2362C78BB77000028C9 /* SwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUIView.swift; sourceTree = "<group>"; };
+		BCC4A2382C78BC85000028C9 /* testDelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testDelay.swift; sourceTree = "<group>"; };
+		BCC4A23A2C78BE3F000028C9 /* RoundResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundResultView.swift; sourceTree = "<group>"; };
+		BCC4A23C2C78F088000028C9 /* SeriesResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeriesResultView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BCB1EB592C5A83370075ED3E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BC347AB02C62891D0084EE1E /* FirebaseFirestore in Frameworks */,
+				BC14358A2C723536008BD25D /* jankenModels.framework in Frameworks */,
+				BCA4A10E2C5B9412005FB360 /* FirebaseAuth in Frameworks */,
+				BCB1EB8D2C5A87A60075ED3E /* FirebaseAnalytics in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BCB1EB692C5A833B0075ED3E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BCB1EB732C5A833B0075ED3E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BC1435822C723525008BD25D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BC1435872C723525008BD25D /* jankenModels.framework */,
+				BC1435892C723525008BD25D /* jankenModelsTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BC347AAE2C62891D0084EE1E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				BC1435812C723525008BD25D /* jankenModels.xcodeproj */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BC347AB12C6289770084EE1E /* subViews */ = {
+			isa = PBXGroup;
+			children = (
+				BC347AB32C628B700084EE1E /* LogoView.swift */,
+				BCC4A23A2C78BE3F000028C9 /* RoundResultView.swift */,
+				BC14354E2C722B40008BD25D /* MessageListView.swift */,
+				BC347B752C6E5C4A0084EE1E /* JankenSessionView.swift */,
+				BC347AB72C636D570084EE1E /* PickOpponentsView.swift */,
+				BC347ABD2C6372B50084EE1E /* AccountCreationView.swift */,
+				BC347AC32C63AB730084EE1E /* JankenView.swift */,
+				BC1435502C722C2F008BD25D /* ChatBubble.swift */,
+			);
+			path = subViews;
+			sourceTree = "<group>";
+		};
+		BC347AB22C6289A40084EE1E /* models */ = {
+			isa = PBXGroup;
+			children = (
+				BC347AB92C636E900084EE1E /* dataHandler.swift */,
+			);
+			path = models;
+			sourceTree = "<group>";
+		};
+		BC347B7B2C6F95CC0084EE1E /* mainViews */ = {
+			isa = PBXGroup;
+			children = (
+				BC347ABF2C63A3690084EE1E /* OrganizeView.swift */,
+				BC347AC12C63A4550084EE1E /* ParticipateView.swift */,
+				BC347AB52C636CC70084EE1E /* LiveSessionView.swift */,
+				BC347B362C6E19340084EE1E /* ComputerDelegatedSessionView.swift */,
+				BCC4A23C2C78F088000028C9 /* SeriesResultView.swift */,
+			);
+			path = mainViews;
+			sourceTree = "<group>";
+		};
+		BCB1EB532C5A83370075ED3E = {
+			isa = PBXGroup;
+			children = (
+				BCB1EB5E2C5A83370075ED3E /* onlineJanken */,
+				BCB1EB6F2C5A833B0075ED3E /* onlineJankenTests */,
+				BCB1EB792C5A833B0075ED3E /* onlineJankenUITests */,
+				BCB1EB5D2C5A83370075ED3E /* Products */,
+				BC347AAE2C62891D0084EE1E /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		BCB1EB5D2C5A83370075ED3E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BCB1EB5C2C5A83370075ED3E /* onlineJanken.app */,
+				BCB1EB6C2C5A833B0075ED3E /* onlineJankenTests.xctest */,
+				BCB1EB762C5A833B0075ED3E /* onlineJankenUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BCB1EB5E2C5A83370075ED3E /* onlineJanken */ = {
+			isa = PBXGroup;
+			children = (
+				BCB1EB5F2C5A83370075ED3E /* onlineJankenApp.swift */,
+				BCB1EB612C5A83370075ED3E /* ContentView.swift */,
+				BCA4A1072C5A928E005FB360 /* WelcomeView.swift */,
+				BC347AB22C6289A40084EE1E /* models */,
+				BC347B7B2C6F95CC0084EE1E /* mainViews */,
+				BC347AB12C6289770084EE1E /* subViews */,
+				BCA4A10F2C5BE191005FB360 /* LoginView.swift */,
+				BCC4A2352C78BB67000028C9 /* test */,
+				BCB1EB892C5A85940075ED3E /* GoogleService-Info.plist */,
+				BCB1EB632C5A833B0075ED3E /* Assets.xcassets */,
+				BCB1EB652C5A833B0075ED3E /* Preview Content */,
+			);
+			path = onlineJanken;
+			sourceTree = "<group>";
+		};
+		BCB1EB652C5A833B0075ED3E /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				BCB1EB662C5A833B0075ED3E /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		BCB1EB6F2C5A833B0075ED3E /* onlineJankenTests */ = {
+			isa = PBXGroup;
+			children = (
+				BCB1EB702C5A833B0075ED3E /* onlineJankenTests.swift */,
+			);
+			path = onlineJankenTests;
+			sourceTree = "<group>";
+		};
+		BCB1EB792C5A833B0075ED3E /* onlineJankenUITests */ = {
+			isa = PBXGroup;
+			children = (
+				BCB1EB7A2C5A833B0075ED3E /* onlineJankenUITests.swift */,
+				BCB1EB7C2C5A833B0075ED3E /* onlineJankenUITestsLaunchTests.swift */,
+			);
+			path = onlineJankenUITests;
+			sourceTree = "<group>";
+		};
+		BCC4A2352C78BB67000028C9 /* test */ = {
+			isa = PBXGroup;
+			children = (
+				BCC4A2362C78BB77000028C9 /* SwiftUIView.swift */,
+				BCC4A2382C78BC85000028C9 /* testDelay.swift */,
+			);
+			path = test;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BCB1EB5B2C5A83370075ED3E /* onlineJanken */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BCB1EB802C5A833B0075ED3E /* Build configuration list for PBXNativeTarget "onlineJanken" */;
+			buildPhases = (
+				BCB1EB582C5A83370075ED3E /* Sources */,
+				BCB1EB592C5A83370075ED3E /* Frameworks */,
+				BCB1EB5A2C5A83370075ED3E /* Resources */,
+				BC1435452C722224008BD25D /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = onlineJanken;
+			packageProductDependencies = (
+				BCB1EB8C2C5A87A60075ED3E /* FirebaseAnalytics */,
+				BCA4A10D2C5B9412005FB360 /* FirebaseAuth */,
+				BC347AAF2C62891D0084EE1E /* FirebaseFirestore */,
+			);
+			productName = onlineJanken;
+			productReference = BCB1EB5C2C5A83370075ED3E /* onlineJanken.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BCB1EB6B2C5A833B0075ED3E /* onlineJankenTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BCB1EB832C5A833B0075ED3E /* Build configuration list for PBXNativeTarget "onlineJankenTests" */;
+			buildPhases = (
+				BCB1EB682C5A833B0075ED3E /* Sources */,
+				BCB1EB692C5A833B0075ED3E /* Frameworks */,
+				BCB1EB6A2C5A833B0075ED3E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BCB1EB6E2C5A833B0075ED3E /* PBXTargetDependency */,
+			);
+			name = onlineJankenTests;
+			productName = onlineJankenTests;
+			productReference = BCB1EB6C2C5A833B0075ED3E /* onlineJankenTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		BCB1EB752C5A833B0075ED3E /* onlineJankenUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BCB1EB862C5A833B0075ED3E /* Build configuration list for PBXNativeTarget "onlineJankenUITests" */;
+			buildPhases = (
+				BCB1EB722C5A833B0075ED3E /* Sources */,
+				BCB1EB732C5A833B0075ED3E /* Frameworks */,
+				BCB1EB742C5A833B0075ED3E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BCB1EB782C5A833B0075ED3E /* PBXTargetDependency */,
+			);
+			name = onlineJankenUITests;
+			productName = onlineJankenUITests;
+			productReference = BCB1EB762C5A833B0075ED3E /* onlineJankenUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BCB1EB542C5A83370075ED3E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					BCB1EB5B2C5A83370075ED3E = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					BCB1EB6B2C5A833B0075ED3E = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = BCB1EB5B2C5A83370075ED3E;
+					};
+					BCB1EB752C5A833B0075ED3E = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = BCB1EB5B2C5A83370075ED3E;
+					};
+				};
+			};
+			buildConfigurationList = BCB1EB572C5A83370075ED3E /* Build configuration list for PBXProject "onlineJanken" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BCB1EB532C5A83370075ED3E;
+			packageReferences = (
+				BCB1EB8B2C5A87A50075ED3E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
+			productRefGroup = BCB1EB5D2C5A83370075ED3E /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = BC1435822C723525008BD25D /* Products */;
+					ProjectRef = BC1435812C723525008BD25D /* jankenModels.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				BCB1EB5B2C5A83370075ED3E /* onlineJanken */,
+				BCB1EB6B2C5A833B0075ED3E /* onlineJankenTests */,
+				BCB1EB752C5A833B0075ED3E /* onlineJankenUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		BC1435872C723525008BD25D /* jankenModels.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = jankenModels.framework;
+			remoteRef = BC1435862C723525008BD25D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BC1435892C723525008BD25D /* jankenModelsTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = jankenModelsTests.xctest;
+			remoteRef = BC1435882C723525008BD25D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BCB1EB5A2C5A83370075ED3E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BCB1EB672C5A833B0075ED3E /* Preview Assets.xcassets in Resources */,
+				BCB1EB642C5A833B0075ED3E /* Assets.xcassets in Resources */,
+				BCB1EB8A2C5A85950075ED3E /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BCB1EB6A2C5A833B0075ED3E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BCB1EB742C5A833B0075ED3E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BCB1EB582C5A83370075ED3E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BC347B762C6E5C4A0084EE1E /* JankenSessionView.swift in Sources */,
+				BCC4A2392C78BC85000028C9 /* testDelay.swift in Sources */,
+				BCA4A1102C5BE191005FB360 /* LoginView.swift in Sources */,
+				BCC4A2372C78BB77000028C9 /* SwiftUIView.swift in Sources */,
+				BC1435512C722C2F008BD25D /* ChatBubble.swift in Sources */,
+				BC347AC42C63AB730084EE1E /* JankenView.swift in Sources */,
+				BC347ABE2C6372B50084EE1E /* AccountCreationView.swift in Sources */,
+				BCB1EB622C5A83370075ED3E /* ContentView.swift in Sources */,
+				BCC4A23B2C78BE3F000028C9 /* RoundResultView.swift in Sources */,
+				BC347AB82C636D570084EE1E /* PickOpponentsView.swift in Sources */,
+				BC347ABA2C636E900084EE1E /* dataHandler.swift in Sources */,
+				BC347AB62C636CC70084EE1E /* LiveSessionView.swift in Sources */,
+				BC347AB42C628B700084EE1E /* LogoView.swift in Sources */,
+				BCA4A1082C5A928E005FB360 /* WelcomeView.swift in Sources */,
+				BC347B372C6E19340084EE1E /* ComputerDelegatedSessionView.swift in Sources */,
+				BC14354F2C722B40008BD25D /* MessageListView.swift in Sources */,
+				BCB1EB602C5A83370075ED3E /* onlineJankenApp.swift in Sources */,
+				BC347AC22C63A4550084EE1E /* ParticipateView.swift in Sources */,
+				BCC4A23D2C78F088000028C9 /* SeriesResultView.swift in Sources */,
+				BC347AC02C63A3690084EE1E /* OrganizeView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BCB1EB682C5A833B0075ED3E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BCB1EB712C5A833B0075ED3E /* onlineJankenTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BCB1EB722C5A833B0075ED3E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BCB1EB7D2C5A833B0075ED3E /* onlineJankenUITestsLaunchTests.swift in Sources */,
+				BCB1EB7B2C5A833B0075ED3E /* onlineJankenUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BCB1EB6E2C5A833B0075ED3E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BCB1EB5B2C5A83370075ED3E /* onlineJanken */;
+			targetProxy = BCB1EB6D2C5A833B0075ED3E /* PBXContainerItemProxy */;
+		};
+		BCB1EB782C5A833B0075ED3E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BCB1EB5B2C5A83370075ED3E /* onlineJanken */;
+			targetProxy = BCB1EB772C5A833B0075ED3E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		BCB1EB7E2C5A833B0075ED3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BCB1EB7F2C5A833B0075ED3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		BCB1EB812C5A833B0075ED3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"onlineJanken/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.satoama.onlineJanken;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BCB1EB822C5A833B0075ED3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"onlineJanken/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.satoama.onlineJanken;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		BCB1EB842C5A833B0075ED3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.satoama.onlineJankenTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/onlineJanken.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/onlineJanken";
+			};
+			name = Debug;
+		};
+		BCB1EB852C5A833B0075ED3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.satoama.onlineJankenTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/onlineJanken.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/onlineJanken";
+			};
+			name = Release;
+		};
+		BCB1EB872C5A833B0075ED3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.satoama.onlineJankenUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = onlineJanken;
+			};
+			name = Debug;
+		};
+		BCB1EB882C5A833B0075ED3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.satoama.onlineJankenUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = onlineJanken;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BCB1EB572C5A83370075ED3E /* Build configuration list for PBXProject "onlineJanken" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BCB1EB7E2C5A833B0075ED3E /* Debug */,
+				BCB1EB7F2C5A833B0075ED3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BCB1EB802C5A833B0075ED3E /* Build configuration list for PBXNativeTarget "onlineJanken" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BCB1EB812C5A833B0075ED3E /* Debug */,
+				BCB1EB822C5A833B0075ED3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BCB1EB832C5A833B0075ED3E /* Build configuration list for PBXNativeTarget "onlineJankenTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BCB1EB842C5A833B0075ED3E /* Debug */,
+				BCB1EB852C5A833B0075ED3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BCB1EB862C5A833B0075ED3E /* Build configuration list for PBXNativeTarget "onlineJankenUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BCB1EB872C5A833B0075ED3E /* Debug */,
+				BCB1EB882C5A833B0075ED3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BCB1EB8B2C5A87A50075ED3E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BC347AAF2C62891D0084EE1E /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BCB1EB8B2C5A87A50075ED3E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		BCA4A10D2C5B9412005FB360 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BCB1EB8B2C5A87A50075ED3E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		BCB1EB8C2C5A87A60075ED3E /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BCB1EB8B2C5A87A50075ED3E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = BCB1EB542C5A83370075ED3E /* Project object */;
+}

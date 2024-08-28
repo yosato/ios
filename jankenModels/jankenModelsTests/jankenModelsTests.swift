@@ -70,6 +70,14 @@ final class jankenModelTests: XCTestCase {
         let jankenSeries=JankenSeriesInGroup(groupMembers:Set(mockParticipants[0...6]))
         let jankenTree=jankenSeries.do_jankenSeries_in_group()
     }
+    
+    func testMakingDrawnSessions() throws{
+        for i in (2...8){
+            let dSessions=DrawnSessions(participants:Set(mockParticipants[0...i]))
+            
+        }
+        
+    }
 
     func testPerformanceExample() throws {
         // This is an example of a performance test case.

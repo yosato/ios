@@ -41,7 +41,7 @@ public struct Participant: Identifiable,Equatable,Hashable{
     public static func ==(lhs: Participant, rhs: Participant) -> Bool {
             return lhs.id == rhs.id
         }
-    
+
     public let displayName:String
     public let email:String
     public let delimiter:String="--"
@@ -74,6 +74,7 @@ public struct JankenSession:Identifiable, Hashable{
     public var handVarieties:Set<JankenHand> {Set(participantHandPairs.values)}
     public var winners:Set<Participant> {self.do_janken_and_get_winners()}
     public var drawnP:Bool {handVarieties.count != 2}
+    public var losers:Set<Participant> {(drawnP ? Set() : participants.filter{participant in !winners.contains(participant)})}
     
     let winLossDict=[JankenHand.rock:JankenHand.scissors,
                      JankenHand.paper:JankenHand.rock,
@@ -118,47 +119,35 @@ public func binaryToDecimal(_ binary: String) -> Int {
  
 
 
-public class JankenTree:ObservableObject{
+public class JankenTree{
     public var rounds=Set<JankenRound>()
-    var sessions=[JankenSession]()
-    public var IDsSessions:[String:JankenSession] {
-        var idsSessions:[String:JankenSession]=[:]
-            for session in self.sessions{
-                idsSessions[session.id]=session
-            }
-            return idsSessions
-        }
-    
-    var drawnSessionInds:[Int]
-    var drawnSessionIDs:Set<String>
     public var sortedLeaves:[Participant] {self.sort_leaves()}
     
-    public init(branches: Set<JankenRound>, sessions:[JankenSession]) {
+    public init(branches: Set<JankenRound>) {
         // as many as decided sessions
         self.rounds = branches
         // both decided and drawn sessions
-        self.sessions=sessions
-        self.drawnSessionInds=sessions.enumerated().filter{(cntr,session) in session.drawnP}.map{(cntr,_) in cntr}
-        
-        var drawnSessionIDs=Set<String>(); var decidedSessionIDs=Set<String>()
-        for (cntr,session) in sessions.enumerated(){
-            if drawnSessionInds.contains(cntr){
-                drawnSessionIDs.insert(session.id)
-            }else{decidedSessionIDs.insert(session.id)}
-        }
-        var idsInDecidedSessionsInBranches=Set<String>(); var idsInDrawnSessionsInBranches=Set<String>();
-        for branch in branches{
-            idsInDecidedSessionsInBranches.insert(branch.finalSessionID)
-            for drawnID in branch.drawSessionIDs{
-                idsInDrawnSessionsInBranches.insert(drawnID)
-            }
-        }
-        self.drawnSessionIDs=drawnSessionIDs
-        assert(idsInDrawnSessionsInBranches==drawnSessionIDs)
-        assert(idsInDecidedSessionsInBranches==decidedSessionIDs)
+//        self.drawnSessionInds=sessions.enumerated().filter{(cntr,session) in session.drawnP}.map{(cntr,_) in cntr}
+//        
+//        var drawnSessionIDs=Set<String>(); var decidedSessionIDs=Set<String>()
+//        for (cntr,session) in sessions.enumerated(){
+//            if drawnSessionInds.contains(cntr){
+//                drawnSessionIDs.insert(session.id)
+//            }else{decidedSessionIDs.insert(session.id)}
+//        }
+//        var idsInDecidedSessionsInBranches=Set<String>(); var idsInDrawnSessionsInBranches=Set<String>();
+//        for branch in branches{
+//            idsInDecidedSessionsInBranches.insert(branch.finalSessionID)
+//            for drawnID in branch.drawSessionIDs{
+//                idsInDrawnSessionsInBranches.insert(drawnID)
+//            }
+//        }
+//        self.drawnSessionIDs=drawnSessionIDs
+//        assert(idsInDrawnSessionsInBranches==drawnSessionIDs)
+//        assert(idsInDecidedSessionsInBranches==decidedSessionIDs)
         }
     func sort_leaves()->[Participant]{
-        var leaves=[(Participant,Int)]()
+        var leaves=[(Participant,String)]()
         var winner:Participant?=nil;var loser:Participant?=nil
         for round in self.rounds{
             let winners=round.leftSet
@@ -166,11 +155,11 @@ public class JankenTree:ObservableObject{
             if ( winners.count==1 || losers.count==1 ){
                 if(winners.count==1){
                     winner=winners.first!
-                    leaves.append((winner!,binaryToDecimal(round.childAddresses.0)))
+                    leaves.append((winner!,round.childAddresses.0))
                 }
                 if(losers.count==1){
                     loser=losers.first!
-                    leaves.append((loser!,binaryToDecimal(round.childAddresses.1)))
+                    leaves.append((loser!,round.childAddresses.1))
                 }
             }
         }
@@ -179,15 +168,113 @@ public class JankenTree:ObservableObject{
     
     }
 
-public struct JankenRound:Hashable{
-    public let finalSessionID:String
-    public let leftSet:Set<Participant>
-    public let rightSet:Set<Participant>
-    public let parentAddress:String
-    public let drawSessionIDs:[String]
-    var childAddresses:(String,String) {(parentAddress+"0",parentAddress+"1")}
+public struct DrawnSessions:Hashable{
+    var participants:Set<Participant>
+    var sessions:[JankenSession]=[]
+    
+    public init(participants:Set<Participant>, sessions: [JankenSession]) {
+        self.sessions=sessions
+        if(sessions.isEmpty){
+            self.participants=participants
+        }else{
+            assert(self.sessions.map{session in session.drawnP}.reduce(true){$0 && $1})
+            self.participants=sessions[0].participants
+        }
+    }
+    public init(participants:Set<Participant>){
+        self.participants=participants
+        self.sessions=self.generate_drawn_sessions(participants)
+    }
+    
+    func generate_drawn_sessions(_ participants:Set<Participant>)-> [JankenSession]{
+        var sessions=[JankenSession]()
+        let randomInt=Int.random(in:0..<participants.count*2)
+        for _ in (0..<randomInt){
+            sessions.append(generate_drawn_session(participants))
+        }
+        return sessions
+        
+    }
+    func generate_drawn_session(_ participants:Set<Participant>)-> JankenSession{
+        let jankenHands=[JankenHand.paper,JankenHand.rock,JankenHand.scissors]
+        let aJankenHand=jankenHands.randomElement()
+        if(participants.count==2){
+            return JankenSession(Dictionary(uniqueKeysWithValues:participants.map{participant in (participant,aJankenHand!) }))
+        }else{
+            let anAttemptedPairs=assign_hand_to_participants(participants)
+            if(Set(anAttemptedPairs.values).count==1){
+                return JankenSession(anAttemptedPairs)
+            }
+            var partHandPairs=[Participant:JankenHand]()
+            var intsHands:[Int:JankenHand]=[:]
+            var ints=Set(0..<participants.count)
+            for hand in jankenHands.shuffled(){
+                let anInt=ints.randomElement()!
+                ints.remove(anInt)
+                intsHands[anInt]=hand
+            }
+            for (cntr,participant) in participants.enumerated(){
+                if(intsHands.keys.contains(cntr)){
+                    partHandPairs[participant]=intsHands[cntr]
+                }else{
+                    partHandPairs[participant]=jankenHands.randomElement()
+                }
+            }
+            return JankenSession(partHandPairs)
+        }
+    }
     
 }
+
+public struct JankenRound:Hashable,Equatable{
+    
+    public static func ==(lhs: JankenRound, rhs: JankenRound) -> Bool {
+            return lhs.sessions == rhs.sessions
+        }
+
+    public let finalSession:JankenSession
+    public let drawnSessions:DrawnSessions
+    public let parentAddress:String
+    public let parentRange:ClosedRange<Int>
+    public var childAddresses:(String,String) {(parentAddress+"0",parentAddress+"1")}
+
+    public init(finalSession: JankenSession, drawnSessions: DrawnSessions,  parentAddress: String, parentRange: ClosedRange<Int>) {
+        assert(!finalSession.drawnP)
+        assert(!finalSession.participants.isEmpty)
+        self.finalSession = finalSession
+        //guard !finalSession.drawnP else {return}
+        assert(drawnSessions.participants==finalSession.participants)
+        self.drawnSessions = drawnSessions
+        self.parentAddress = parentAddress
+        self.parentRange = parentRange
+    }
+
+    public var leftSet:Set<Participant> {finalSession.winners}
+    public var rightSet:Set<Participant> {finalSession.losers}
+
+    public var sessions:[JankenSession] {drawnSessions.sessions+[finalSession]}
+    public var hasAWinner:Bool {leftSet.count==1}
+    public var hasALoser:Bool {rightSet.count==1}
+    
+}
+//
+//public struct JankenRound0:Hashable{
+//    public let finalSessionID:String
+//    public let drawSessionIDs:[String]
+//    
+//    //public let finalSession:JankenSession
+//    //public let drawnSessions:[JankenSession]
+//    //public var sessions:[JankenSession] {drawnSessions+[finalSession]}
+//    
+//    public let leftSet:Set<Participant>
+//    public let rightSet:Set<Participant>
+//    public var hasAWinner:Bool {leftSet.count==1}
+//    public var hasALoser:Bool {rightSet.count==1}
+//    public let parentAddress:String
+//    public let parentRange:ClosedRange<Int>
+//    public var childAddresses:(String,String) {(parentAddress+"0",parentAddress+"1")}
+//    
+//}
 
 func divide_set_in_two<T:Hashable>(_ aSet:Set<T>)->(Set<T>,Set<T>){
     let randInt=Int.random(in: 1..<aSet.count)
@@ -200,58 +287,66 @@ func divide_set_in_two<T:Hashable>(_ aSet:Set<T>)->(Set<T>,Set<T>){
     
 }
 
+func assign_hand_to_participants(_ sessionParticipants:Set<Participant>)->[Participant:JankenHand]{
+    var participantsHands=[Participant:JankenHand]()
+    for participant in sessionParticipants{
+        participantsHands[participant]=JankenHand.allCases.randomElement()
+    }
+    return participantsHands
+}
+
 public class JankenSeriesInGroup:ObservableObject{
-    public var groupMembers:Set<Participant>
-    @Published public private(set) var seriesTree=JankenTree(branches:Set(),sessions:[])
+    public var groupMembers=Set<Participant>()
+    public var rounds=Set<JankenRound>()
     
     
-    public init(groupMembers: Set<Participant>=Set(), seriesTree: JankenTree = JankenTree(branches:Set(),sessions:[])) {
+    @Published public private(set) var seriesTree=JankenTree(branches:Set())
+    
+    
+    public init(groupMembers: Set<Participant>=Set(), seriesTree: JankenTree = JankenTree(branches:Set())) {
         self.groupMembers = groupMembers
         self.seriesTree = seriesTree
-        self.do_jankenSeries_in_group()
+//        self.do_jankenSeries_in_group()
     }
     
-    func assign_hand_to_participants(_ sessionParticipants:Set<Participant>)->[Participant:JankenHand]{
-        var participantsHands=[Participant:JankenHand]()
-        for participant in sessionParticipants{
-            participantsHands[participant]=JankenHand.allCases.randomElement()
-        }
-        return participantsHands
+    
+    public func do_jankenSeries_in_group(){
+        let (rounds,_)=self.develop_jankenbranches(self.groupMembers,cumBranches:Set(),parentAddress:"",parentRange:(1...self.groupMembers.count),sessions:[])
+        //there always are membersCount-1 rounds
+        assert(rounds.count==groupMembers.count-1)
+        self.seriesTree=JankenTree(branches:rounds)
     }
     
-    func do_jankenSeries_in_group(){
-        let (branches,sessions)=self.develop_jankenbranches(self.groupMembers)
-        let branchCount=branches.count
-        assert(branchCount==groupMembers.count-1)
-        let drawnCount=branches.map{br in br.drawSessionIDs.count}.reduce(0,+)
-        assert(sessions.count==branchCount+drawnCount)
-        self.seriesTree=JankenTree(branches:branches,sessions:sessions)
-    }
-    
-    func develop_jankenbranches(_ participants:Set<Participant>, cumBranches:Set<JankenRound>=Set(), parentAddress:String="", sessions:[JankenSession]=[])->(Set<JankenRound>,[JankenSession]){
-        var cumBranches=cumBranches; var sessions=sessions
+    func develop_jankenbranches(_ participants:Set<Participant>, cumBranches:Set<JankenRound>, parentAddress:String, parentRange:ClosedRange<Int>, sessions:[JankenSession])->(Set<JankenRound>,[JankenSession]){
+        var rounds=cumBranches; var sessions=sessions
         var winners:Set<Participant>
-        var drawSessionIDs:[String]=[]
+        var drawnSessions:[JankenSession]=[]
         var drawnP:Bool
         if(participants.count==1){
-            return (cumBranches,sessions)
+            return (rounds,sessions)
         }
         var jankenSession:JankenSession
         repeat{
-            jankenSession=JankenSession(self.assign_hand_to_participants(participants))
+            jankenSession=JankenSession(assign_hand_to_participants(participants))
             winners=jankenSession.do_janken_and_get_winners()
             if(winners.isEmpty){
-                drawSessionIDs.append(jankenSession.id)
+                drawnSessions.append(jankenSession)
                 sessions.append(jankenSession)
                 drawnP=true
             }else{drawnP=false;sessions.append(jankenSession)}
         }while(drawnP)
         let losers=participants.filter{el in !winners.contains(el)}
-        cumBranches.insert(JankenRound(finalSessionID:jankenSession.id, leftSet: winners, rightSet: losers, parentAddress: parentAddress, drawSessionIDs:drawSessionIDs))
+        rounds.insert(JankenRound(finalSession:jankenSession, drawnSessions:DrawnSessions(participants:participants,sessions:drawnSessions), parentAddress: parentAddress, parentRange:parentRange))
         let leftAddress=parentAddress+"0"; let rightAddress=parentAddress+"1"
-        let (leftBranches,leftSessions)=develop_jankenbranches(winners, cumBranches:cumBranches, parentAddress:leftAddress, sessions:sessions)
-        let (finalCumBranches,finalSessions)=develop_jankenbranches(losers, cumBranches:leftBranches, parentAddress:rightAddress, sessions:leftSessions)
-        return (finalCumBranches,finalSessions)
+        let rangeFirst=parentRange.first!; let rangeLast=parentRange.last!
+        let winnerOffset=rangeFirst+winners.count-1; let loserOffset=winnerOffset+1
+        let winnerRange=(rangeFirst...winnerOffset)
+        let loserRange=(loserOffset...rangeLast)
+        assert(winners.count==(winnerOffset-winnerRange.first!+1))
+        assert(losers.count==(loserRange.last!-loserOffset+1))
+        let (leftRounds,leftSessions)=develop_jankenbranches(winners, cumBranches:rounds, parentAddress:leftAddress, parentRange:winnerRange, sessions:sessions)
+        let (finalCumRounds,finalSessions)=develop_jankenbranches(losers, cumBranches:leftRounds, parentAddress:rightAddress, parentRange:loserRange, sessions:leftSessions)
+        return (finalCumRounds,finalSessions)
     }
 }
 

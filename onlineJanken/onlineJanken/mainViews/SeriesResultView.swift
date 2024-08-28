@@ -10,42 +10,54 @@ import jankenModels
 
 struct SeriesResultView: View {
     @EnvironmentObject var series:JankenSeriesInGroup
-    var IDsSessions:[String:JankenSession] {series.seriesTree.IDsSessions}
-    
-    var body: some View {
-        ScrollView{
-            VStack{
-                Text(series.seriesTree.sortedLeaves.map{part in part.displayName}.joined(separator:"--"))
-                ForEach(Array(series.seriesTree.rounds).sorted{$0.parentAddress<$1.parentAddress},id:\.self){round in
-                    
-                    Text(round.parentAddress.replacingOccurrences(of: "0", with:    "W").replacingOccurrences(of: "1", with: "L")).padding()
-                    
-                    let finalSession=IDsSessions[round.finalSessionID]!
-                    let drawnSessions=IDsSessions.filter{(id,session) in round.drawSessionIDs.contains(id)}.map{(_id,session) in session}
-                    let sessions=drawnSessions+[finalSession]
-                                        
-//                    RoundResultView(session:sessions)
-                    
-                    ForEach(sessions,id:\.self){session in
-                        let strings=session.participantHandPairs.map{(part,hand) in part.displayName+": "+hand.rawValue}.sorted{$0<$1}
-                        Text(strings.joined(separator:" ")).padding(2)
-                        
-                    }
-                    
-                }
-            }
-        }
-    }
-}
+    var memberCount:Int {series.groupMembers.count}
+    var sortedRounds:[JankenRound] {Array(series.seriesTree.rounds).sorted{$0.parentAddress<$1.parentAddress}}
+    let timer = Timer.publish (every: 1, on: .current, in: .common).autoconnect()
+    @State private var currentNumber=0
+    var lastNumber:Int {sortedRounds.count-1}
 
-#Preview { 
-    SeriesResultView().environmentObject(JankenSeriesInGroup(groupMembers:Set([
+    var body: some View {
+        ScrollViewReader{scrollView in
+            ScrollView{
+                
+                VStack{
+                    ForEach(sortedRounds,id:\.self){round in
+                        
+                        RoundResultView(round:round)
+                        //Text("hahahaha").padding(100)
+                        if(round.hasAWinner||round.hasALoser){
+                            if(round.hasAWinner){
+                                Text("順位決定 \(round.leftSet.first!.displayName) \(round.parentRange.first!)位")
+                            }
+                            if(round.hasALoser){
+                                Text("順位決定 \(round.rightSet.first!.displayName) \(round.parentRange.last!)位")
+                            }
+                        }
+
+                    }
+                }                .onChange(of:sortedRounds){
+                    scrollView.scrollTo(sortedRounds.endIndex-1,anchor:.bottom)}
+
+                Text("最終順位 \(series.seriesTree.sortedLeaves.map{part in part.displayName}.joined(separator: "-"))")
+                
+            
+            }
+            .onAppear{series.do_jankenSeries_in_group()}
+                
+            }
+    }
+    }
+
+
+#Preview {
+    SeriesResultView().environmentObject(
+        JankenSeriesInGroup(groupMembers:Set([
         Participant(displayName: "John", email: "hahaha@mail.com")
         ,Participant(displayName: "Mary", email: "hihihi@mail.com")
         ,Participant(displayName: "Dan", email: "huhuhu@mail.com")        ,Participant(displayName: "Tim", email: "hehehe@mail.com")
         ,Participant(displayName: "Darlene", email: "hehehe@mail.com")
         ,Participant(displayName: "Zak", email: "hahaha@mail.com")
-        ,Participant(displayName: "Yo", email: "hihihi@mail.com") 
+        ,Participant(displayName: "Yo", email: "hihihi@mail.com")
 //        ,Participant(displayName: "Motoko", email: "huhuhu@mail.com")
 //        ,Participant(displayName: "Brian", email: "hehehe@mail.com")
 //        ,Participant(displayName: "Simon", email: "hehehe@mail.com")
@@ -68,5 +80,6 @@ struct SeriesResultView: View {
 //        Participant(displayName: "Y", email: "hehehe@mail.com"),
 //        Participant(displayName: "Z", email: "hohoho@mail.com")
 
-    ])))
+        ]))
+    )
 }

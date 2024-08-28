@@ -9,89 +9,71 @@ import SwiftUI
 import jankenModels
 
 struct RoundResultView: View {
-    let sessions:[JankenSession]
+    let round:JankenRound
     let timer = Timer.publish (every: 1, on: .current, in: .common).autoconnect()
-    var lastNumber:Int {sessions.count-1}
-    let firstNumber: Int=0
+    var lastNumber:Int {round.sessions.count-1}
+    //let firstNumber: Int=0
     @State var currentNumber=0
-    var numbers:[Int] {Array(firstNumber..<(firstNumber+currentNumber+1))}
+    var numbers:[Int] {Array(0..<(currentNumber+1))}
     
     var body: some View {
         ScrollViewReader{scrollView in
             //GeometryReader{geo in
-                ScrollView{
-                    LazyVStack{
-                        ForEach(numbers,id:\.self){ number in
-                   //         VStack{Text("aaa");Text("iii");Text("\(number)")}.padding(10)
-                            JankenSessionView(session:sessions[number])
-                            
-                        }.transition(.opacity)
-                        
-                    }.onChange(of:numbers){
-                        scrollView.scrollTo(numbers.endIndex-1,anchor:.bottom)
-                    }
-                }}
+            ScrollView{
+                if(round.parentAddress==""){Text("初戦")}else{Text(round.parentAddress)}
+                LazyVStack{
+                    ForEach(numbers,id:\.self){ number in
+                        //         VStack{Text("aaa");Text("iii");Text("\(number)")}.padding(10)
+                        if(number<=lastNumber){
+                            JankenSessionView(session:round.sessions[number])
+                        }
+                    }.transition(.opacity)
+
+                }.padding().onChange(of:numbers){
+                    scrollView.scrollTo(numbers.endIndex-1,anchor:.bottom)
+                }
+            }
+        }
             .onReceive(timer) { _ in
                 currentNumber += 1
                 if currentNumber == lastNumber {
                     timer.upstream.connect().cancel()
                 }
+                //somehow animation chops the last image off at the bottom
             //}//.animation(.default,value:currentNumber)
         }
     }
 }
 #Preview {
-    RoundResultView(sessions:   [
-        JankenSession([
-            Participant(displayName: "C", email: "bbb@ccc.co.uk"): JankenHand.rock,
-            Participant(displayName: "D", email: "eee@fff.com"): JankenHand.rock,
-            Participant(displayName: "F", email: "eef@fff.com"): JankenHand.rock,
-            Participant(displayName: "E", email: "bbb@ccc.co.uk"): JankenHand.rock]),
-        JankenSession([
-            Participant(displayName: "C", email: "bbb@ccc.co.uk"): JankenHand.rock,
-            Participant(displayName: "D", email: "eee@fff.com"): JankenHand.scissors,
-            Participant(displayName: "F", email: "eef@fff.com"): JankenHand.paper,
-            Participant(displayName: "E", email: "bbb@ccc.co.uk"): JankenHand.rock]),
-        JankenSession([
-            Participant(displayName: "C", email: "bbb@ccc.co.uk"): JankenHand.rock,
-            Participant(displayName: "D", email: "eee@fff.com"): JankenHand.rock,
-            Participant(displayName: "F", email: "eef@fff.com"): JankenHand.rock,
-            Participant(displayName: "E", email: "bbb@ccc.co.uk"): JankenHand.rock]),
-        JankenSession([
-            Participant(displayName: "C", email: "bbb@ccc.co.uk"): JankenHand.rock,
-            Participant(displayName: "D", email: "eee@fff.com"): JankenHand.scissors,
-            Participant(displayName: "F", email: "eef@fff.com"): JankenHand.paper,
-            Participant(displayName: "E", email: "bbb@ccc.co.uk"): JankenHand.rock]),
-        JankenSession([
-            Participant(displayName: "C", email: "bbb@ccc.co.uk"): JankenHand.rock,
-            Participant(displayName: "D", email: "eee@fff.com"): JankenHand.rock,
-            Participant(displayName: "F", email: "eef@fff.com"): JankenHand.rock,
-            Participant(displayName: "E", email: "bbb@ccc.co.uk"): JankenHand.rock]),
-        JankenSession([
-            Participant(displayName: "C", email: "bbb@ccc.co.uk"): JankenHand.rock,
-            Participant(displayName: "D", email: "eee@fff.com"): JankenHand.paper,
-            Participant(displayName: "F", email: "eef@fff.com"): JankenHand.scissors,
-            Participant(displayName: "E", email: "bbb@ccc.co.uk"): JankenHand.rock]),
-        JankenSession([
-            Participant(displayName: "C", email: "bbb@ccc.co.uk"): JankenHand.rock,
-            Participant(displayName: "D", email: "eee@fff.com"): JankenHand.scissors,
-            Participant(displayName: "F", email: "eef@fff.com"): JankenHand.paper,
-            Participant(displayName: "E", email: "bbb@ccc.co.uk"): JankenHand.rock]),
-        JankenSession([
-            Participant(displayName: "C", email: "bbb@ccc.co.uk"): JankenHand.rock,
-            Participant(displayName: "D", email: "eee@fff.com"): JankenHand.rock,
-            Participant(displayName: "F", email: "eef@fff.com"): JankenHand.rock,
-            Participant(displayName: "E", email: "bbb@ccc.co.uk"): JankenHand.rock]),
-        JankenSession([
-            Participant(displayName: "C", email: "bbb@ccc.co.uk"): JankenHand.rock,
-            Participant(displayName: "D", email: "eee@fff.com"): JankenHand.paper,
-            Participant(displayName: "F", email: "eef@fff.com"): JankenHand.scissors,
-            Participant(displayName: "E", email: "bbb@ccc.co.uk"): JankenHand.rock]),
-        JankenSession([
-            Participant(displayName: "C", email: "bbb@ccc.co.uk"): JankenHand.rock,
-            Participant(displayName: "D", email: "eee@fff.com"): JankenHand.scissors,
-            Participant(displayName: "F", email: "eef@fff.com"): JankenHand.scissors,
-            Participant(displayName: "E", email: "bbb@ccc.co.uk"): JankenHand.rock])
-    ]
-)
+    RoundResultView(round:
+                        JankenRound(
+                            finalSession: JankenSession([
+                                Participant(displayName: "A", email: "aaa@ccc.co.uk"): JankenHand.rock
+                                , Participant(displayName: "B", email: "bbb@ccc.co.uk"): JankenHand.rock
+                                , Participant(displayName: "C", email: "ccc@ccc.co.uk"): JankenHand.rock
+                                ,   Participant(displayName: "D", email: "ddd@ccc.co.uk"): JankenHand.scissors
+                                ,   Participant(displayName: "F", email: "fff@ccc.co.uk"): JankenHand.scissors
+                                ,  Participant(displayName: "E", email: "eee@ccc.co.uk"): JankenHand.rock
+                                ,  Participant(displayName: "G", email: "ggg@ccc.co.uk"): JankenHand.rock
+                                ,  Participant(displayName: "HHHHHHHHH", email: "hhh@ccc.co.uk"): JankenHand.rock
+                                ,  Participant(displayName: "I", email: "iii@ccc.co.uk"): JankenHand.rock
+                            ]),
+                            drawnSessions: DrawnSessions(participants:
+                                        Set([
+                                            Participant(displayName: "A", email: "aaa@ccc.co.uk"),
+                                            Participant(displayName: "B", email: "bbb@ccc.co.uk"),
+                                                Participant(displayName: "C", email: "ccc@ccc.co.uk"),
+                                            Participant(displayName: "D", email: "ddd@ccc.co.uk"),
+                                            Participant(displayName: "F", email: "fff@ccc.co.uk"),
+                                            Participant(displayName: "E", email: "eee@ccc.co.uk")
+                                            ,  Participant(displayName: "G", email: "ggg@ccc.co.uk")
+                                            ,  Participant(displayName: "HHHHHHHHH", email: "hhh@ccc.co.uk")
+                                            ,  Participant(displayName: "I", email: "iii@ccc.co.uk")
+                                            
+                                            
+                                        ])),
+                            parentAddress: "",
+                            parentRange: (1...9)
+                                )
+        )
 }

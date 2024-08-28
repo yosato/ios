@@ -38,6 +38,7 @@
 		BCC4A2392C78BC85000028C9 /* testDelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A2382C78BC85000028C9 /* testDelay.swift */; };
 		BCC4A23B2C78BE3F000028C9 /* RoundResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A23A2C78BE3F000028C9 /* RoundResultView.swift */; };
 		BCC4A23D2C78F088000028C9 /* SeriesResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A23C2C78F088000028C9 /* SeriesResultView.swift */; };
+		BCC4A2462C7DE4D2000028C9 /* ContentView1.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A2452C7DE4D2000028C9 /* ContentView1.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,6 +117,7 @@
 		BCC4A2382C78BC85000028C9 /* testDelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testDelay.swift; sourceTree = "<group>"; };
 		BCC4A23A2C78BE3F000028C9 /* RoundResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundResultView.swift; sourceTree = "<group>"; };
 		BCC4A23C2C78F088000028C9 /* SeriesResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeriesResultView.swift; sourceTree = "<group>"; };
+		BCC4A2452C7DE4D2000028C9 /* ContentView1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView1.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -225,6 +227,7 @@
 			children = (
 				BCB1EB5F2C5A83370075ED3E /* onlineJankenApp.swift */,
 				BCB1EB612C5A83370075ED3E /* ContentView.swift */,
+				BCC4A2452C7DE4D2000028C9 /* ContentView1.swift */,
 				BCA4A1072C5A928E005FB360 /* WelcomeView.swift */,
 				BC347AB22C6289A40084EE1E /* models */,
 				BC347B7B2C6F95CC0084EE1E /* mainViews */,
@@ -441,6 +444,7 @@
 				BCC4A2372C78BB77000028C9 /* SwiftUIView.swift in Sources */,
 				BC1435512C722C2F008BD25D /* ChatBubble.swift in Sources */,
 				BC347AC42C63AB730084EE1E /* JankenView.swift in Sources */,
+				BCC4A2462C7DE4D2000028C9 /* ContentView1.swift in Sources */,
 				BC347ABE2C6372B50084EE1E /* AccountCreationView.swift in Sources */,
 				BCB1EB622C5A83370075ED3E /* ContentView.swift in Sources */,
 				BCC4A23B2C78BE3F000028C9 /* RoundResultView.swift in Sources */,

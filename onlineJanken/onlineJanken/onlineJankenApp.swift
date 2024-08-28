@@ -22,10 +22,10 @@ struct onlineJankenApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject var authService=AuthService()
     @StateObject var dataService=DataService()
-    @StateObject var jankenHistories=JankenSeriesInGroup()
+    @StateObject var jankenSeries=JankenSeriesInGroup()
     var body: some Scene {
         WindowGroup {
-            ContentView().environmentObject(authService).environmentObject(dataService)//.environmentObject(jankenTree)
+            ContentView1().environmentObject(authService).environmentObject(dataService).environmentObject(jankenSeries)
         }
     }
 }

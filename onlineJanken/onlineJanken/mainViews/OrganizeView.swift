@@ -7,7 +7,10 @@
 
 import SwiftUI
 
+
+
 struct OrganizeView: View {
+    let organiser:Member
     @EnvironmentObject var authService: AuthService
     @EnvironmentObject var dataService: DataService
     //let fakeName="信子"
@@ -18,18 +21,22 @@ struct OrganizeView: View {
     @State private var selectedOpponents=Set<Member>()
     @State private var sessionName:String=""
     @State private var invitees:[Member]=[]
+    var opponentNamesString:String {Array(selectedOpponents).map{opponent in opponent.displayName.replacingOccurrences(of: " ", with: "_")}.sorted().joined(separator: "--")}
+    var namesString:String {organiser.displayName+":"+opponentNamesString}
+
+
     let methods=["お任せ対戦","ライブ対戦"]
-    let resultTypes=["全員順位づけ","勝者ひとり"]
+    let resultTypes=["順位づけ","勝者ひとり"]
     
     var body: some View {
         NavigationStack {
             VStack{
-                Text("ようこそ\(authService.userName)さん")
+                Text("主催者 \(organiser.displayName)")
                 Spacer()
                 Form{
                     Section("対戦相手"){
                         NavigationLink("選ぶ"){
-                            PickOpponentsView(selectedOpponents: $selectedOpponents).environmentObject(dataService)
+                            PickOpponentsView(organiser:organiser,selectedOpponents: $selectedOpponents).environmentObject(dataService)
                         }
                         HStack{ForEach(Array(selectedOpponents)){opponent in Text("\(opponent.displayName)")}
                         }
@@ -49,32 +56,35 @@ struct OrganizeView: View {
                         }
                     }
                     Section("セッション名（任意に変更可）"){
-                        TextField(Array(selectedOpponents).map{opponent in opponent.displayName}.sorted().joined(separator: "--"),text:$sessionName)
+                        
+                        TextField(namesString,text:$sessionName)
                     }
                 }      //   ZStack{
                 Button("開催"){
-                    if(sessionName==""){
-                        sessionName=selectedOpponents.map{member in member.displayName}.joined(separator:"__")
-                    }
 //                    dataService.createSessionInFB(session: Session(sessionName:sessionName)){ error in
 //                        if let error{
 //                            print(error.localizedDescription)
 //                        }
 //                    }
                     showAlert.toggle()
-                }.disabled(selectedOpponents.isEmpty).alert("セッション名は\(sessionName)です。OKを押すと招待メールが送られ全員そろい次第開催されます",isPresented:$showAlert){Button("OK",role:.cancel){
-                    gotoLiveView.toggle()
-                    invitees+=selectedOpponents
-                    sendInvitationEmails(invitees)
-                    
+                }.disabled(selectedOpponents.isEmpty).alert("セッション名は\(sessionName)です。\nOKを押すと招待メールが送られ全員が了承次第開催されます",isPresented:$showAlert){
+                    Button("Cancel",role:.cancel){}
+                    Button("OK"){
+                        invitees+=selectedOpponents
+                        let groupSession=GroupSession(sessionName: sessionName, organiser: organiser, invitees: selectedOpponents)
+                        dataService.createSessionInFB(session: groupSession) {_error in }
+                        
+//                        sendInvitationEmails(invitees)
+                        gotoLiveView.toggle()
                     }
                 }
                     .navigationDestination(isPresented: $gotoLiveView){
-                    LiveSessionView(session:Session(sessionName:sessionName))
+                        LiveSessionView(session:GroupSession(sessionName:sessionName,organiser:organiser, invitees:selectedOpponents))
                 }
             }.navigationTitle("じゃんけん開催設定").navigationBarTitleDisplayMode(.inline)
 
-        }.onAppear{Task{try? await dataService.fetchMembersFromFB()}}
+        }.onAppear{sessionName=namesString
+                            Task{try? await dataService.fetchMembersFromFB()}}
     }
     func sendEmail(_ email:String,adressee:String="Member"){
         
@@ -86,5 +96,5 @@ struct OrganizeView: View {
     }
 }
 #Preview {
-    OrganizeView().environmentObject(AuthService()).environmentObject(DataService())
+    OrganizeView(organiser:Member(displayName: "hahaha", email: "hihihi@hihihi.com")).environmentObject(AuthService()).environmentObject(DataService())
 }

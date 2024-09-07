@@ -11,6 +11,20 @@ import Iterators
 import Network
 
 
+func get_url_request(urlStr:String, requestType:String)->URLRequest?{
+    guard let url = URL(string:urlStr)
+    else {
+        print("Invalid URL")
+        return nil
+    }
+    
+    var request=URLRequest(url:url)
+    request.setValue("application/json",forHTTPHeaderField: "Content-Type")
+    request.httpMethod = requestType
+    
+    return request
+}
+
 //@Observable
 final class NetworkMonitor: ObservableObject {
     @Published var isConnected = false

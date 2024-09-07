@@ -9,6 +9,7 @@ import SwiftUI
 import FirebaseFirestore
 
 struct PickOpponentsView: View {
+    let organiser:Member
     @EnvironmentObject var dataService:DataService
     //@State var opponents:[Member]=[]
     @State private var goBackToOrganizeView=false
@@ -18,7 +19,7 @@ struct PickOpponentsView: View {
     var body: some View {
         NavigationStack{
             List{
-                ForEach(dataService.registeredMembers){member in
+                ForEach(dataService.registeredMembers.filter{member in member != organiser}){member in
                     MultipleSelection(name: member.displayName, isSelected:selectedOpponents.contains(member)){
                         if(selectedOpponents.contains(member)){
                             selectedOpponents.remove(member)

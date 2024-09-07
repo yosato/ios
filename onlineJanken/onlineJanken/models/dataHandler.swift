@@ -9,14 +9,16 @@ import Foundation
 import FirebaseAuth
 import FirebaseFirestore
 
-struct Session: Codable, Identifiable, Equatable{
+struct GroupSession: Codable, Identifiable, Equatable{
     var documentID:String?=nil
     let sessionName: String
-    var members=Set<Member>()
+    let organiser:Member
+    let invitees:Set<Member>
+    var createdAt=Date()
     var id: String{
         documentID ?? UUID().uuidString
     }
-    
+    var members:Set<Member> {Set([organiser]).union(invitees)}
     func toDictionary()->[String:String]{
         return ["name":sessionName]
     }
@@ -33,10 +35,10 @@ struct Member:Identifiable,Hashable,Equatable,Codable{
     
     let displayName:String
     let email:String
-    let uid:String?=nil
+    var uid:String?=nil
     var id:String {displayName+"--"+email}
-    var documentID:String?=nil
     let groupsJoined:[Group]=[]
+    var onlineP:Bool=false
     
     func hash(into hasher: inout Hasher){
         hasher.combine(self.id)
@@ -48,19 +50,22 @@ struct Group{
     let members:[Member]
 }
 
-func docSnapshot2session(snapshot:QueryDocumentSnapshot)->Session?{
+func docSnapshot2session(snapshot:QueryDocumentSnapshot)->GroupSession?{
     let dictionary=snapshot.data()
-    guard let sessionName=dictionary["sessionName"] as? String else {
+    guard let sessionName=dictionary["sessionName"] as? String,
+          let organiser=dictionary["organiser"] as? Member,
+          let invitees=dictionary["invitees"] as? Set<Member>
+    else {
         return nil
     }
-    return Session(documentID: snapshot.documentID, sessionName: sessionName)
+    return GroupSession(documentID: snapshot.documentID, sessionName: sessionName,organiser:organiser,invitees:invitees)
 }
 func snapshot2member(snapshot:QueryDocumentSnapshot)->Member?{
     let dictionary=snapshot.data()
     guard let displayName=dictionary["displayName"] as? String, let email=dictionary["email"] as? String else {
         return nil
     }
-    return Member(displayName: displayName, email: email, documentID: snapshot.documentID)
+    return Member(displayName: displayName, email: email, uid: snapshot.documentID)
 }
 
 struct ChatMessage:Codable,Identifiable,Equatable{
@@ -100,16 +105,15 @@ func snapshot2ChatMessage(_ snapshot:QueryDocumentSnapshot)->ChatMessage?{
     return ChatMessage(documentID: snapshot.documentID, text: text, uid: uid, displayName: displayName, dateCreated:dateCreated)
 }
 
-@MainActor
+
 class DataService:ObservableObject{
     
-    @Published var sessions:[Session]=[]
+    @Published var ourGroupSession:GroupSession?=nil
     @Published var messagesInSession=[ChatMessage]()
     @Published var registeredMembers:[Member]=[]
     
     
     var firestoreListener: ListenerRegistration?
-
     
     func updateDisplayName(for user:User,displayName:String) async throws{
         let request=user.createProfileChangeRequest()
@@ -124,35 +128,75 @@ class DataService:ObservableObject{
         let fetchedMembers=registeredMemberDocs.compactMap{ snapshot in snapshot2member(snapshot:snapshot) }
         self.registeredMembers=fetchedMembers
     }
-    func fetchSessionsFromFB() async throws{
-        let db=Firestore.firestore()
-        let snapshot=try await db.collection("sessions").getDocuments()
-        self.sessions=snapshot.documents.compactMap { snapshot in
-            docSnapshot2session(snapshot:snapshot)
-        }
-    }
+//    func fetchSessionsFromFB() async throws{
+//        let db=Firestore.firestore()
+//        let snapshot=try await db.collection("groupSessions").getDocuments()
+//        self.groupSessions=snapshot.documents.compactMap { snapshot in
+//            docSnapshot2session(snapshot:snapshot)
+//        }
+//    }
 
-    func sendMessageToFB(text:String,session:Session,completion:@escaping (Error?)->Void){
+    func get_currentMember_withEmail(_ email:String)-> Member?{
+        if(self.registeredMembers.isEmpty){
+            return nil}else{
+                let hits=self.registeredMembers.filter{member in member.email==email}
+                if(hits.count != 1){
+                    return nil
+                }else{return hits.first!}
+            }
+    }
+    func fetchYourGroupSessionFromFS(_ email:String) async throws ->GroupSession?{
+        let db=Firestore.firestore()
+        let groupSessionsCollection=db.collection("groupSessions")
+        let allSessionsDocuments=try await groupSessionsCollection.getDocuments()
+        //let groupSessionsInvitees=try await groupSessionsCollection.document()
+        db.collection("groupSessions").document()
+        let selectedSessions=allSessionsDocuments.documents.compactMap{snapshot in
+            docSnapshot2session(snapshot:snapshot)}
+        var selectedSession:GroupSession?
+        for session in selectedSessions{
+            let emails=session.invitees.map{invitee in invitee.email}
+            if(emails.contains(email)){selectedSession=session;break}
+            selectedSession=nil
+        }
+        self.ourGroupSession=selectedSession
+        return ourGroupSession
+        }
+
+    func sendMessageToFB(text:String,session:GroupSession,completion:@escaping (Error?)->Void){
         let db=Firestore.firestore()
         guard let sessionDocID=session.documentID else {return}
         db.collection("sessions").document(sessionDocID).collection("messages").addDocument(data:["chatText":text]){ error in completion(error) }
         
     }
+    func addMemberToSessionInFB(member:Member,sessionDocID:String,completion:@escaping (Error?)->Void){
+        let db=Firestore.firestore()
+//        guard let sessionDocID=session.documentID else {return}
+        db.collection("sessions").document(sessionDocID).collection("members").addDocument(data:["name":member.displayName,"email":member.email]){ error in completion(error) }
+        
+    }
 
-    func createSessionInFB(session:Session, completion:@escaping (Error?)->Void){
+    
+    
+    func createSessionInFB(session:GroupSession, completion:@escaping (Error?)->Void){
         let db=Firestore.firestore()
         var docRef:DocumentReference?=nil
-        docRef=db.collection("sessions")
-            .addDocument(data:["name":session.sessionName]){ error in
+        docRef=db.collection("groupSessions")
+            .addDocument(data:["sessionName":session.sessionName,"organiserEmail":session.organiser.email,"createdAt":session.createdAt]){ error in
                 if(error != nil){completion(error)}else{
                     if let docRef{
+                        db.collection("groupSessions").document(docRef.documentID).collection("organiser").document(session.organiser.uid!).setData(["uid":session.organiser.uid!])
+                        let inviteeUIDs=session.invitees.map{invitee in invitee.uid!}
+                        for inviteeUID in inviteeUIDs{
+                            db.collection("groupSessions").document(docRef.documentID).collection("invitees").document(inviteeUID).setData(["uid":inviteeUID])}
                         var newSession=session
                         newSession.documentID=docRef.documentID
-                        self.sessions.append(newSession)
+                        self.ourGroupSession=newSession
                     }
                 }
             }
     }
+
     func registerMemberInFB(member:Member, completion:@escaping (Error?)->Void){
         let db=Firestore.firestore()
         var docRef:DocumentReference?=nil
@@ -161,7 +205,7 @@ class DataService:ObservableObject{
                 if(error != nil){completion(error)}else{
                     if let docRef{
                         var newMember=member
-                        newMember.documentID=docRef.documentID
+                        newMember.uid=docRef.documentID
                         self.registeredMembers.append(newMember)
                     }
                 }
@@ -169,7 +213,7 @@ class DataService:ObservableObject{
     }
 
     
-    func listenForMessagesInSession(in session:Session){
+    func listenForMessagesInSession(in session:GroupSession){
         let db=Firestore.firestore()
         self.messagesInSession.removeAll()
         guard let docID=session.documentID else {return}
@@ -207,12 +251,15 @@ class DataService:ObservableObject{
 
 class AuthService: ObservableObject{
     @Published var signedIn:Bool=false
-    @Published var userName:String? = nil
+  //  @Published var userName:String? = nil
+    @Published var currentUser:User? = nil
+    @Published var currentMember:Member?=nil
     init() {
         Auth.auth().addStateDidChangeListener() { auth, user in
             if user != nil {
                 self.signedIn = true
-                self.userName=user?.displayName ?? ""
+//                self.userName=user?.displayName ?? ""
+                self.currentUser=auth.currentUser!
                 print("Auth state changed, is signed in")
             } else {
                 self.signedIn = false
@@ -222,16 +269,16 @@ class AuthService: ObservableObject{
     }
     
     // MARK: - Password Account
-        func regularCreateAccount(email: String, password: String) {
-            Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
-                if let e = error {
-                    print(e.localizedDescription)
-                    
-                } else {
-                    print("Successfully created password account")
-                }
-            }
+    func regularCreateAccount(displayName:String, email: String, password: String) async throws {
+        do {let authResult=try await Auth.auth().createUser(withEmail: email, password: password)
+            
+            self.currentUser=authResult.user
+            try await Firestore.firestore().collection("registeredMembers").document(currentUser!.uid).setData(["displayName":displayName,"email":email,"uid":currentUser!.uid,"createdAt":            currentUser!.metadata.creationDate!],merge:false)
+        } catch{
+            print("account creation failed")
+            return
         }
+    }
         
     //MARK: - Traditional sign in
       // Traditional sign in with password and email
@@ -241,7 +288,7 @@ class AuthService: ObservableObject{
                   completion(e)
               } else {
                   print("Login success")
-                  
+                  Firestore.firestore().collection("registeredMembers")
                   completion(nil)
               }
           }

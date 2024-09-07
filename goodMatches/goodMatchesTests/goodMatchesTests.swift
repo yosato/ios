@@ -24,12 +24,15 @@ final class goodMatchesTests: XCTestCase {
     var matchSetsOnCourt:MatchSetOnCourt!
     var begPlayers:[Player]!; var lowerIntPlayers:[Player]!;var upperIntPlayers:[Player]!; var advPlayers:[Player]!
     var outsideTeamPlayers:[Player]!
+    var sameStrengthPlayers_beg:[Player]!; var sameStrengthPlayers_adv:[Player]!
     var playersOnCourt5:PlayersOnCourt!;  var playersOnCourt6:PlayersOnCourt!; var playersOnCourt7:PlayersOnCourt!
     var playersOnCourt8:PlayersOnCourt!;  var playersOnCourt9:PlayersOnCourt!; var playersOnCourt10:PlayersOnCourt!
     var playersOnCourt11:PlayersOnCourt!;  var playersOnCourt12:PlayersOnCourt!;
     var aMatch:Match!
     var begTeam:Team!; var begTeam0:Team!; var intTeam:Team!; var advTeam:Team!
     var begIntTeam:Team!; var intAdvTeam:Team!; var begAdvTeam:Team!
+    var sameStrTeams_begD:[Team]!; var sameStrTeam_beg1s:Team!;var sameStrTeam_adv1s:Team!;var sameStrTeam_adv2s:Team!; var sameStrTeam_beg2s:Team!; var sameStrTeams_begadvD:[Team]!
+    var veryStrongTeams:[Team]!; var veryWeakTeams:[Team]!
     var singleBegTeam:Team!; var singleIntTeam:Team!
     var matchesD1S1:[Match]!; var matchesD2:[Match]!; var matchesD2S1:[Match]!
     var matchSetOnCourt6a:MatchSetOnCourt!; var matchSetOnCourt6b:MatchSetOnCourt!; var matchSetOnCourt6c:MatchSetOnCourt!
@@ -39,12 +42,26 @@ final class goodMatchesTests: XCTestCase {
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         try super.setUpWithError()
+        veryStrongTeams=[
+            Team([Player(name:"strong1",score:99,gender:"male",club:"Funabashi"),Player(name:"strong2",score:99,gender:"male",club:"Funabashi")])
+       ,           Team([Player(name:"strong3",score:99,gender:"male",club:"Funabashi"),Player(name:"strong4",score:99,gender:"male",club:"Funabashi")])
+        ]
+        veryWeakTeams=[
+            Team([Player(name:"strong1",score:1,gender:"male",club:"Funabashi"),Player(name:"strong2",score:1,gender:"male",club:"Funabashi")])
+       ,           Team([Player(name:"strong3",score:1,gender:"male",club:"Funabashi"),Player(name:"strong4",score:1,gender:"male",club:"Funabashi")])
+        ]
+        
         begPlayers=[Player(name:"a1",score:10,gender:"male",club:"Funabashi"), Player(name:"a2",score:20,gender:"male",club:"Funabashi"), Player(name:"a3",score:30,gender:"male",club:"Funabashi"), Player(name:"a4",score:30,gender:"male",club:"Funabashi"), Player(name:"a5",score:30,gender:"male",club:"Funabashi")]
         lowerIntPlayers=[Player(name:"b1",score:40,gender:"male",club:"Funabashi"), Player(name:"b2",score:45,gender:"male",club:"Funabashi"), Player(name:"b3",score:50,gender:"male",club:"Funabashi"), Player(name:"b4",score:50,gender:"male",club:"Funabashi"), Player(name:"b5",score:50,gender:"male",club:"Funabashi")]
         upperIntPlayers=[Player(name:"b6",score:55,gender:"male",club:"Funabashi"), Player(name:"b7",score:55,gender:"male",club:"Funabashi"), Player(name:"b8",score:55,gender:"male",club:"Funabashi"), Player(name:"b9",score:60,gender:"male",club:"Funabashi"), Player(name:"b10",score:60,gender:"male",club:"Funabashi")]
         advPlayers=[Player(name:"c1",score:70,gender:"male",club:"Funabashi"), Player(name:"c2",score:80,gender:"male",club:"Funabashi"), Player(name:"c3",score:90,gender:"male",club:"Funabashi"), Player(name:"c4",score:90,gender:"male",club:"Funabashi")]
         outsideTeamPlayers=[Player(name:"d1",score:40,gender:"male",club:"Funabashi"), Player(name:"d2",score:50,gender:"male",club:"Funabashi"), Player(name:"d3",score:60,gender:"male",club:"Funabashi"), Player(name:"d4",score:70,gender:"male",club:"Funabashi")]
-        
+        sameStrengthPlayers_beg=[Player(name:"sb1",score:20,gender:"male",club:"Funabashi"), Player(name:"sb2",score:20,gender:"male",club:"Funabashi"), Player(name:"sb3",score:20,gender:"male",club:"Funabashi"), Player(name:"sb4",score:20,gender:"male",club:"Funabashi"),
+            Player(name:"sb5",score:20,gender:"male",club:"Funabashi"),
+            Player(name:"sb6",score:20,gender:"male",club:"Funabashi")]
+        sameStrengthPlayers_adv=[Player(name:"sa1",score:80,gender:"male",club:"Funabashi"), Player(name:"sa2",score:80,gender:"male",club:"Funabashi"), Player(name:"sa3",score:80,gender:"male",club:"Funabashi"), Player(name:"sa4",score:80,gender:"male",club:"Funabashi"),
+                                 Player(name:"sa5",score:80,gender:"male",club:"Funabashi"), Player(name:"sa6",score:80,gender:"male",club:"Funabashi")]
+
         let players5=[begPlayers[0],lowerIntPlayers[0],lowerIntPlayers[1],upperIntPlayers[0],advPlayers[0]]
         
         playersOnCourt5=PlayersOnCourt();  playersOnCourt5.add_players(players5)
@@ -67,6 +84,12 @@ final class goodMatchesTests: XCTestCase {
         begTeam0=Team([begPlayers[2],begPlayers[3]])
         intTeam=Team([lowerIntPlayers[0],lowerIntPlayers[1]])
         advTeam=Team([advPlayers[0],advPlayers[1]])
+        sameStrTeams_begD=[Team([sameStrengthPlayers_beg[0],sameStrengthPlayers_beg[1]]),Team([sameStrengthPlayers_beg[2],sameStrengthPlayers_beg[3]])]
+        sameStrTeams_begadvD=[Team([sameStrengthPlayers_beg[0],sameStrengthPlayers_adv[0]]),Team([sameStrengthPlayers_beg[1],sameStrengthPlayers_adv[1]])]
+        sameStrTeam_beg1s=Team([sameStrengthPlayers_beg[4]])
+        sameStrTeam_beg2s=Team([sameStrengthPlayers_beg[5]])
+        sameStrTeam_adv1s=Team([sameStrengthPlayers_adv[4]])
+        sameStrTeam_adv2s=Team([sameStrengthPlayers_adv[5]])
 //        begAdvTeam=Team([begPlayers[2],advPlayers[2]])
 //        intAdvTeam=Team([lowerIntPlayers[2],advPlayers[3]])
 //        begIntTeam=Team([begPlayers[3],lowerIntPlayers[3]])
@@ -123,6 +146,21 @@ final class goodMatchesTests: XCTestCase {
         }
     }
     
+    func test_matchscore_same_across_sizes(){
+        let sameStrMatch_begS1=Match([sameStrTeam_beg1s,sameStrTeam_beg2s])
+        let sameStrMatch_begS2=Match([sameStrTeam_beg1s,sameStrTeam_beg2s])
+        let sameStrMatch_begD1=Match([sameStrTeams_begD[0],sameStrTeams_begD[1]])
+        XCTAssert(sameStrMatch_begS1.scoreDiff==sameStrMatch_begD1.scoreDiff)
+        let matchSetOnCourt=MatchSetOnCourt([sameStrMatch_begS1,sameStrMatch_begS2],restingPlayers:[])
+        XCTAssert(sameStrMatch_begS1.scoreDiff==matchSetOnCourt.totalScoreDiff)
+    }
+    func test_matchscore_average(){
+        let sameStrMatch_S1=Match([sameStrTeam_beg1s,sameStrTeam_adv1s])
+        let sameStrMatch_S2=Match([sameStrTeam_beg1s,sameStrTeam_adv2s])
+        let matchSetOnCourt=MatchSetOnCourt([sameStrMatch_S1,sameStrMatch_S2],restingPlayers:[])
+        XCTAssert((sameStrMatch_S1.scoreDiff+sameStrMatch_S2.scoreDiff)/2.0==matchSetOnCourt.totalScoreDiff)
+    }
+
     func test_doublesTeamShared_p(){
         XCTAssert(doublesTeamShared_p(matchSetOnCourt6a, matchSetOnCourt6b))
         XCTAssert(doublesTeamShared_p(matchSetOnCourt6b, matchSetOnCourt6c))
@@ -223,6 +261,7 @@ final class goodMatchesTests: XCTestCase {
         let goodMatchSetsOnCourt=GoodMatchSetsOnCourt()
         goodMatchSetsOnCourt.get_best_matchsets(playersOnCourt6, 2)
         let finalSets=goodMatchSetsOnCourt.orderedMatchSets
+        XCTAssert(goodMatchSetsOnCourt.restPlayerKeyedOrderedMatchSets.values.map{MSs in matchsets_ordered(MSs)}.reduce(true){$0 && $1})
     }
 
     func test_GoodMatchSetsOnCourt_get_good_matchsets8(){
@@ -231,6 +270,45 @@ final class goodMatchesTests: XCTestCase {
         let finalSets=goodMatchSetsOnCourt.orderedMatchSets
     }
 
+    func url_connection_checking(){
+        XCTAssert(!verifyUrl(urlString: "http://nonsense"))
+        //address valid, but server not up
+                  
+    }
+    
+    func test_data_handling(){
+        //deleting, remote / local
+        
+        //adding
+        //changing
+    }
+    
+    func test_elo_integrity(){
+        //sum of the scores will be constant with a set of members, increases only when a member is added, by the member's score. mean score*members gives the total
+        //drawing doesn't earn anything
+        XCTAssert(get_elo_update_value(winningTeam:sameStrTeams_begD[0], against:sameStrTeams_begadvD[0], result:(4,4))==0.0)
+        //winning against a stronger opponent earns more than against a weaker one
+        let predictedResult=get_elo_update_value(winningTeam:sameStrTeams_begadvD[0], against:sameStrTeams_begD[0], result:(6,3))
+        let upsetResult=get_elo_update_value(winningTeam:sameStrTeams_begD[0], against:sameStrTeams_begadvD[0], result:(6,3))
+        XCTAssert(predictedResult<upsetResult)
+
+        //winning with a larger margin earns more than with a smaller one
+        let largerMarginResult=get_elo_update_value(winningTeam:sameStrTeams_begadvD[0], against:sameStrTeams_begD[0], result:(6,1))
+        let smallerMarginResult=get_elo_update_value(winningTeam:sameStrTeams_begadvD[0], against:sameStrTeams_begD[0], result:(6,4))
+        XCTAssert(smallerMarginResult<largerMarginResult)
+
+        //score should not go over 100 or under 0
+        XCTAssert(get_elo_update_value(winningTeam:veryStrongTeams[0], against: veryStrongTeams[1], result:(6,0))<100)
+        XCTAssert(get_elo_update_value(winningTeam:veryWeakTeams[0], against: veryWeakTeams[1], result:(6,0))>0)
+
+    }
+    
+    func test_updated_scores(){
+        // liveMode should make a difference
+        
+    }
+    
+    
 //    func test_Match_ordered(){
 //        aMatch=Match([begTeam,intTeam])
 //        XCTAssert(aMatch.teams.0.meanScore>aMatch.teams.1.meanScore)
@@ -244,14 +322,14 @@ final class goodMatchesTests: XCTestCase {
         }
     }
     
-    func testPerformance_get_best_matchsets() throws {
-            self.measure {
-                // Put the code you want to measure the time of here.
-                let goodMatchSetsOnCourt=GoodMatchSetsOnCourt()
-                goodMatchSetsOnCourt.get_best_matchsets(playersOnCourt10, 2)
-                //let finalSets=goodMatchSetsOnCourt.orderedMatchSets
-            
-        }
-    }
+//    func testPerformance_get_best_matchsets() throws {
+//            self.measure {
+//                // Put the code you want to measure the time of here.
+//                let goodMatchSetsOnCourt=GoodMatchSetsOnCourt()
+//                goodMatchSetsOnCourt.get_best_matchsets(playersOnCourt10, 2)
+//                //let finalSets=goodMatchSetsOnCourt.orderedMatchSets
+//            
+//        }
+//    }
 
 }

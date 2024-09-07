@@ -13,12 +13,22 @@ enum Gender:String{
     case female="female"
 }
 
-struct Player: Codable, Equatable, Hashable, Identifiable{
-    enum CodingKeys:CodingKey{
+class Player: Codable, Equatable, Hashable, Identifiable{
+    static func == (lhs: Player, rhs: Player) -> Bool {
+        lhs.id==rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher){
+        hasher.combine(self.id)
+    }
+
+    enum CodingKeys:String,CodingKey{
         case name
         case score
         case gender
         case club
+        //case id
+
     }
     var name: String
     var score: Double
@@ -29,12 +39,14 @@ struct Player: Codable, Equatable, Hashable, Identifiable{
     var clubAbbr:String {club.split(separator: " ").map{word in word.prefix(1)}.joined(separator:"")}
     var id:String {nameAbbr+"_"+clubAbbr}
 
-    mutating func update_score(_ increment: Double){
+    init(name:String,score:Double,gender:String,club:String){
+        self.name=name; self.score=score; self.gender=gender; self.club=club
+    }
+    
+    func update_score(_ increment: Double){
         self.score+=increment
     }
 }
-
-
 
 struct PlayerSet:Hashable,Equatable,Identifiable {
     static func == (lhs: PlayerSet, rhs: PlayerSet) -> Bool {
@@ -51,13 +63,14 @@ struct PlayerSet:Hashable,Equatable,Identifiable {
 struct Team:Hashable,Equatable,Identifiable {
     var players:[Player]
     var id:String
+    var playersString:String {players.map{player in player.name}.joined(separator: " / ")}
     var playerSet:Set<Player> {Set(self.players)}
     var scores:[Double] {players.map{$0.score}}
     var totalScore:Double {sum(scores)}
     var meanScore:Double {self.totalScore/Double(self.players.count)}
     init(_ players:[Player]){
         self.players=players.sorted{$0.name>$1.name}
-        self.id=players.map{player in player.name}.joined(separator: "/")
+        self.id=players.map{player in player.id}.joined(separator: "/")
     }
     mutating func update_playerscores(_ playersScores:[Player:Double]){
         for (playerToUpdate,newScore) in playersScores{
@@ -158,6 +171,8 @@ class PlayersOnCourt:ObservableObject{
         return myDict
     }
     
+
+    
     func get_balanced_matches(_ perCourtPlayerCounts:[Int])-> [Int:[PlayerSet:[Match]]]{
         let orderedLevelCombos=[["s","s"],["m","m"],["w","w"],["m","s"],["m","w"],["s","w"]]
         
@@ -253,6 +268,15 @@ class PlayersOnCourt:ObservableObject{
         }
     }
 
+    func update_playerscores_remote(urlStr:String) async {
+        for player in self.players{
+            if let request=get_url_request(urlStr: urlStr, requestType: "PUT"){
+                guard let encodedPlayer=try? JSONEncoder().encode(player) else{return}
+                do{let (data, _) = try await URLSession.shared.upload(for:request,from:encodedPlayer)}catch{print()}
+            }
+        }
+    }
+    
     func playerInd_fromID(_ id:String)-> Int{
         for (ind,player) in self.players.enumerated(){
             if player.id==id{
@@ -272,7 +296,7 @@ struct MatchSetOnCourt:Hashable,Equatable{
     
     var sizedMatchesOnCourt:[Int:[Match]]
     let sizedCourtCounts:[Int:Int]
-    let myPlayers:PlayersOnCourt
+//    let myPlayers:PlayersOnCourt
     let restingPlayers:[Player]
     
     var doublesOnlyP:Bool {sizedCourtCounts.keys.count==1 && sizedCourtCounts.keys.contains(4)}
@@ -280,11 +304,11 @@ struct MatchSetOnCourt:Hashable,Equatable{
     var mixedP:Bool {!singlesOnlyP && !doublesOnlyP}
     var sizedWeights:[Int:Double] {mixedP ? [2:0.3,4:0.7] : (doublesOnlyP ? [4:1.0] : [2:1.0])}
     
-    
-    var allPlayers:[Player] {myPlayers.players}
-    var playingPlayers:[Player] {allPlayers.filter{player in !restingPlayers.map{restP in restP.id}.contains(player.id)}}
-    
     var matchesOnCourt:[Match] {(sizedMatchesOnCourt[4] ?? [])+(sizedMatchesOnCourt[2] ?? [])}
+
+    var playingPlayers:[Player]  {matchesOnCourt.map{match in match.listOfPlayers}.flatMap{$0}}
+    var allPlayers:[Player]  {playingPlayers+restingPlayers}
+    
     var allTeamOppositions:[(Team,Team)] {matchesOnCourt.map{$0.teams}}
     var playingRestingPlayerCounts:(Int,Int) {(self.playingPlayers.count, self.restingPlayers.count)}
     
@@ -303,16 +327,16 @@ struct MatchSetOnCourt:Hashable,Equatable{
     //
     //    }
     
-    func updated_playerscores()->MatchSetOnCourt{
-        var myMatches:[Match]=[]
-        for match in matchesOnCourt{
-            match.update_playerscores(players: myPlayers.players)
-            myMatches.append(match)
-        }
-        
-        return MatchSetOnCourt(myMatches,myPlayers:self.myPlayers,restingPlayers:restingPlayers)
-        
-    }
+//    func updated_playerscores()->MatchSetOnCourt{
+//        var myMatches:[Match]=[]
+//        for match in matchesOnCourt{
+//            match.update_playerscores(players: myPlayers.players)
+//            myMatches.append(match)
+//        }
+//        
+//        return MatchSetOnCourt(myMatches,myPlayers:self.myPlayers,restingPlayers:restingPlayers)
+//        
+//    }
 
     var sizedScoreDiffs:[Int:Double] {
         let myTuple=self.sizedMatchesOnCourt.map { (size,matches) in
@@ -333,13 +357,13 @@ struct MatchSetOnCourt:Hashable,Equatable{
         return cum
     }
     
-    init(_ sizedMatches:[Int:[Match]], sizedCourtCounts:[Int:Int], myPlayers:PlayersOnCourt, restingPlayers:[Player]=[]){
+    init(_ sizedMatches:[Int:[Match]], sizedCourtCounts:[Int:Int], restingPlayers:[Player]=[]){
         self.sizedMatchesOnCourt=sizedMatches
         self.restingPlayers=restingPlayers
         self.sizedCourtCounts=sizedCourtCounts
-        self.myPlayers=myPlayers
+        //self.myPlayers=myPlayers
     }
-    init(_ matches:[Match], myPlayers:PlayersOnCourt, restingPlayers:[Player]){
+    init(_ matches:[Match], restingPlayers:[Player]){
         var sizedMatches=[Int:[Match]](); var sizedCC=[Int:Int]()
         for match in matches{
             let playerCount=match.listOfPlayers.count
@@ -350,7 +374,7 @@ struct MatchSetOnCourt:Hashable,Equatable{
         self.sizedMatchesOnCourt=sizedMatches
         self.restingPlayers=restingPlayers
         self.sizedCourtCounts=sizedCC
-        self.myPlayers=myPlayers
+        //self.myPlayers=myPlayers
         
     }
     func match_identical(_ anotherMatchSet:MatchSetOnCourt)->Bool{
@@ -464,8 +488,9 @@ class GoodMatchSetsOnCourt:ObservableObject{
     let constraintTipWindow=(6,3)
     var restPlayerKeyedOrderedMatchSets:[String:[MatchSetOnCourt]]=[:]
     
+    // these properties only available after populating orderedmatchsets
     var playingRestingPlayerCounts:(Int,Int)? {self.orderedMatchSets.isEmpty ? nil : self.orderedMatchSets[0].playingRestingPlayerCounts}
-    var allPlayers:[Player]? { self.orderedMatchSets.isEmpty ? nil : self.orderedMatchSets[0].myPlayers.players  }
+    var allPlayers:[Player]? { self.orderedMatchSets.isEmpty ? nil : self.orderedMatchSets[0].allPlayers  }
     
     var sizedCourtCount:[Int:Int]? {self.orderedMatchSets.isEmpty ? nil : self.orderedMatchSets[0].sizedCourtCounts}
     var doublesSinglesPs:(Bool,Bool)? {self.sizedCourtCount==nil ? nil : (self.sizedCourtCount!.keys.contains(4),self.sizedCourtCount!.keys.contains(2))}
@@ -530,7 +555,7 @@ class GoodMatchSetsOnCourt:ObservableObject{
                 for possibleMatchSet in possibleMatchSets{
                     let playingPlayers:[Player]=possibleMatchSet.map{match in match.listOfPlayers}.flatMap{$0}
                     let restingPlayers:[Player]=playersOnCourt.players.filter{player in !playingPlayers.contains(player)}
-                    matchSetsOnCourt.append(MatchSetOnCourt(possibleMatchSet,myPlayers:playersOnCourt,restingPlayers: restingPlayers))
+                    matchSetsOnCourt.append(MatchSetOnCourt(possibleMatchSet, restingPlayers: restingPlayers))
                 }
             }
         }
@@ -585,20 +610,22 @@ class GoodMatchSetsOnCourt:ObservableObject{
         let playingRestingPlayerCounts=matchSets[0].playingRestingPlayerCounts
 
         //this part enforces constraints
-        self.get_constrained_ordered_matchsets(players:players)
+        self.get_constrained_ordered_matchsets()
         
     }
 
-    func get_constrained_ordered_matchsets(players:[Player],headCount:Int=20,from:Int=0){
+    func get_constrained_ordered_matchsets(headCount:Int=20,from:Int=0){
         assert(!self.restPlayerKeyedOrderedMatchSets.isEmpty)
         let headMS=Array(self.restPlayerKeyedOrderedMatchSets.values)[0][0]
+        let allPlayers=headMS.allPlayers
         let playingRestingPlayerCounts=headMS.playingRestingPlayerCounts
-        assert(players.count==(playingRestingPlayerCounts.0+playingRestingPlayerCounts.1))
+        //assert(players.count==(playingRestingPlayerCounts.0+playingRestingPlayerCounts.1))
         let totalCount=playingRestingPlayerCounts.0+playingRestingPlayerCounts.1
         let repetitionCount:Int=(playingRestingPlayerCounts.1==0 ? 1 : totalCount/playingRestingPlayerCounts.1)
         
         let (firstPart,histWindow)=self.constraintTipWindow
-        var orderedKeys:[String]=(playingRestingPlayerCounts.1==0 ? Array(self.restPlayerKeyedOrderedMatchSets.keys) : partition_based_ordering(players, Array(repeating:playingRestingPlayerCounts.1,count:repetitionCount)))
+        var orderedKeys:[String]=(playingRestingPlayerCounts.1==0 ? Array(self.restPlayerKeyedOrderedMatchSets.keys) : partition_based_ordering(allPlayers, Array(repeating:playingRestingPlayerCounts.1,count:repetitionCount)))
+        //orderedKeys=orderedKeys.sorted{$0<$1}
         let orderedKeyCount=orderedKeys.count
         
         var myDict=self.restPlayerKeyedOrderedMatchSets
@@ -645,12 +672,12 @@ class GoodMatchSetsOnCourt:ObservableObject{
         self.order_restkeyed_matchsets(restPlayerKeyedMatchSets)
     }
     
-    func order_restkeyed_matchsets(_ restPlayerKeyedMatchSets:[String:[MatchSetOnCourt]], beam:Bool=false, update:Bool=false){
+    func order_restkeyed_matchsets(_ restPlayerKeyedMatchSets:[String:[MatchSetOnCourt]], beam:Bool=false){
         var myRestPlayerKeyedMatchSets=restPlayerKeyedMatchSets
         for (restSet, matchSetsPerRestset) in myRestPlayerKeyedMatchSets{
             //let updatedMatchSetsPerRestset=matchSetsPerRestset.map{ms in ms.updated_playerscores()}
             var myMatchSetsPerRestset=(beam ? Array(matchSetsPerRestset[0..<(matchSetsPerRestset.count>30 ? 30 : matchSetsPerRestset.count)]) : matchSetsPerRestset)
-            myMatchSetsPerRestset=(update ? myMatchSetsPerRestset.map{ms in ms.updated_playerscores()} : matchSetsPerRestset)
+            //myMatchSetsPerRestset=(update ? myMatchSetsPerRestset.map{ms in ms.updated_playerscores()} : matchSetsPerRestset)
             myRestPlayerKeyedMatchSets[restSet]=myMatchSetsPerRestset.sorted{$0.totalScoreDiff < $1.totalScoreDiff}
         }
         self.restPlayerKeyedOrderedMatchSets=myRestPlayerKeyedMatchSets
@@ -662,9 +689,9 @@ class GoodMatchSetsOnCourt:ObservableObject{
             self.delete_matchset_from_keyedmatchsets(finishedMS)
         }
         print("re-ordering restplayer based queues...")
-        self.order_restkeyed_matchsets(self.restPlayerKeyedOrderedMatchSets,beam:true,update:true)
+        self.order_restkeyed_matchsets(self.restPlayerKeyedOrderedMatchSets, beam:true)
         print("re-enforcing constraints...")
-        self.get_constrained_ordered_matchsets(players:self.allPlayers!,from:from)
+        self.get_constrained_ordered_matchsets(from:from)
         print("... done")
     }
     
@@ -690,6 +717,11 @@ class GoodMatchSetsOnCourt:ObservableObject{
             self.restPlayerKeyedOrderedMatchSets[hitKey!]?.remove(at:hitInd!)}
     }
     // checking methods
+    func check_order_restkeyed_matchsets(){
+        for MSs in self.restPlayerKeyedOrderedMatchSets.values{
+            
+        }
+    }
     func intermatchset_constraints_observed(tipWindow:(Int,Int))->Bool{
         var myBool:Bool
         var fncs=[(MatchSetOnCourt,MatchSetOnCourt)->Bool]()
@@ -1024,3 +1056,12 @@ func matches_nooverlap_p(_ matches:[Match])-> Bool{
     return true
 }
 
+func matchsets_ordered(_ matchSets:[MatchSetOnCourt])->Bool{
+    var prev=matchSets[0]
+    for msoc in matchSets[1...]{
+        if prev.totalScoreDiff>msoc.totalScoreDiff{
+            return false
+        }
+    }
+    return true    
+}

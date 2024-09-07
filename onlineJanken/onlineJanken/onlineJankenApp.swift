@@ -25,7 +25,7 @@ struct onlineJankenApp: App {
     @StateObject var jankenSeries=JankenSeriesInGroup()
     var body: some Scene {
         WindowGroup {
-            ContentView1().environmentObject(authService).environmentObject(dataService).environmentObject(jankenSeries)
+            ContentView().environmentObject(authService).environmentObject(dataService).environmentObject(jankenSeries)
         }
     }
 }

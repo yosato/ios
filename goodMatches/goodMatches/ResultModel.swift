@@ -1,5 +1,5 @@
 //
-//  ResultModel.swift
+//  ResultModelswift
 //  goodMatches
 //
 //  Created by Yo Sato on 21/05/2024.
@@ -7,18 +7,28 @@
 
 import Foundation
 
-func get_elo_prob(favourite:Team, against:Team, n:Double=200.0)-> Double{
+func get_elo_prob(favourite:Team, against:Team, n:Double=50.0)-> Double{
     let scoreDiff=Double(favourite.meanScore-against.meanScore)
     let divisor=1.0+pow(10.0,scoreDiff/n)
     return Double(1.0/divisor)
 }
 
-func get_elo_update_value(winningTeam:Team, against:Team, result:(Int,Int), k:Int=7)-> Double{
+func get_elo_update_value(winningTeam:Team, against:Team, result:(Int,Int), k:Int=3)-> Double {
     assert(result.0>=result.1)
+    if result.0==result.1 {return 0.0}
     let resultRate=0.1*Double(result.0-result.1)+0.7
     let weight=(winningTeam.players.count==4 ? 0.8 : 0.6)
     let expectedProb=get_elo_prob(favourite:winningTeam,against:against)
-    return Double(k)*expectedProb*resultRate*weight
+    
+    
+    let meanDiffToBound=diffToBound(score:winningTeam.meanScore).0 != diffToBound(score:against.meanScore).0 ? 50 : (diffToBound(score:winningTeam.meanScore).1+diffToBound(score:against.meanScore).1 )/2.0
+    let coeffWeight=(0.9*meanDiffToBound+4.1)/50.0
+    return Double(k)*expectedProb*resultRate*coeffWeight
+    
+    func diffToBound(score:Double)->(Bool,Double){
+        return (score>50.0 ? (false, 100.0-score) : (true, score-0.0))
+    }
+
 }
 
 class MatchResults:ObservableObject{
@@ -80,8 +90,8 @@ struct MatchResult:Identifiable,Equatable{
     var winningInd:Int? {drawnP ? nil : (scores.0>scores.1 ? 0 : 1)}
     
     func prettystring()->String{
-        let team0Str=match.teams.0.id
-        let team1Str=match.teams.1.id
+        let team0Str=match.teams.0.playersString
+        let team1Str=match.teams.1.playersString
         let scoreStr=(winningInd==0 ? "\(scores.0)-\(scores.1)" : "\(scores.1)-\(scores.0)")
         var prettyString:String=""
         if(drawnP){prettyString+="\(team0Str) and \(team1Str) drew with \(scoreStr)"}else{

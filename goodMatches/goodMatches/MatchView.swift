@@ -73,6 +73,7 @@ struct MatchView: View {
                     gainsLosses=myPlayers.update_playerscores_matchSetResult(matchResults.results.last!)
                     showGains=true
                     goodMatchSets.reorder_matchsets(from:currentMatchSetInd+1)
+                    Task{await myPlayers.update_playerscores_remote(urlStr:"http://127.0.0.1:5000/players")}
                 }
                 currentMatchSetInd=(currentMatchSetInd+1<comboCount ? currentMatchSetInd+1 : 0)
                 

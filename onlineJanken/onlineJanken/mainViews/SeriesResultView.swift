@@ -12,19 +12,25 @@ struct SeriesResultView: View {
     @EnvironmentObject var series:JankenSeriesInGroup
     var memberCount:Int {series.groupMembers.count}
     var sortedRounds:[JankenRound] {Array(series.seriesTree.rounds).sorted{$0.parentAddress<$1.parentAddress}}
-    let timer = Timer.publish (every: 1, on: .current, in: .common).autoconnect()
+    let timer = Timer.publish (every: 2, on: .main, in: .common).autoconnect()
     @State private var currentNumber=0
     var lastNumber:Int {sortedRounds.count-1}
+    var numbers:[Int] {Array(0..<currentNumber+1) }
+    @State private var index:Int=0
 
     var body: some View {
         ScrollViewReader{scrollView in
             ScrollView{
-                
-                VStack{
+                LazyVStack{
+                    
                     ForEach(sortedRounds,id:\.self){round in
                         
-                        RoundResultView(round:round)
+                        //                            let round=sortedRounds[number]
+                        RoundResultViewStatic(round:round).id(round)
+                        
+                        
                         //Text("hahahaha").padding(100)
+                        
                         if(round.hasAWinner||round.hasALoser){
                             if(round.hasAWinner){
                                 Text("順位決定 \(round.leftSet.first!.displayName) \(round.parentRange.first!)位")
@@ -33,18 +39,21 @@ struct SeriesResultView: View {
                                 Text("順位決定 \(round.rightSet.first!.displayName) \(round.parentRange.last!)位")
                             }
                         }
-
                     }
-                }                .onChange(of:sortedRounds){
-                    scrollView.scrollTo(sortedRounds.endIndex-1,anchor:.bottom)}
+                    Text("最終順位 \(series.seriesTree.sortedLeaves.map{part in part.displayName}.joined(separator: "-"))").padding()
+                    
+                }   .onChange(of:sortedRounds){
+                    scrollView.scrollTo(sortedRounds[sortedRounds.endIndex-1],anchor:.center)}
 
-                Text("最終順位 \(series.seriesTree.sortedLeaves.map{part in part.displayName}.joined(separator: "-"))")
-                
-            
             }
             .onAppear{series.do_jankenSeries_in_group()}
-                
+            .onReceive(timer) { _ in
+             currentNumber += 1
+             if currentNumber == lastNumber-1 {
+                 timer.upstream.connect().cancel()
+             }
             }
+        }
     }
     }
 

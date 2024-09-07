@@ -1,20 +1,16 @@
 //
-//  ResultsView.swift
+//  RoundResultViewStatic.swift
 //  onlineJanken
 //
-//  Created by Yo Sato on 23/08/2024.
+//  Created by Yo Sato on 02/09/2024.
 //
+
 
 import SwiftUI
 import jankenModels
 
-struct RoundResultView: View {
+struct RoundResultViewStatic: View {
     let round:JankenRound
-    let timer = Timer.publish (every: 1, on: .main, in: .common).autoconnect()
-    var lastNumber:Int {round.sessions.count-1}
-    //let firstNumber: Int=0
-    @State var currentNumber=0
-    var numbers:[Int] {Array(0..<(currentNumber+1))}
 
     var body: some View {
         ScrollViewReader{scrollView in
@@ -22,31 +18,20 @@ struct RoundResultView: View {
             ScrollView{
                 if(round.parentAddress==""){Text("初戦")}else{Text(round.parentAddress)}
                 LazyVStack{
-                    ForEach(numbers,id:\.self){ number in
+                    ForEach(round.sessions,id:\.self){ session in
                         //         VStack{Text("aaa");Text("iii");Text("\(number)")}.padding(10)
-                        if(number<=lastNumber){
-                            JankenSessionView(session:round.sessions[number])
-                        }
+                        
+                            JankenSessionView(session:session)
+                        
                     }.transition(.opacity)
 
-                }.padding().onChange(of:numbers){
-                    scrollView.scrollTo(numbers.endIndex-1,anchor:.bottom)
+                }.padding()
                 }
             }
-        }
-        .onReceive(timer) { time in
-            print(time)
-            currentNumber += 1
-            if currentNumber == lastNumber {
-                timer.upstream.connect().cancel()
-            }
-            //somehow animation chops the last image off at the bottom
-            //}//.animation(.default,value:currentNumber)
-        }
     }
 }
 #Preview {
-    RoundResultView(round:
+    RoundResultViewStatic(round:
                         JankenRound(
                             finalSession: JankenSession([
                                 Participant(displayName: "A", email: "aaa@ccc.co.uk"): JankenHand.rock
@@ -78,3 +63,5 @@ struct RoundResultView: View {
                                 )
         )
 }
+
+

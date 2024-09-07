@@ -42,7 +42,7 @@ struct AccountCreationView: View {
                 ZStack{
                     Button("作成"){
                         let meAsMember=Member(displayName:displayName,email:email)
-                        authService.regularCreateAccount(email: email, password: password)
+                        Task{try? await authService.regularCreateAccount(displayName:displayName, email: email, password: password)}
                         dataService.registerMemberInFB(member:meAsMember){ error in print(error)
                             
                         }

@@ -17,7 +17,7 @@ struct PlayerConfirmView: View {
     @State private var inputInvalid=false
     @State private var calculationDone=false
     @State private var calculating=false
-    @State private var liveMode=true
+    @State private var liveMode=false
     @State var debug:Bool
     var body: some View {
         NavigationStack{
@@ -38,22 +38,31 @@ struct PlayerConfirmView: View {
                     Stepper("How many courts?\t\t\t \(courtCount)", value:$courtCount, in:1...10)
                 }.padding()
                 
-                VStack{              Toggle("Live update",isOn:$liveMode).padding()
+
+                
+                VStack{              Toggle("Live update",isOn:$liveMode)
 
 
 //                VStack{
-                    Button(action:{
+                    Button(action:{calculating=true
                         if(Double(myPlayers.players.count)/Double(2)<Double(courtCount)){inputInvalid=true}else{
-                            calculating=true
-                            goodMatchSets.get_best_matchsets(myPlayers,courtCount);calculating=false;calculationDone=true}},label:{Text("Get good matches")}).padding().alert("Too many courts for the player",isPresented: $inputInvalid){
+                            //                            calculating=true
+                            //DispatchQueue.global(qos: .background).async {
+                                goodMatchSets.get_best_matchsets(myPlayers,courtCount);calculating=false;calculationDone=true
+                            //}
+                        }
+                    },label:{Text("Get good matches")}).padding().alert("Too many courts for the player",isPresented: $inputInvalid){
                                 Button("OK",role:.cancel){}
-                            }
-                    //NavigationLink(destination:TabViews(liveMode:liveMode)){if(calculationDone){Text("Show")}}
-                    if(calculating){Text("aaaa");ProgressView()}
+                                }.disabled(calculating)
+                    if(calculating){HStack{Text("Calculating...");ProgressView()}}
 
+                    //NavigationLink(destination:TabViews(liveMode:liveMode)){if(calculationDone){Text("Show")}}
+                 
                 }.navigationDestination(isPresented:$calculationDone){
                     TabViews(liveMode:liveMode,registeredPlayers:$registeredPlayers,debug:debug).navigationBarBackButtonHidden()
                 }
+                
+
 //                Spacer()
             }
         }
@@ -61,5 +70,5 @@ struct PlayerConfirmView: View {
 }
 
 //#Preview {
-//    PlayerConfirmView(courtCount:2,debug:false).environmentObject(PlayersOnCourt())
+//    PlayerConfirmView(registeredPlayers:Binding<U:Player>([U]),layers,courtCount:2,debug:false).environmentObject(PlayersOnCourt())
 //}

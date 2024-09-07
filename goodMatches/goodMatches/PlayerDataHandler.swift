@@ -20,7 +20,7 @@ class PlayerDataHandler: ObservableObject  {
     }
     
     func loadData_local() ->[Player]{
-        guard let url = Bundle.main.url(forResource: "players", withExtension: "json")
+        guard let url = Bundle.main.url(forResource: "players_test", withExtension: "json")
             else {
                 print("Json file not found")
                 return []
@@ -128,19 +128,6 @@ class PlayerDataHandler: ObservableObject  {
             
             task.resume()
         }
-    }
-    func get_url_request(urlStr:String, requestType:String)->URLRequest?{
-        guard let url = URL(string:urlStr)
-        else {
-            print("Invalid URL")
-            return nil
-        }
-        
-        var request=URLRequest(url:url)
-        request.setValue("application/json",forHTTPHeaderField: "Content-Type")
-        request.httpMethod = requestType
-        
-        return request
     }
 }
 

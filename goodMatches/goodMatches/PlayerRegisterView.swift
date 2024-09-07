@@ -9,7 +9,7 @@ import SwiftUI
 
 struct PlayerRegisterView: View {
     @Environment(\.dismiss) var dismiss
-    @State var registeredPlayersForClub:[Player]
+    @Binding var registeredPlayersForClub:[Player]
     @EnvironmentObject var playerDataHandler:PlayerDataHandler
  //   @EnvironmentObject var myPlayers:PlayersOnCourt
     @State var playerName:String=""

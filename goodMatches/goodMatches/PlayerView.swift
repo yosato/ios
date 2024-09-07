@@ -22,8 +22,6 @@ struct PlayerView: View {
     @State var registerSheet=false
     @Binding var debug:Bool
     
-    var registeredPlayersForClub:[Player] { registeredPlayers.filter{player in player.club==currentClub}.sorted(by:{$0.name < $1.name})
-    }
     
     var likelyCourtCount:Int { myPlayers.players.count/3 }
 
@@ -35,15 +33,15 @@ struct PlayerView: View {
     //}
     var body: some View {
         NavigationStack{
-            Picker("Club",selection:$currentClub){
-                ForEach(clubs,id:\.self){
-                    Text($0)
-                }
-            }
+//            Picker("Club",selection:$currentClub){
+//                ForEach(clubs,id:\.self){
+//                    Text($0)
+//                }
+//            }
             Text("Pick players and confirm").padding(0.2)
             Button("Register a new player"){registerSheet=true}
             List{
-                ForEach(registeredPlayersForClub){player in
+                ForEach(registeredPlayers){player in
                     MultipleSelection(name:player.name, club:$currentClub, clubs:$clubs, isSelected:self.selectedPlayers.contains(player)){
                         if self.selectedPlayers.contains(player){
                             self.selectedPlayers.remove(player)
@@ -55,9 +53,9 @@ struct PlayerView: View {
                 
                 //                )
             }.sheet(isPresented:$registerSheet){
-                PlayerRegisterView(registeredPlayersForClub:registeredPlayersForClub, currentClub:$currentClub, clubs: $clubs)
+                PlayerRegisterView(registeredPlayersForClub:$registeredPlayers, currentClub:$currentClub, clubs: $clubs)
             }
-                .navigationTitle("Registered players")
+                //.navigationTitle("Registered players")
                 .navigationBarTitleDisplayMode(.inline)
             Text("\(selectedPlayers.count) players selected")
             
@@ -75,7 +73,7 @@ struct PlayerView: View {
     func delete(at offsets: IndexSet) {
         var players2remove:[Player]=[]
         for offset in offsets{
-            players2remove.append(registeredPlayersForClub[offset])
+            players2remove.append(registeredPlayers[offset])
         }
         Task{
             await playerDataHandler.delete_players_remote(players2remove)
@@ -116,6 +114,6 @@ struct MultipleSelection: View {
 
 
 
-//#Preview {
-//    PlayerView(playerDataHandler: <#T##PlayerDataHandler#>).environmentObject(PlayersOnCourt())
-//}
+#Preview {
+    PlayerView(registeredPlayers:[], debug: .constant(false)).environmentObject(PlayerDataHandler(urlString_remote: "")).environmentObject(PlayersOnCourt())
+}

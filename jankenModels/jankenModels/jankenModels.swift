@@ -226,7 +226,7 @@ public struct DrawnSessions:Hashable{
     
 }
 
-public struct JankenRound:Hashable,Equatable{
+public struct JankenRound:Hashable,Equatable,Identifiable{
     
     public static func ==(lhs: JankenRound, rhs: JankenRound) -> Bool {
             return lhs.sessions == rhs.sessions
@@ -237,6 +237,8 @@ public struct JankenRound:Hashable,Equatable{
     public let parentAddress:String
     public let parentRange:ClosedRange<Int>
     public var childAddresses:(String,String) {(parentAddress+"0",parentAddress+"1")}
+    
+    public let id=UUID().uuidString
 
     public init(finalSession: JankenSession, drawnSessions: DrawnSessions,  parentAddress: String, parentRange: ClosedRange<Int>) {
         assert(!finalSession.drawnP)

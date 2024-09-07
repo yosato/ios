@@ -9,10 +9,10 @@ import SwiftUI
 
 
 struct ContentView: View {
-    @State var debug=true
+    @State var debug=false
   
 //    @StateObject var playerDataHandler=PlayerDataHandler(urlString_remote:"http://127.0.0.1:5000/players")
-    @StateObject var playerDataHandler=PlayerDataHandler(urlString_remote:"https://ancient-gorge-03670-d9436f85c740.herokuapp.com/players")
+    @EnvironmentObject var playerDataHandler:PlayerDataHandler
     @StateObject var networkMonitor=NetworkMonitor()
     @EnvironmentObject var myPlayers:PlayersOnCourt
     @State var reachable:Bool=true
@@ -20,7 +20,8 @@ struct ContentView: View {
     @State var showInternetAlert:Bool=false
     @State var showReachabilityAlert:Bool=false
     @State var registeredPlayers:[Player]=[]
-
+    @State var currentClub="MY Wimbledon London"
+    @State var clubs=["MY Wimbledon London","MY Wimbledon Tokyo","Funabashi Tennis Freaks"]
     // @State var goToPlayers:Bool=false
     
     var body: some View {
@@ -32,6 +33,12 @@ struct ContentView: View {
             
 //            MultiPicker(selection1:$selection1,selection2:$selection2,values1:values1,values2:values2)
 
+            Picker("Club",selection:$currentClub){
+                ForEach(clubs,id:\.self){
+                    Text($0)
+                }
+            }
+            
             Button{
                 if(!networkMonitor.isConnected){
                     showInternetAlert.toggle()
@@ -40,16 +47,16 @@ struct ContentView: View {
                     
                     if(false){showReachabilityAlert.toggle()}else{
                         //dataLoading=true
-                        Task{registeredPlayers=try! await playerDataHandler.loadData_remote();
+                        //Task{registeredPlayers=try! await playerDataHandler.loadData_remote(); dataLoaded=true}
+                        registeredPlayers=playerDataHandler.loadData_local();
                             dataLoaded=true
-                        }
 
                         //dataLoading=false
                                          }
                   //  goToPlayers=true
                 }
             } label: {Text("Pick players").font(.headline)}
-            .navigationDestination(isPresented: $dataLoaded){PlayerView(registeredPlayers:registeredPlayers,debug:$debug)}
+                .navigationDestination(isPresented: $dataLoaded){PlayerView(registeredPlayers:registeredPlayers.filter{player in player.club==currentClub}.sorted{$0.name<$1.name},debug:$debug)}
 
 //            NavigationLink(destination:PlayerView(playerDataHandler:playerDataHandler)){
   //              Text("Pick players").font(.headline)}

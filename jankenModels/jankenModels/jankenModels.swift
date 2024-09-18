@@ -6,53 +6,36 @@
 //
 
 import Foundation
+import Combine
 
-public enum JankenHand: String, CaseIterable{
+public enum JankenHand: String, Codable, CaseIterable{
     case rock="✊"
     case paper="✋"
     case scissors="✌️"
 
 }
 
-//public class JankenSessions:ObservableObject{
-//    @Published public var sessions=[JankenSession]()
-//    func add_session(_ jankenSession:JankenSession){
-//        self.sessions.append(jankenSession)
-//    }
-//    public func add_sessions(_ jankenSessions:[JankenSession]){
-//        self.sessions+=jankenSessions
-//    }
-//    func get_stats()->JankenStats{
-//        JankenStats(jankenSessions:self.sessions)
-//    }
-//    
-//    public init(sessions: [JankenSession] = [JankenSession]()) {
-//        self.sessions = sessions
-//    }
-//}
-//
-//struct JankenStats{
-//    let jankenSessions:[JankenSession]
-//}
-
-
-public struct Participant: Identifiable,Equatable,Hashable{
+public struct Participant: Codable,Identifiable,Equatable,Hashable{
     
-    public static func ==(lhs: Participant, rhs: Participant) -> Bool {
-            return lhs.id == rhs.id
-        }
-
-    public let displayName:String
-    public let email:String
-    public let delimiter:String="--"
-    
-//    var records:[JankenRecord]
-    
-    public var id:String{
-        displayName+delimiter+email
+    enum CodingKeys: CodingKey {
+        case displayName
+        case email
+        case delimiter
     }
     
-    public init(displayName: String, email: String) {
+    public static func ==(lhs: Participant, rhs: Participant) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    public let displayName:String
+    public var email:String?=nil
+    public let delimiter:String="--"
+    public var id:String {displayName+delimiter+(email ?? "noEmail")}
+
+//    var records:[JankenRecord]
+    
+    
+    public init(displayName: String, email: String?=nil) {
         self.displayName = displayName
         self.email = email
     }
@@ -66,7 +49,7 @@ extension Dictionary where Value : Equatable {
 
 
 
-public struct JankenSession:Identifiable, Hashable{
+public struct JankenBout:Codable,Identifiable, Hashable{
     
     public let id:String=UUID().uuidString
     public var participantHandPairs=[Participant:JankenHand]()
@@ -117,35 +100,73 @@ public func binaryToDecimal(_ binary: String) -> Int {
     return decimal
 }
  
-
+enum jankenRoundError:Error{
+    case ParticipantInconsistency
+    case NotDecided
+    case NonFinalNotDrawn
+}
+enum JankenTreeError:Error{
+    case RoundNumberError
+    case NoRootError
+    case AddressError
+    case NonContinuousError
+    case NonTerminationError
+}
 
 public class JankenTree{
     public var rounds=Set<JankenRound>()
     public var sortedLeaves:[Participant] {self.sort_leaves()}
+    public var rootRound:JankenRound {rounds.first(where:{round in round.parentAddress==""})!}
+    public var participants:Set<Participant> {rootRound.participants}
+//    private var addresses:[String] {generate_addresses(participantCount: participants.count)}
     
     public init(branches: Set<JankenRound>) {
-        // as many as decided sessions
+        // as many as decided bouts
+        if(!branches.isEmpty){
+            do{try branches_valid(branches)}catch{print("address error")}}
         self.rounds = branches
-        // both decided and drawn sessions
-//        self.drawnSessionInds=sessions.enumerated().filter{(cntr,session) in session.drawnP}.map{(cntr,_) in cntr}
-//        
-//        var drawnSessionIDs=Set<String>(); var decidedSessionIDs=Set<String>()
-//        for (cntr,session) in sessions.enumerated(){
-//            if drawnSessionInds.contains(cntr){
-//                drawnSessionIDs.insert(session.id)
-//            }else{decidedSessionIDs.insert(session.id)}
-//        }
-//        var idsInDecidedSessionsInBranches=Set<String>(); var idsInDrawnSessionsInBranches=Set<String>();
-//        for branch in branches{
-//            idsInDecidedSessionsInBranches.insert(branch.finalSessionID)
-//            for drawnID in branch.drawSessionIDs{
-//                idsInDrawnSessionsInBranches.insert(drawnID)
-//            }
-//        }
-//        self.drawnSessionIDs=drawnSessionIDs
-//        assert(idsInDrawnSessionsInBranches==drawnSessionIDs)
-//        assert(idsInDecidedSessionsInBranches==decidedSessionIDs)
         }
+    
+    func branches_valid(_ rounds:Set<JankenRound>) throws {
+        let addressPairs=Dictionary(uniqueKeysWithValues: rounds.map{round in (round.parentAddress,round.childAddresses)})
+        let parentAddresses=Array(addressPairs.keys)
+        if(!parentAddresses.contains("")){
+            throw JankenTreeError.NoRootError
+        }
+        let parentAddressesExceptRoot=Array(parentAddresses.sorted().dropFirst())
+        if(parentAddressesExceptRoot.contains(where:{address in !(CharacterSet(charactersIn: address).contains("0") || CharacterSet(charactersIn: address).contains("1"))})){
+            throw JankenTreeError.AddressError
+        }
+        var prevCount=0
+        for i in stride(from:0,to:parentAddressesExceptRoot.count-1,by:2){
+            if(parentAddressesExceptRoot[i].count != prevCount+1){
+                throw JankenTreeError.AddressError
+            }
+            prevCount+=1
+        }
+        
+        for (parentAddress,childAddresses) in addressPairs{
+            if(Set([childAddresses.0,childAddresses.1]) != Set([parentAddress+"0",parentAddress+"1"])){
+                throw JankenTreeError.AddressError
+            }
+        }
+    }
+    
+//    func is_valid_for_tree(_ branches:Set<JankenRound>) throws {
+//        var prevParticipants=Set<Participant>()
+//        let finalInd=branches.count-1
+//        for (cntr,branch) in branches.enumerated(){
+//            if(cntr==0){prevParticipants=branch.participants
+//                ;continue}
+//            
+//            if(branch.participants != prevParticipants){
+//                throw jankenTreeError.participantInconsistency
+//                }
+//            
+//        }
+//    }
+//    
+    
     func sort_leaves()->[Participant]{
         var leaves=[(Participant,String)]()
         var winner:Participant?=nil;var loser:Participant?=nil
@@ -168,42 +189,42 @@ public class JankenTree{
     
     }
 
-public struct DrawnSessions:Hashable{
+public struct DrawnBouts:Codable,Hashable{
     var participants:Set<Participant>
-    var sessions:[JankenSession]=[]
+    var bouts:[JankenBout]=[]
     
-    public init(participants:Set<Participant>, sessions: [JankenSession]) {
-        self.sessions=sessions
-        if(sessions.isEmpty){
+    public init(participants:Set<Participant>, bouts: [JankenBout]) {
+        self.bouts=bouts
+        if(bouts.isEmpty){
             self.participants=participants
         }else{
-            assert(self.sessions.map{session in session.drawnP}.reduce(true){$0 && $1})
-            self.participants=sessions[0].participants
+            assert(self.bouts.map{session in session.drawnP}.reduce(true){$0 && $1})
+            self.participants=bouts[0].participants
         }
     }
     public init(participants:Set<Participant>){
         self.participants=participants
-        self.sessions=self.generate_drawn_sessions(participants)
+        self.bouts=self.generate_drawn_bouts(participants)
     }
     
-    func generate_drawn_sessions(_ participants:Set<Participant>)-> [JankenSession]{
-        var sessions=[JankenSession]()
+    func generate_drawn_bouts(_ participants:Set<Participant>)-> [JankenBout]{
+        var bouts=[JankenBout]()
         let randomInt=Int.random(in:0..<participants.count*2)
         for _ in (0..<randomInt){
-            sessions.append(generate_drawn_session(participants))
+            bouts.append(generate_drawn_bout(participants))
         }
-        return sessions
+        return bouts
         
     }
-    func generate_drawn_session(_ participants:Set<Participant>)-> JankenSession{
+    func generate_drawn_bout(_ participants:Set<Participant>)-> JankenBout{
         let jankenHands=[JankenHand.paper,JankenHand.rock,JankenHand.scissors]
         let aJankenHand=jankenHands.randomElement()
         if(participants.count==2){
-            return JankenSession(Dictionary(uniqueKeysWithValues:participants.map{participant in (participant,aJankenHand!) }))
+            return JankenBout(Dictionary(uniqueKeysWithValues:participants.map{participant in (participant,aJankenHand!) }))
         }else{
-            let anAttemptedPairs=assign_hand_to_participants(participants)
+            let anAttemptedPairs=generate_random_participant_hand_pairs(participants)
             if(Set(anAttemptedPairs.values).count==1){
-                return JankenSession(anAttemptedPairs)
+                return JankenBout(anAttemptedPairs)
             }
             var partHandPairs=[Participant:JankenHand]()
             var intsHands:[Int:JankenHand]=[:]
@@ -220,64 +241,196 @@ public struct DrawnSessions:Hashable{
                     partHandPairs[participant]=jankenHands.randomElement()
                 }
             }
-            return JankenSession(partHandPairs)
+            return JankenBout(partHandPairs)
         }
     }
     
 }
 
-public struct JankenRound:Hashable,Equatable,Identifiable{
+let fakeFinalBoutRoot=JankenBout(
+    [Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+     ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.paper
+     ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.paper
+     ,Participant(displayName:"Yo", email:"yo@email.com"): JankenHand.rock
+     ,Participant(displayName: "Mo", email:"mo@email.com"): JankenHand.rock
+     ,Participant(displayName:"Zak", email:"zak@email.com"): JankenHand.rock
+     ,Participant(displayName:"Aaron", email:"aaron@email.com"): JankenHand.rock
+    ])
+
+let fakeDrawnBoutRoota=JankenBout(
+    [Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+     ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.scissors
+     ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.rock
+     ,Participant(displayName:"Yo", email:"yo@email.com"): JankenHand.paper
+     ,Participant(displayName: "Mo", email:"mo@email.com"): JankenHand.rock
+     ,Participant(displayName:"Zak", email:"zak@email.com"): JankenHand.paper
+    ])
+let fakeDrawnBoutRootb=JankenBout(
+    [Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+     ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.paper
+     ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.rock
+     ,Participant(displayName:"Yo", email:"yo@email.com"): JankenHand.paper
+     ,Participant(displayName: "Mo", email:"mo@email.com"): JankenHand.scissors
+     ,Participant(displayName:"Zak", email:"zak@email.com"): JankenHand.paper
+    ])
+let fakeDrawnBoutRootc=JankenBout(
+    [Participant(displayName:"John",email:"john@email.com"): JankenHand.scissors
+     ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.paper
+     ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.rock
+     ,Participant(displayName:"Yo", email:"yo@email.com"): JankenHand.paper
+     ,Participant(displayName: "Mo", email:"mo@email.com"): JankenHand.rock
+     ,Participant(displayName:"Zak", email:"zak@email.com"): JankenHand.scissors
+     ,Participant(displayName:"Aaron", email:"aaron@email.com"): JankenHand.scissors
+    ])
+let fakeDrawnBoutRootd=JankenBout(
+    [Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+     ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.paper
+     ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.rock
+     ,Participant(displayName:"Yo", email:"yo@email.com"): JankenHand.scissors
+     ,Participant(displayName: "Mo", email:"mo@email.com"): JankenHand.rock
+     ,Participant(displayName:"Zak", email:"zak@email.com"): JankenHand.paper
+     ,Participant(displayName:"Aaron", email:"aaron@email.com"): JankenHand.scissors
+    ])
+let fakeDrawnBoutRoote=JankenBout(
+    [Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+     ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.paper
+     ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.rock
+     ,Participant(displayName:"Yo", email:"yo@email.com"): JankenHand.paper
+     ,Participant(displayName: "Mo", email:"mo@email.com"): JankenHand.rock
+     ,Participant(displayName:"Zak", email:"zak@email.com"): JankenHand.scissors
+     ,Participant(displayName:"Aaron", email:"aaron@email.com"): JankenHand.rock
+    ])
+let fakeDrawnBoutRootf=JankenBout(
+    [Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+     ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.scissors
+     ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.rock
+     ,Participant(displayName:"Yo", email:"yo@email.com"): JankenHand.paper
+     ,Participant(displayName: "Mo", email:"mo@email.com"): JankenHand.rock
+     ,Participant(displayName:"Zak", email:"zak@email.com"): JankenHand.paper
+     ,Participant(displayName:"Aaron", email:"aaron@email.com"): JankenHand.scissors
+    ])
+let fakeFinalBout0=JankenBout(
+    [Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+     ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.scissors
+     ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.paper
+     ,Participant(displayName:"Yo", email:"yo@email.com"): JankenHand.paper
+    ])
+let fakeDrawnBout0a=JankenBout(
+    [Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+     ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.scissors
+     ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.rock
+     ,Participant(displayName:"Yo", email:"yo@email.com"): JankenHand.paper
+    ])
+
+let fakeDrawnBout0b=JankenBout(
+    [Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+     ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.scissors
+     ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.rock
+     ,Participant(displayName:"Yo", email:"yo@email.com"): JankenHand.paper
+    ])
+
+let fakeFinalBout1=JankenBout(
+    [
+    Participant(displayName: "Mo", email:"mo@email.com"): JankenHand.paper
+    ,Participant(displayName:"Zak", email:"zak@email.com"): JankenHand.paper
+    ,Participant(displayName:"Aaron", email:"aaron@email.com"): JankenHand.rock
+    ])
+let fakeDrawnBout1=JankenBout(
+    [
+    Participant(displayName: "Mo", email:"mo@email.com"): JankenHand.paper
+    ,Participant(displayName:"Zak", email:"zak@email.com"): JankenHand.scissors
+    ,Participant(displayName:"Aaron", email:"aaron@email.com"): JankenHand.rock
+    ])
+
+let fakeFinalBout01=JankenBout(
+    [
+    Participant(displayName: "John", email:"mo@email.com"): JankenHand.paper
+    ,Participant(displayName:"Tim", email:"zak@email.com"): JankenHand.rock
+    ,Participant(displayName:"Yo", email:"zak@email.com"): JankenHand.paper
+ ])
+let fakeDrawnBout01=JankenBout(
+    [
+    Participant(displayName: "John", email:"mo@email.com"): JankenHand.paper
+    ,Participant(displayName:"Tim", email:"zak@email.com"): JankenHand.rock
+    ,Participant(displayName:"Yo", email:"zak@email.com"): JankenHand.scissors
+ ])
+
+
+let fakeFinalBout010=JankenBout(
+    [
+    Participant(displayName: "John", email:"mo@email.com"): JankenHand.paper
+    ,Participant(displayName:"Yo", email:"zak@email.com"): JankenHand.scissors
+    ])
+let fakeDrawnBout010=JankenBout(
+    [
+    Participant(displayName: "John", email:"mo@email.com"): JankenHand.rock
+    ,Participant(displayName:"Tim", email:"zak@email.com"): JankenHand.rock
+    ])
+let fakeFinalBout10=JankenBout(
+    [
+    Participant(displayName: "Mo", email:"mo@email.com"): JankenHand.paper
+    ,Participant(displayName:"Zak", email:"zak@email.com"): JankenHand.scissors
+    ])
+
+
+let fakeRoundRoot = JankenRound(finalBout:fakeFinalBoutRoot,
+                             drawnBouts:DrawnBouts(participants:fakeFinalBoutRoot.participants,bouts:[fakeDrawnBoutRoota,fakeDrawnBoutRootb,fakeDrawnBoutRootc,fakeDrawnBoutRootd,fakeDrawnBoutRoote,fakeDrawnBoutRootf]),
+                             parentAddress:"Root",parentRange:1...7)
+let fakeRound0 = JankenRound(finalBout:fakeFinalBout0,
+                             drawnBouts:DrawnBouts(participants:fakeFinalBout0.participants, bouts:[fakeDrawnBout0a,fakeDrawnBout0b]),
+                             parentAddress:"",parentRange:1...4)
+let fakeRound1 = JankenRound(finalBout:fakeFinalBout1,
+                             drawnBouts:DrawnBouts(participants:fakeFinalBout1.participants, bouts:[fakeDrawnBout1]),
+                             parentAddress:"",parentRange:5...7)
+let fakeRound01 = JankenRound(finalBout:fakeFinalBout01,
+                             drawnBouts:DrawnBouts(participants:fakeFinalBout01.participants, bouts:[fakeDrawnBout01]),
+                             parentAddress:"0",parentRange:2...4)
+let fakeRound010 = JankenRound(finalBout:fakeFinalBout010,
+                             drawnBouts:DrawnBouts(participants:fakeFinalBout010.participants, bouts:[fakeDrawnBout010]),
+                             parentAddress:"00",parentRange:2...3)
+let fakeRound10 = JankenRound(finalBout:fakeFinalBout10,
+                             drawnBouts:DrawnBouts(participants:fakeFinalBout10.participants, bouts:[]),
+                             parentAddress:"1",parentRange:5...6)
+
+
+let fakeRounds=Set([fakeRoundRoot,fakeRound0,fakeRound1,fakeRound01,fakeRound10,fakeRound010])
+
+
+
+public struct JankenRound:Codable,Hashable,Equatable,Identifiable{
     
     public static func ==(lhs: JankenRound, rhs: JankenRound) -> Bool {
-            return lhs.sessions == rhs.sessions
+            return lhs.bouts == rhs.bouts
         }
 
-    public let finalSession:JankenSession
-    public let drawnSessions:DrawnSessions
+    public let finalBout:JankenBout
+    public let drawnBouts:DrawnBouts
     public let parentAddress:String
     public let parentRange:ClosedRange<Int>
     public var childAddresses:(String,String) {(parentAddress+"0",parentAddress+"1")}
     
     public let id=UUID().uuidString
 
-    public init(finalSession: JankenSession, drawnSessions: DrawnSessions,  parentAddress: String, parentRange: ClosedRange<Int>) {
-        assert(!finalSession.drawnP)
-        assert(!finalSession.participants.isEmpty)
-        self.finalSession = finalSession
-        //guard !finalSession.drawnP else {return}
-        assert(drawnSessions.participants==finalSession.participants)
-        self.drawnSessions = drawnSessions
+    public init(finalBout: JankenBout, drawnBouts: DrawnBouts,  parentAddress: String, parentRange: ClosedRange<Int>) {
+        assert(!finalBout.drawnP)
+        assert(!finalBout.participants.isEmpty)
+        self.finalBout = finalBout
+        //guard !finalBout.drawnP else {return}
+        assert(drawnBouts.participants==finalBout.participants)
+        self.drawnBouts = drawnBouts
         self.parentAddress = parentAddress
         self.parentRange = parentRange
     }
 
-    public var leftSet:Set<Participant> {finalSession.winners}
-    public var rightSet:Set<Participant> {finalSession.losers}
+    public var leftSet:Set<Participant> {finalBout.winners}
+    public var rightSet:Set<Participant> {finalBout.losers}
+    public var participants:Set<Participant> {leftSet.union(rightSet)}
 
-    public var sessions:[JankenSession] {drawnSessions.sessions+[finalSession]}
+    public var bouts:[JankenBout] {drawnBouts.bouts+[finalBout]}
     public var hasAWinner:Bool {leftSet.count==1}
     public var hasALoser:Bool {rightSet.count==1}
     
 }
-//
-//public struct JankenRound0:Hashable{
-//    public let finalSessionID:String
-//    public let drawSessionIDs:[String]
-//    
-//    //public let finalSession:JankenSession
-//    //public let drawnSessions:[JankenSession]
-//    //public var sessions:[JankenSession] {drawnSessions+[finalSession]}
-//    
-//    public let leftSet:Set<Participant>
-//    public let rightSet:Set<Participant>
-//    public var hasAWinner:Bool {leftSet.count==1}
-//    public var hasALoser:Bool {rightSet.count==1}
-//    public let parentAddress:String
-//    public let parentRange:ClosedRange<Int>
-//    public var childAddresses:(String,String) {(parentAddress+"0",parentAddress+"1")}
-//    
-//}
-
 func divide_set_in_two<T:Hashable>(_ aSet:Set<T>)->(Set<T>,Set<T>){
     let randInt=Int.random(in: 1..<aSet.count)
     var set1=Set<T>()
@@ -289,7 +442,7 @@ func divide_set_in_two<T:Hashable>(_ aSet:Set<T>)->(Set<T>,Set<T>){
     
 }
 
-func assign_hand_to_participants(_ sessionParticipants:Set<Participant>)->[Participant:JankenHand]{
+func generate_random_participant_hand_pairs(_ sessionParticipants:Set<Participant>)->[Participant:JankenHand]{
     var participantsHands=[Participant:JankenHand]()
     for participant in sessionParticipants{
         participantsHands[participant]=JankenHand.allCases.randomElement()
@@ -297,48 +450,91 @@ func assign_hand_to_participants(_ sessionParticipants:Set<Participant>)->[Parti
     return participantsHands
 }
 
+
+enum DrawPattern{
+    case AllScissors,AllRock,AllPaper,AllVarieties
+}
+
+func generate_samehand_participant_hand_pairs(_ sessionParticipants:Set<Participant>, hand:JankenHand)->[Participant:JankenHand]{
+    var participantsHands=[Participant:JankenHand]()
+    for participant in sessionParticipants{
+        participantsHands[participant]=hand
+    }
+    return participantsHands
+}
+
+//func generate_allvariety_participant_hand_pairs(_ boutParticipants:Set<Participant>)->[Participant:JankenHand]{
+//    assert(boutParticipants.count>=3)
+//    var participantsHands=[Participant:JankenHand]()
+//    for participant in sessionParticipants{
+//        participantsHands[participant]=hand
+//    }
+//    return participantsHands
+//}
+
+public enum SessionState{
+    case NotStarted,InProgress,Completed
+}
+
+
 public class JankenSeriesInGroup:ObservableObject{
-    public var groupMembers=Set<Participant>()
-    public var rounds=Set<JankenRound>()
+    public var groupMembers:Set<Participant>=Set()
+    //public var rounds=Set<JankenRound>()
+    @Published public var seriesTree=JankenTree(branches:Set())
+    public var sessionState:SessionState
     
     
-    @Published public private(set) var seriesTree=JankenTree(branches:Set())
-    
-    
-    public init(groupMembers: Set<Participant>=Set(), seriesTree: JankenTree = JankenTree(branches:Set())) {
+    public init(groupMembers: Set<Participant>=Set()) {
         self.groupMembers = groupMembers
-        self.seriesTree = seriesTree
+        self.sessionState=SessionState.NotStarted
+        //self.seriesTree = seriesTree
 //        self.do_jankenSeries_in_group()
+    }
+    public init(seriesTree: JankenTree) {
+        self.groupMembers = seriesTree.participants
+        self.seriesTree = seriesTree
+        self.sessionState=SessionState.Completed
+//        self.do_jankenSeries_in_group()
+    }
+
+    public func add_members(_ members:Set<Participant>){
+        self.groupMembers=self.groupMembers.union(members)
+    }
+    
+    public func provide_fixed_fakeseries(){
+        self.seriesTree=JankenTree(branches:fakeRounds)
+        self.groupMembers=seriesTree.participants
     }
     
     
-    public func do_jankenSeries_in_group(){
-        let (rounds,_)=self.develop_jankenbranches(self.groupMembers,cumBranches:Set(),parentAddress:"",parentRange:(1...self.groupMembers.count),sessions:[])
+    public func do_jankenSeries_in_group(saishowaGu:Bool=true){
+        assert(!self.groupMembers.isEmpty)
+        let (rounds,_)=self.develop_jankenbranches(self.groupMembers,cumBranches:Set(),parentAddress:"",parentRange:(1...self.groupMembers.count),bouts:[],saishowaGu:saishowaGu)
         //there always are membersCount-1 rounds
         assert(rounds.count==groupMembers.count-1)
         self.seriesTree=JankenTree(branches:rounds)
     }
     
-    func develop_jankenbranches(_ participants:Set<Participant>, cumBranches:Set<JankenRound>, parentAddress:String, parentRange:ClosedRange<Int>, sessions:[JankenSession])->(Set<JankenRound>,[JankenSession]){
-        var rounds=cumBranches; var sessions=sessions
+    func develop_jankenbranches(_ participants:Set<Participant>, cumBranches:Set<JankenRound>, parentAddress:String, parentRange:ClosedRange<Int>, bouts:[JankenBout],saishowaGu:Bool)->(Set<JankenRound>,[JankenBout]){
+        var rounds=cumBranches; var bouts=bouts
         var winners:Set<Participant>
-        var drawnSessions:[JankenSession]=[]
+        var drawnbouts:[JankenBout]=(saishowaGu ? [JankenBout(generate_samehand_participant_hand_pairs(participants, hand: JankenHand.rock))] : [])
         var drawnP:Bool
         if(participants.count==1){
-            return (rounds,sessions)
+            return (rounds,bouts)
         }
-        var jankenSession:JankenSession
+        var jankenSession:JankenBout
         repeat{
-            jankenSession=JankenSession(assign_hand_to_participants(participants))
+            jankenSession=JankenBout(generate_random_participant_hand_pairs(participants))
             winners=jankenSession.do_janken_and_get_winners()
             if(winners.isEmpty){
-                drawnSessions.append(jankenSession)
-                sessions.append(jankenSession)
+                drawnbouts.append(jankenSession)
+                bouts.append(jankenSession)
                 drawnP=true
-            }else{drawnP=false;sessions.append(jankenSession)}
+            }else{drawnP=false;bouts.append(jankenSession)}
         }while(drawnP)
         let losers=participants.filter{el in !winners.contains(el)}
-        rounds.insert(JankenRound(finalSession:jankenSession, drawnSessions:DrawnSessions(participants:participants,sessions:drawnSessions), parentAddress: parentAddress, parentRange:parentRange))
+        rounds.insert(JankenRound(finalBout:jankenSession, drawnBouts:DrawnBouts(participants:participants,bouts:drawnbouts), parentAddress: parentAddress, parentRange:parentRange))
         let leftAddress=parentAddress+"0"; let rightAddress=parentAddress+"1"
         let rangeFirst=parentRange.first!; let rangeLast=parentRange.last!
         let winnerOffset=rangeFirst+winners.count-1; let loserOffset=winnerOffset+1
@@ -346,9 +542,94 @@ public class JankenSeriesInGroup:ObservableObject{
         let loserRange=(loserOffset...rangeLast)
         assert(winners.count==(winnerOffset-winnerRange.first!+1))
         assert(losers.count==(loserRange.last!-loserOffset+1))
-        let (leftRounds,leftSessions)=develop_jankenbranches(winners, cumBranches:rounds, parentAddress:leftAddress, parentRange:winnerRange, sessions:sessions)
-        let (finalCumRounds,finalSessions)=develop_jankenbranches(losers, cumBranches:leftRounds, parentAddress:rightAddress, parentRange:loserRange, sessions:leftSessions)
-        return (finalCumRounds,finalSessions)
+        let (leftRounds,leftbouts)=develop_jankenbranches(winners, cumBranches:rounds, parentAddress:leftAddress, parentRange:winnerRange, bouts:bouts, saishowaGu:saishowaGu)
+        let (finalCumRounds,finalbouts)=develop_jankenbranches(losers, cumBranches:leftRounds, parentAddress:rightAddress, parentRange:loserRange, bouts:leftbouts, saishowaGu:saishowaGu)
+        return (finalCumRounds,finalbouts)
     }
 }
 
+let fakeRoundsSmall=Set([
+   JankenRound(finalBout:JankenBout(
+       [Participant(displayName:"John",email:"john@email.com"): JankenHand.scissors
+    ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.scissors
+    ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.scissors
+    ,Participant(displayName:"Yo", email:"yo@email.com"): JankenHand.paper
+    ,Participant(displayName:"Zak", email:"zak@email.com"): JankenHand.paper
+   ]),
+           drawnBouts:DrawnBouts(participants:Set( [Participant(displayName:"John",email:"john@email.com"),
+                                                           Participant(displayName:"Tim", email:"tim@email.com")
+                                                           ,Participant(displayName: "Dan", email:"dan@email.com")
+                                                    ,Participant(displayName:"Yo", email:"yo@email.com")
+                                                    ,Participant(displayName:"Zak", email:"zak@email.com")
+                                                          ]),
+                                 bouts:[JankenBout(
+                                                           [Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+                                                            ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.scissors
+                                                            ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.rock
+                                                            ,Participant(displayName:"Yo", email:"yo@email.com"): JankenHand.paper
+                                                            ,Participant(displayName:"Zak", email:"zak@email.com"): JankenHand.paper
+                                   ])]),
+           parentAddress:"",parentRange:1...5
+          )
+           
+           ,
+           JankenRound(finalBout:JankenBout(
+   [Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+    ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.scissors
+    ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.paper
+   ]),
+           drawnBouts:DrawnBouts(participants:Set( [Participant(displayName:"John",email:"john@email.com"),Participant(displayName:"Tim", email:"tim@email.com"),Participant(displayName: "Dan", email:"dan@email.com")]),
+               bouts:[
+                   JankenBout([Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+                               ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.paper
+                               ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.paper])
+                   , JankenBout([Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+                                 ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.scissors
+                                 ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.rock])
+               ,JankenBout([Participant(displayName:"John",email:"john@email.com"): JankenHand.scissors
+                            ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.scissors
+                            ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.scissors])
+               ,JankenBout([Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+                            ,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.paper
+                            ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.paper])
+           ,JankenBout([Participant(displayName:"John",email:"john@email.com"): JankenHand.paper,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.paper,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.paper])
+               ,JankenBout([Participant(displayName:"John",email:"john@email.com"): JankenHand.paper,Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.paper,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.paper])
+           ,JankenBout([Participant(displayName:"John",email:"john@email.com"): JankenHand.rock,
+                        Participant(displayName:"Tim", email:"tim@email.com"): JankenHand.scissors,
+                        Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.paper])
+
+           ]),
+           parentAddress:"0",parentRange:1...3
+          )
+           
+           ,
+           JankenRound(finalBout:JankenBout(
+                                   [Participant(displayName:"John",email:"john@email.com"): JankenHand.paper
+                                    ,Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.rock
+                                   ]),
+                                           drawnBouts:DrawnBouts(participants:Set( [Participant(displayName:"John",email:"john@email.com"),Participant(displayName: "Dan", email:"dan@email.com")]),bouts:[
+                                               JankenBout([Participant(displayName:"John",email:"john@email.com"): JankenHand.rock,
+                                                           Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.rock])
+                                               ,JankenBout([Participant(displayName:"John",email:"john@email.com"): JankenHand.paper,
+                                                           Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.paper])
+                                               ,JankenBout([Participant(displayName:"John",email:"john@email.com"): JankenHand.paper,
+                                                           Participant(displayName: "Dan", email:"dan@email.com"): JankenHand.paper])
+
+                                           ]
+                                           ),
+                                           parentAddress:"01",parentRange:2...3
+                                          )
+           ,
+           
+           JankenRound(finalBout:JankenBout(
+                                   [Participant(displayName:"Yo",email:"yo@email.com"): JankenHand.paper
+                                    ,Participant(displayName: "Zak", email:"zak@email.com"): JankenHand.rock
+   ]),
+           drawnBouts:DrawnBouts(participants:Set( [Participant(displayName:"Yo",email:"yo@email.com"),Participant(displayName: "Zak", email:"zak@email.com")]),bouts:[
+           ]
+           ),
+           parentAddress:"1",parentRange:4...5
+          )
+           
+])
+   

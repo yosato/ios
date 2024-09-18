@@ -6,22 +6,37 @@
 //
 
 import SwiftUI
+import jankenModels
 
 struct LiveSessionView: View {
     var session:GroupSession
-    @EnvironmentObject private var dataService:DataService
-    @EnvironmentObject private var authService:AuthService
+    @EnvironmentObject var dataService:DataService
+    @StateObject var jankenSeries=JankenSeriesInGroup()
+    @EnvironmentObject var authService:AuthService
     @State private var currentChatText:String=""
-    var allReady=false
+    //@State var allReadyP=false
+    @State var showSeries=false
     @State private var chosenHand="rock"
-    @State private var participants:Set<Member>=Set()
+    var participatingMembers:Set<Member> {Set(dataService.registeredMembers.filter{member in dataService.ourGroupSession!.memberUIDs.contains(member.uid!)})}
+    var onlineParticipants:Set<Member> {Set(participatingMembers.filter{member in dataService.onlineUserIDs.contains(member.uid ?? "")})}
+    var jankenParticipants:Set<Participant> {
+        Set(Array(self.participatingMembers).map{member in member.convertIntoParticipant()})
+    }
+    
+    var allReadyP:Bool {participatingMembers==onlineParticipants}
+    var sessionState:SessionState {dataService.ourGroupSession == nil ? SessionState.NotStarted : SessionState.Completed}
+    
     
     var body: some View {
-        VStack{
-            Spacer()
+        NavigationStack{
             VStack{
+                LogoView().frame(maxHeight:50)
+                ParticipantsView(participants:participatingMembers).environmentObject(authService)
+                Button("中継"){
+                    if(sessionState==SessionState.NotStarted){Task{try await do_and_push_series(jankenParticipants); showSeries=true}}else{Task{let rounds=try await fetch_series();jankenSeries.seriesTree=JankenTree(branches:rounds);showSeries=true}}
                 
-                ParticipantsView(participants:session.members)
+                    //the first one pushing the button triggers the series
+                }.disabled(!allReadyP)
                 MessageListView(messages:dataService.messagesInSession)
                 //JankenView(chosenHand:$chosenHand).disabled(!allReady)
                 HStack{
@@ -30,11 +45,29 @@ struct LiveSessionView: View {
                         dataService.sendMessageToFB(text: currentChatText, session: session) { error in }
                     } label:{Image(systemName:"paperplane.fill")}.disabled(currentChatText.isEmpty)
                 }.padding()
+            }.navigationDestination(isPresented: $showSeries) {
+                SeriesResultView().environmentObject(jankenSeries)
             }
-        }.onAppear{dataService.listenForMessagesInSession(in: session)}
+            
+        }.onAppear{dataService.listenForUsers()}
     }
+    func fetch_series() async throws -> Set<JankenRound> {
+        var rounds=Set<JankenRound>()
+        //check fetch_seriesTree existence, if not somebody else is still doing janken, so wait a bit
+        
+        
+        return rounds
+    }
+    func do_and_push_series(_ jParticipants:Set<Participant>) async throws {
+        //mark completed first
+        jankenSeries.add_members(jParticipants)
+        jankenSeries.do_jankenSeries_in_group()
+        dataService.ourGroupSession!.rounds=Array(jankenSeries.seriesTree.rounds)
+        try await dataService.updateSessionInFB()
+    }
+    
 }
 
 #Preview {
-    LiveSessionView(session: GroupSession(documentID: "123", sessionName: "tennis",organiser:Member(displayName:"aaa",email:"aaa@aaa.com"),invitees:Set([Member(displayName: "hahaha", email: "hahaha@hahaha.com")]))).environmentObject(DataService())
+    LiveSessionView(session: GroupSession(sessionName: "tennis",organiserUID:"aaa",inviteeUIDs:Set(["iii","uuu","eee"]), isCompleted: false)).environmentObject(DataService()).environmentObject(AuthService())
 }

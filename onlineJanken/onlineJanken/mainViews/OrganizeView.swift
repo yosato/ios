@@ -23,8 +23,6 @@ struct OrganizeView: View {
     @State private var invitees:[Member]=[]
     var opponentNamesString:String {Array(selectedOpponents).map{opponent in opponent.displayName.replacingOccurrences(of: " ", with: "_")}.sorted().joined(separator: "--")}
     var namesString:String {organiser.displayName+":"+opponentNamesString}
-
-
     let methods=["お任せ対戦","ライブ対戦"]
     let resultTypes=["順位づけ","勝者ひとり"]
     
@@ -40,15 +38,8 @@ struct OrganizeView: View {
                         }
                         HStack{ForEach(Array(selectedOpponents)){opponent in Text("\(opponent.displayName)")}
                         }
-
                     }
                     Section("オプション"){
-//                        Picker("開催方式",selection:$selectedMethod){
-//                            ForEach(methods,id:\.self){
-//                                Text($0)
-//                            }
-//                        }
-                        
                         Picker("決定方式",selection:$resultType){
                             ForEach(resultTypes,id:\.self){
                                 Text($0)
@@ -61,26 +52,23 @@ struct OrganizeView: View {
                     }
                 }      //   ZStack{
                 Button("開催"){
-//                    dataService.createSessionInFB(session: Session(sessionName:sessionName)){ error in
-//                        if let error{
-//                            print(error.localizedDescription)
-//                        }
-//                    }
                     showAlert.toggle()
-                }.disabled(selectedOpponents.isEmpty).alert("セッション名は\(sessionName)です。\nOKを押すと招待メールが送られ全員が了承次第開催されます",isPresented:$showAlert){
+                }.disabled(selectedOpponents.isEmpty).alert("セッション名は\(sessionName)です。\nOKを押すと招待メールが送られ全員が了承次第開催されます", isPresented:$showAlert){
                     Button("Cancel",role:.cancel){}
                     Button("OK"){
-                        invitees+=selectedOpponents
-                        let groupSession=GroupSession(sessionName: sessionName, organiser: organiser, invitees: selectedOpponents)
-                        dataService.createSessionInFB(session: groupSession) {_error in }
-                        
-//                        sendInvitationEmails(invitees)
-                        gotoLiveView.toggle()
+                        Task{    let inviteeUIDs=Set(selectedOpponents.map{opp in opp.uid!})
+                            var groupSession=GroupSession(sessionName: sessionName, organiserUID: organiser.uid!, inviteeUIDs: inviteeUIDs)
+                            if let sessionDocRef=try? await dataService.createEmptySessionInFB(session: groupSession){
+                                groupSession.id=sessionDocRef.documentID
+                                dataService.ourGroupSession=groupSession
+
+                            }
+                            //sendInvitationEmails(invitees)
+                            gotoLiveView=true }
                     }
                 }
                     .navigationDestination(isPresented: $gotoLiveView){
-                        LiveSessionView(session:GroupSession(sessionName:sessionName,organiser:organiser, invitees:selectedOpponents))
-                }
+                        LiveSessionView(session:dataService.ourGroupSession!)  }
             }.navigationTitle("じゃんけん開催設定").navigationBarTitleDisplayMode(.inline)
 
         }.onAppear{sessionName=namesString

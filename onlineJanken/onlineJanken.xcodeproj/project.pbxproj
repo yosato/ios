@@ -18,13 +18,9 @@
 		BC347ABA2C636E900084EE1E /* dataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347AB92C636E900084EE1E /* dataHandler.swift */; };
 		BC347ABE2C6372B50084EE1E /* AccountCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347ABD2C6372B50084EE1E /* AccountCreationView.swift */; };
 		BC347AC02C63A3690084EE1E /* OrganizeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347ABF2C63A3690084EE1E /* OrganizeView.swift */; };
-		BC347AC22C63A4550084EE1E /* ParticipateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347AC12C63A4550084EE1E /* ParticipateView.swift */; };
-		BC347AC42C63AB730084EE1E /* JankenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347AC32C63AB730084EE1E /* JankenView.swift */; };
-		BC347B372C6E19340084EE1E /* ComputerDelegatedSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347B362C6E19340084EE1E /* ComputerDelegatedSessionView.swift */; };
-		BC347B762C6E5C4A0084EE1E /* JankenSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347B752C6E5C4A0084EE1E /* JankenSessionView.swift */; };
+		BC347B762C6E5C4A0084EE1E /* JankenBoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC347B752C6E5C4A0084EE1E /* JankenBoutView.swift */; };
 		BCA4A1082C5A928E005FB360 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA4A1072C5A928E005FB360 /* WelcomeView.swift */; };
 		BCA4A10E2C5B9412005FB360 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = BCA4A10D2C5B9412005FB360 /* FirebaseAuth */; };
-		BCA4A1102C5BE191005FB360 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA4A10F2C5BE191005FB360 /* LoginView.swift */; };
 		BCB1EB602C5A83370075ED3E /* onlineJankenApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB1EB5F2C5A83370075ED3E /* onlineJankenApp.swift */; };
 		BCB1EB622C5A83370075ED3E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB1EB612C5A83370075ED3E /* ContentView.swift */; };
 		BCB1EB642C5A833B0075ED3E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BCB1EB632C5A833B0075ED3E /* Assets.xcassets */; };
@@ -36,12 +32,12 @@
 		BCB1EB8D2C5A87A60075ED3E /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = BCB1EB8C2C5A87A60075ED3E /* FirebaseAnalytics */; };
 		BCC4A2372C78BB77000028C9 /* SwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A2362C78BB77000028C9 /* SwiftUIView.swift */; };
 		BCC4A2392C78BC85000028C9 /* testDelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A2382C78BC85000028C9 /* testDelay.swift */; };
-		BCC4A23B2C78BE3F000028C9 /* RoundResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A23A2C78BE3F000028C9 /* RoundResultView.swift */; };
 		BCC4A23D2C78F088000028C9 /* SeriesResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A23C2C78F088000028C9 /* SeriesResultView.swift */; };
-		BCC4A2462C7DE4D2000028C9 /* ContentView1.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC4A2452C7DE4D2000028C9 /* ContentView1.swift */; };
-		BCCCDB6F2C85F4B50072709A /* RoundResultViewStatic.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCCCDB6E2C85F4B50072709A /* RoundResultViewStatic.swift */; };
 		BCCCDB712C8615C30072709A /* ParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCCCDB702C8615C30072709A /* ParticipantsView.swift */; };
 		BCCCDB732C8A27D60072709A /* AfterLogInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCCCDB722C8A27D60072709A /* AfterLogInView.swift */; };
+		BCCCDB782C9077820072709A /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = BCCCDB772C9077820072709A /* FirebaseDatabase */; };
+		BCCCDB7F2C9985990072709A /* ResultSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCCCDB7E2C9985990072709A /* ResultSummaryView.swift */; };
+		BCCCDB812C99C4520072709A /* SeriesResultViewStatic.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCCCDB802C99C4520072709A /* SeriesResultViewStatic.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -99,12 +95,8 @@
 		BC347AB92C636E900084EE1E /* dataHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dataHandler.swift; sourceTree = "<group>"; };
 		BC347ABD2C6372B50084EE1E /* AccountCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCreationView.swift; sourceTree = "<group>"; };
 		BC347ABF2C63A3690084EE1E /* OrganizeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrganizeView.swift; sourceTree = "<group>"; };
-		BC347AC12C63A4550084EE1E /* ParticipateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipateView.swift; sourceTree = "<group>"; };
-		BC347AC32C63AB730084EE1E /* JankenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JankenView.swift; sourceTree = "<group>"; };
-		BC347B362C6E19340084EE1E /* ComputerDelegatedSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComputerDelegatedSessionView.swift; sourceTree = "<group>"; };
-		BC347B752C6E5C4A0084EE1E /* JankenSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JankenSessionView.swift; sourceTree = "<group>"; };
+		BC347B752C6E5C4A0084EE1E /* JankenBoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JankenBoutView.swift; sourceTree = "<group>"; };
 		BCA4A1072C5A928E005FB360 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
-		BCA4A10F2C5BE191005FB360 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		BCB1EB5C2C5A83370075ED3E /* onlineJanken.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = onlineJanken.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BCB1EB5F2C5A83370075ED3E /* onlineJankenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = onlineJankenApp.swift; sourceTree = "<group>"; };
 		BCB1EB612C5A83370075ED3E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -118,12 +110,11 @@
 		BCB1EB892C5A85940075ED3E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		BCC4A2362C78BB77000028C9 /* SwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUIView.swift; sourceTree = "<group>"; };
 		BCC4A2382C78BC85000028C9 /* testDelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testDelay.swift; sourceTree = "<group>"; };
-		BCC4A23A2C78BE3F000028C9 /* RoundResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundResultView.swift; sourceTree = "<group>"; };
 		BCC4A23C2C78F088000028C9 /* SeriesResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeriesResultView.swift; sourceTree = "<group>"; };
-		BCC4A2452C7DE4D2000028C9 /* ContentView1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView1.swift; sourceTree = "<group>"; };
-		BCCCDB6E2C85F4B50072709A /* RoundResultViewStatic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundResultViewStatic.swift; sourceTree = "<group>"; };
 		BCCCDB702C8615C30072709A /* ParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsView.swift; sourceTree = "<group>"; };
 		BCCCDB722C8A27D60072709A /* AfterLogInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AfterLogInView.swift; sourceTree = "<group>"; };
+		BCCCDB7E2C9985990072709A /* ResultSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultSummaryView.swift; sourceTree = "<group>"; };
+		BCCCDB802C99C4520072709A /* SeriesResultViewStatic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeriesResultViewStatic.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,6 +122,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BCCCDB782C9077820072709A /* FirebaseDatabase in Frameworks */,
 				BC347AB02C62891D0084EE1E /* FirebaseFirestore in Frameworks */,
 				BC14358A2C723536008BD25D /* jankenModels.framework in Frameworks */,
 				BCA4A10E2C5B9412005FB360 /* FirebaseAuth in Frameworks */,
@@ -176,15 +168,13 @@
 			isa = PBXGroup;
 			children = (
 				BC347AB32C628B700084EE1E /* LogoView.swift */,
-				BCC4A23A2C78BE3F000028C9 /* RoundResultView.swift */,
 				BC14354E2C722B40008BD25D /* MessageListView.swift */,
-				BC347B752C6E5C4A0084EE1E /* JankenSessionView.swift */,
+				BC347B752C6E5C4A0084EE1E /* JankenBoutView.swift */,
 				BC347AB72C636D570084EE1E /* PickOpponentsView.swift */,
 				BC347ABD2C6372B50084EE1E /* AccountCreationView.swift */,
-				BC347AC32C63AB730084EE1E /* JankenView.swift */,
 				BC1435502C722C2F008BD25D /* ChatBubble.swift */,
-				BCCCDB6E2C85F4B50072709A /* RoundResultViewStatic.swift */,
 				BCCCDB702C8615C30072709A /* ParticipantsView.swift */,
+				BCCCDB7E2C9985990072709A /* ResultSummaryView.swift */,
 			);
 			path = subViews;
 			sourceTree = "<group>";
@@ -201,10 +191,9 @@
 			isa = PBXGroup;
 			children = (
 				BC347ABF2C63A3690084EE1E /* OrganizeView.swift */,
-				BC347AC12C63A4550084EE1E /* ParticipateView.swift */,
 				BC347AB52C636CC70084EE1E /* LiveSessionView.swift */,
-				BC347B362C6E19340084EE1E /* ComputerDelegatedSessionView.swift */,
 				BCC4A23C2C78F088000028C9 /* SeriesResultView.swift */,
+				BCCCDB802C99C4520072709A /* SeriesResultViewStatic.swift */,
 			);
 			path = mainViews;
 			sourceTree = "<group>";
@@ -236,12 +225,10 @@
 				BCB1EB5F2C5A83370075ED3E /* onlineJankenApp.swift */,
 				BCB1EB612C5A83370075ED3E /* ContentView.swift */,
 				BCCCDB722C8A27D60072709A /* AfterLogInView.swift */,
-				BCC4A2452C7DE4D2000028C9 /* ContentView1.swift */,
 				BCA4A1072C5A928E005FB360 /* WelcomeView.swift */,
 				BC347AB22C6289A40084EE1E /* models */,
 				BC347B7B2C6F95CC0084EE1E /* mainViews */,
 				BC347AB12C6289770084EE1E /* subViews */,
-				BCA4A10F2C5BE191005FB360 /* LoginView.swift */,
 				BCC4A2352C78BB67000028C9 /* test */,
 				BCB1EB892C5A85940075ED3E /* GoogleService-Info.plist */,
 				BCB1EB632C5A833B0075ED3E /* Assets.xcassets */,
@@ -305,6 +292,7 @@
 				BCB1EB8C2C5A87A60075ED3E /* FirebaseAnalytics */,
 				BCA4A10D2C5B9412005FB360 /* FirebaseAuth */,
 				BC347AAF2C62891D0084EE1E /* FirebaseFirestore */,
+				BCCCDB772C9077820072709A /* FirebaseDatabase */,
 			);
 			productName = onlineJanken;
 			productReference = BCB1EB5C2C5A83370075ED3E /* onlineJanken.app */;
@@ -447,28 +435,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BC347B762C6E5C4A0084EE1E /* JankenSessionView.swift in Sources */,
+				BCCCDB7F2C9985990072709A /* ResultSummaryView.swift in Sources */,
+				BC347B762C6E5C4A0084EE1E /* JankenBoutView.swift in Sources */,
 				BCC4A2392C78BC85000028C9 /* testDelay.swift in Sources */,
-				BCA4A1102C5BE191005FB360 /* LoginView.swift in Sources */,
 				BCC4A2372C78BB77000028C9 /* SwiftUIView.swift in Sources */,
+				BCCCDB812C99C4520072709A /* SeriesResultViewStatic.swift in Sources */,
 				BC1435512C722C2F008BD25D /* ChatBubble.swift in Sources */,
-				BC347AC42C63AB730084EE1E /* JankenView.swift in Sources */,
-				BCC4A2462C7DE4D2000028C9 /* ContentView1.swift in Sources */,
 				BC347ABE2C6372B50084EE1E /* AccountCreationView.swift in Sources */,
 				BCB1EB622C5A83370075ED3E /* ContentView.swift in Sources */,
-				BCC4A23B2C78BE3F000028C9 /* RoundResultView.swift in Sources */,
 				BC347AB82C636D570084EE1E /* PickOpponentsView.swift in Sources */,
 				BC347ABA2C636E900084EE1E /* dataHandler.swift in Sources */,
 				BC347AB62C636CC70084EE1E /* LiveSessionView.swift in Sources */,
 				BC347AB42C628B700084EE1E /* LogoView.swift in Sources */,
 				BCA4A1082C5A928E005FB360 /* WelcomeView.swift in Sources */,
 				BCCCDB712C8615C30072709A /* ParticipantsView.swift in Sources */,
-				BC347B372C6E19340084EE1E /* ComputerDelegatedSessionView.swift in Sources */,
 				BC14354F2C722B40008BD25D /* MessageListView.swift in Sources */,
 				BCB1EB602C5A83370075ED3E /* onlineJankenApp.swift in Sources */,
 				BCCCDB732C8A27D60072709A /* AfterLogInView.swift in Sources */,
-				BCCCDB6F2C85F4B50072709A /* RoundResultViewStatic.swift in Sources */,
-				BC347AC22C63A4550084EE1E /* ParticipateView.swift in Sources */,
 				BCC4A23D2C78F088000028C9 /* SeriesResultView.swift in Sources */,
 				BC347AC02C63A3690084EE1E /* OrganizeView.swift in Sources */,
 			);
@@ -821,6 +804,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BCB1EB8B2C5A87A50075ED3E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAnalytics;
+		};
+		BCCCDB772C9077820072709A /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BCB1EB8B2C5A87A50075ED3E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

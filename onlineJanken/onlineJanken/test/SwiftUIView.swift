@@ -9,12 +9,10 @@ import SwiftUI
 
 struct SwiftUIView: View {
     let myArray=[1,2,3,4,5,6]
+    @State var currentInd=0
     var body: some View {
-        VStack{
-            ForEach(myArray,id:\.self){el in
-                Text("\(el)")
-                
-            }
+        if(currentInd<=5){
+            Text("\(myArray[currentInd])").onAppear{DispatchQueue.main.asyncAfter(deadline:DispatchTime.now()+1){currentInd+=1}}.onChange(of:currentInd){DispatchQueue.main.asyncAfter(deadline:DispatchTime.now()+1){currentInd+=1}}
         }
     }
 }

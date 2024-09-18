@@ -10,7 +10,7 @@ import SwiftUI
 struct LogoView: View {
     var body: some View {
         Text("どこでもじゃんけん").font(.title).bold()
-        Image("janken")
+        Image("janken").resizable().scaledToFit()
     }
 }
 

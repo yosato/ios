@@ -113,6 +113,8 @@
 			dependencies = (
 			);
 			name = jankenModels;
+			packageProductDependencies = (
+			);
 			productName = jankenModels;
 			productReference = BC1435672C7233ED008BD25D /* jankenModels.framework */;
 			productType = "com.apple.product-type.framework";
@@ -163,6 +165,9 @@
 				Base,
 			);
 			mainGroup = BC14355D2C7233ED008BD25D;
+			packageReferences = (
+				BCCCDB792C9077BB0072709A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = BC1435682C7233ED008BD25D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -477,6 +482,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BCCCDB792C9077BB0072709A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = BC14355E2C7233ED008BD25D /* Project object */;
 }

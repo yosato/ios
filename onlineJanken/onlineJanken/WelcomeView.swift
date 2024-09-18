@@ -12,11 +12,12 @@ struct WelcomeView: View {
     @State private var email: String = ""
     @State private var password: String = ""
     @EnvironmentObject var authService: AuthService
+    @State private var goToAfterLogin=false
 
     var body: some View {
         
         VStack {
-            LogoView()
+            LogoView().frame(maxHeight:100)
             NavigationView {
                        ZStack {
                            Color.gray
@@ -37,13 +38,13 @@ struct WelcomeView: View {
                                    .textFieldStyle(.roundedBorder)
                                
                                HStack{
-                                   Button("ログイン"){  authService.regularSignIn(email: email, password: password) { error in
-                                       if let e = error {
-                                           print(e.localizedDescription)
+                                   Button("ログイン"){ 
+                                       Task{do{
+                                           try await authService.regularSignIn(email: email, password: password)
+                                           goToAfterLogin=true
+                                       }catch{print("login failed")}
                                        }
-                                   }
-                                   }
-                                                                       
+                                   }                                   
                                 .controlSize(.large).padding()
                                }
                                Spacer()

@@ -10,8 +10,8 @@ import XCTest
 final class jankenModelTests: XCTestCase {
     
     var mockParticipants:[Participant] = []
-    var twoPeopleSession:JankenSession=JankenSession([:])
-    var threePeopleSession:JankenSession=JankenSession([:])
+    var twoPeopleSession:JankenBout=JankenBout([:])
+    var threePeopleSession:JankenBout=JankenBout([:])
 
     override func setUpWithError() throws {
         for num in (1...10){
@@ -25,37 +25,37 @@ final class jankenModelTests: XCTestCase {
     }
 
     func testJankenTwoPeople() throws {
-        twoPeopleSession=JankenSession([mockParticipants[0]:JankenHand.rock,  mockParticipants[1]:JankenHand.rock])
+        twoPeopleSession=JankenBout([mockParticipants[0]:JankenHand.rock,  mockParticipants[1]:JankenHand.rock])
         XCTAssert(twoPeopleSession.do_janken_and_get_winners() == [])
-        twoPeopleSession=JankenSession([mockParticipants[0]:JankenHand.scissors,  mockParticipants[1]:JankenHand.scissors])
+        twoPeopleSession=JankenBout([mockParticipants[0]:JankenHand.scissors,  mockParticipants[1]:JankenHand.scissors])
         XCTAssert(twoPeopleSession.do_janken_and_get_winners() == [])
-        twoPeopleSession=JankenSession([mockParticipants[0]:JankenHand.paper,  mockParticipants[1]:JankenHand.paper])
+        twoPeopleSession=JankenBout([mockParticipants[0]:JankenHand.paper,  mockParticipants[1]:JankenHand.paper])
         XCTAssert(twoPeopleSession.do_janken_and_get_winners() == [])
 
-        twoPeopleSession=JankenSession([mockParticipants[0]:JankenHand.rock,  mockParticipants[1]:JankenHand.paper])
+        twoPeopleSession=JankenBout([mockParticipants[0]:JankenHand.rock,  mockParticipants[1]:JankenHand.paper])
         XCTAssert(twoPeopleSession.do_janken_and_get_winners() == [mockParticipants[1]])
 
-        twoPeopleSession=JankenSession([mockParticipants[0]:JankenHand.rock,  mockParticipants[1]:JankenHand.scissors])
+        twoPeopleSession=JankenBout([mockParticipants[0]:JankenHand.rock,  mockParticipants[1]:JankenHand.scissors])
         XCTAssert(twoPeopleSession.do_janken_and_get_winners() == [mockParticipants[0]])
 
-        twoPeopleSession=JankenSession([mockParticipants[0]:JankenHand.paper,  mockParticipants[1]:JankenHand.scissors])
+        twoPeopleSession=JankenBout([mockParticipants[0]:JankenHand.paper,  mockParticipants[1]:JankenHand.scissors])
         XCTAssert(twoPeopleSession.do_janken_and_get_winners() == [mockParticipants[1]])
 
 
     }
     func testJankenThreePeople() throws {
-        threePeopleSession=JankenSession([mockParticipants[0]:JankenHand.rock,  mockParticipants[1]:JankenHand.rock, mockParticipants[2]:JankenHand.rock])
+        threePeopleSession=JankenBout([mockParticipants[0]:JankenHand.rock,  mockParticipants[1]:JankenHand.rock, mockParticipants[2]:JankenHand.rock])
         XCTAssert(threePeopleSession.do_janken_and_get_winners() == [])
-        threePeopleSession=JankenSession([mockParticipants[0]:JankenHand.paper,  mockParticipants[1]:JankenHand.paper, mockParticipants[2]:JankenHand.paper])
+        threePeopleSession=JankenBout([mockParticipants[0]:JankenHand.paper,  mockParticipants[1]:JankenHand.paper, mockParticipants[2]:JankenHand.paper])
         XCTAssert(threePeopleSession.do_janken_and_get_winners() == [])
-        threePeopleSession=JankenSession([mockParticipants[0]:JankenHand.scissors,  mockParticipants[1]:JankenHand.rock,mockParticipants[2]:JankenHand.paper])
+        threePeopleSession=JankenBout([mockParticipants[0]:JankenHand.scissors,  mockParticipants[1]:JankenHand.rock,mockParticipants[2]:JankenHand.paper])
         XCTAssert(threePeopleSession.do_janken_and_get_winners() == [])
 
-        threePeopleSession=JankenSession([mockParticipants[0]:JankenHand.rock,  mockParticipants[1]:JankenHand.rock, mockParticipants[2]:JankenHand.scissors])
+        threePeopleSession=JankenBout([mockParticipants[0]:JankenHand.rock,  mockParticipants[1]:JankenHand.rock, mockParticipants[2]:JankenHand.scissors])
         XCTAssert(threePeopleSession.do_janken_and_get_winners() == [mockParticipants[0],mockParticipants[1]])
-        threePeopleSession=JankenSession([mockParticipants[0]:JankenHand.paper,  mockParticipants[1]:JankenHand.scissors, mockParticipants[2]:JankenHand.paper])
+        threePeopleSession=JankenBout([mockParticipants[0]:JankenHand.paper,  mockParticipants[1]:JankenHand.scissors, mockParticipants[2]:JankenHand.paper])
         XCTAssert(threePeopleSession.do_janken_and_get_winners() == [mockParticipants[1]])
-        threePeopleSession=JankenSession([mockParticipants[0]:JankenHand.paper,  mockParticipants[1]:JankenHand.rock,mockParticipants[2]:JankenHand.rock])
+        threePeopleSession=JankenBout([mockParticipants[0]:JankenHand.paper,  mockParticipants[1]:JankenHand.rock,mockParticipants[2]:JankenHand.rock])
         XCTAssert(threePeopleSession.do_janken_and_get_winners() == [mockParticipants[0]])
 
 
@@ -66,14 +66,18 @@ final class jankenModelTests: XCTestCase {
         // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
     }
 
-    func testJankenSeriesInGroup() throws{
+    func testJankenSeriesInGroup1() throws{
         let jankenSeries=JankenSeriesInGroup(groupMembers:Set(mockParticipants[0...6]))
         let jankenTree=jankenSeries.do_jankenSeries_in_group()
     }
-    
+    func testJankenSeriesInGroup2() throws{
+        let jankenSeries=JankenSeriesInGroup(seriesTree:JankenTree(branches:jankenModels.fakeRoundsSmall))
+        
+    }
+
     func testMakingDrawnSessions() throws{
         for i in (2...8){
-            let dSessions=DrawnSessions(participants:Set(mockParticipants[0...i]))
+            let dSessions=DrawnBouts(participants:Set(mockParticipants[0...i]))
             
         }
         

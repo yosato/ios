@@ -16,7 +16,7 @@ struct OrganizeView: View {
     //let fakeName="信子"
     @State private var selectedMethod="お任せ対戦"
     @State private var resultType="順位づけ"
-    @State private var gotoLiveView=false
+    @State var gotoLiveView=false
     @State private var showAlert=false
     @State private var selectedOpponents=Set<Member>()
     @State private var sessionName:String=""
@@ -59,7 +59,7 @@ struct OrganizeView: View {
                         Task{    let inviteeUIDs=Set(selectedOpponents.map{opp in opp.uid!})
                             var groupSession=GroupSession(sessionName: sessionName, organiserUID: organiser.uid!, inviteeUIDs: inviteeUIDs)
                             if let sessionDocRef=try? await dataService.createEmptySessionInFB(session: groupSession){
-                                groupSession.id=sessionDocRef.documentID
+                                groupSession.docID=sessionDocRef.documentID
                                 dataService.ourGroupSession=groupSession
 
                             }
@@ -67,8 +67,9 @@ struct OrganizeView: View {
                             gotoLiveView=true }
                     }
                 }
-                    .navigationDestination(isPresented: $gotoLiveView){
-                        LiveSessionView(session:dataService.ourGroupSession!)  }
+                .navigationDestination(isPresented: $gotoLiveView){
+                    if let grSession=dataService.ourGroupSession{
+                        LiveSessionView(session:dataService.ourGroupSession!)  }}
             }.navigationTitle("じゃんけん開催設定").navigationBarTitleDisplayMode(.inline)
 
         }.onAppear{sessionName=namesString

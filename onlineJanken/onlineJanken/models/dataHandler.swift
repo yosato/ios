@@ -11,19 +11,21 @@ import FirebaseFirestore
 import FirebaseDatabase
 import jankenModels
 
-struct GroupSession: Codable,Identifiable{
+
+struct GroupSession: Codable{
     let sessionName: String
     let organiserUID:String
     let inviteeUIDs:Set<String>
-    var id:String?=nil
+    var docID:String?=nil
     var createdAt=Date()
     var rounds:[JankenRound]=[]
-    var isCompleted:Bool=false
+//    var isCompleted:Bool=false
+    var sessionState:SessionState=SessionState.NotStarted
     
 //    var id: String{
 //        documentID ?? UUID().uuidString
 //    }
-    var memberUIDs:Set<String> {Set([organiserUID]).union(inviteeUIDs)}
+    //var memberUIDs:Set<String> {Set([organiserUID]).union(inviteeUIDs)}
     
     func toDictionary()->[String:String]{
         return ["name":sessionName]
@@ -124,24 +126,32 @@ class DataService:ObservableObject{
     func createEmptySessionInFB(session:GroupSession) async throws-> DocumentReference?{
         let db=Firestore.firestore()
         var docRef:DocumentReference?=nil
-        do {let _=try await db.collection("groupSessions")
-            .addDocument( data:["sessionName":session.sessionName,"organiserUID":session.organiserUID,"inviteeUIDs":session.inviteeUIDs,"createdAt":session.createdAt,"isCompleted":false])}
-//        do {let docRef=try await db.collection("groupSessions")
-//            .addDocument( data:["sessionName":session.sessionName,"organiserUID":session.organiserUID,"inviteeUIDs":session.inviteeUIDs,"createdAt":session.createdAt,"isCompleted":false])}
+        do {docRef=try await db.collection("groupSessions")
+                .addDocument( data:["sessionName":session.sessionName,"organiserUID":session.organiserUID,"inviteeUIDs":FieldValue.arrayUnion(Array(session.inviteeUIDs)), "createdAt":session.createdAt,"sessionState":session.sessionState.rawValue])
+     //       if(docRef != nil){try await docRef!.updateData(["inviteeUIDs":FieldValue.arrayUnion(Array(session.inviteeUIDs))])}
+                                    }
         catch{
                 throw URLError(.badServerResponse)
             }
         return docRef
     }
-    func updateSessionInFB() async throws{
-        let db=Firestore.firestore()
+    func markSessionState(_ state:SessionState) async throws{
         guard let grSession=self.ourGroupSession else {return}
-        guard let grSessionID=grSession.id else {return}
-        //var docRef:DocumentReference?=nil
+        guard let grSessionID=grSession.docID else {return}
+        self.ourGroupSession!.sessionState=state
+        do {if let docRef=getMatchedDocRefFromFSCollection(matching: grSessionID, collectionName: "groupSessions") {
+            try await docRef.updateData(["sessionState":state.rawValue])
+        }}catch{throw URLError(.badServerResponse)}
+
+    }
+    func updateSessionInFB() async throws{
+       // let db=Firestore.firestore()
+        guard let grSession=self.ourGroupSession else {return}
+        guard let grSessionID=grSession.docID else {return}
         do {if let docRef=getMatchedDocRefFromFSCollection(matching: grSessionID, collectionName: "groupSessions") {
             try docRef.setData(from:grSession)
         }}catch{throw URLError(.badServerResponse)}
-        
+
     }
 
         
@@ -169,7 +179,7 @@ class DataService:ObservableObject{
         let dictionary=sessionSnapshot.data()
         guard let sessionName=dictionary["sessionName"] as? String,
               let createdAt=dictionary["createdAt"] as? Timestamp,
-              let isCompleted=dictionary["isCompleted"] as? Bool,
+              let sessionState=dictionary["sessionState"] as? String,
               let organiserUID=dictionary["organiserUID"] as? String,
               let inviteeUIDs=dictionary["inviteeUIDs"] as? [String]
         else {
@@ -177,7 +187,7 @@ class DataService:ObservableObject{
             return nil
         }
         
-        return GroupSession(sessionName: sessionName, organiserUID: organiserUID, inviteeUIDs: Set(inviteeUIDs), id:sessionSnapshot.documentID, createdAt:createdAt.dateValue(), isCompleted: isCompleted)
+        return GroupSession(sessionName: sessionName, organiserUID: organiserUID, inviteeUIDs: Set(inviteeUIDs), docID:sessionSnapshot.documentID, createdAt:createdAt.dateValue(), sessionState:SessionState(rawValue:sessionState)!)
     }
 
     func fetchMembersFromFB() async throws{
@@ -208,13 +218,13 @@ class DataService:ObservableObject{
         let grSessions=Firestore.firestore().collection("groupSessions")
         var selectedSessions=[GroupSession]()
         do{
-            let sessionsSnapshot=try await grSessions.whereField("isCompleted", isEqualTo:false).whereFilter(Filter.orFilter([
-                Filter.whereField("inviteeUIDs",arrayContains:uidToSearch), Filter.whereField("organiserUID",isEqualTo:uidToSearch)
-            ])).getDocuments()
+            let sessionsSnapshot=try await grSessions.whereFilter(Filter.orFilter([Filter.whereField("inviteeUIDs",arrayContains:uidToSearch), Filter.whereField("organiserUID",isEqualTo:uidToSearch)]))
+                .getDocuments()
             
             for sessionSnapshot in sessionsSnapshot.documents{
                 if let session=fsdata2session(sessionSnapshot:sessionSnapshot){
-                    selectedSessions.append(session)
+                    if(session.sessionState != SessionState.Outdated){
+                        selectedSessions.append(session)}
                 }
                 
             }
@@ -227,7 +237,7 @@ class DataService:ObservableObject{
 
     func sendMessageToFB(text:String,session:GroupSession,completion:@escaping (Error?)->Void){
         let db=Firestore.firestore()
-        guard let sessionDocID=session.id else {return}
+        guard let sessionDocID=session.docID else {return}
         db.collection("sessions").document(sessionDocID).collection("messages").addDocument(data:["chatText":text]){ error in completion(error) }
         
     }
@@ -301,7 +311,7 @@ class DataService:ObservableObject{
     func listenForMessagesInSession(in session:GroupSession){
         let db=Firestore.firestore()
         self.messagesInSession.removeAll()
-        guard let docID=session.id else {return}
+        guard let docID=session.docID else {return}
         self.firestoreMessageListener=db.collection("sessions")
             .document(docID)
             .collection("messages")

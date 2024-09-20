@@ -38,13 +38,14 @@ struct WelcomeView: View {
                                    .textFieldStyle(.roundedBorder)
                                
                                HStack{
-                                   Button("ログイン"){ 
+                                   Button("ログイン"){
+                                       if(!emailLookingGood(email)){print("input doesn't look good")}
                                        Task{do{
                                            try await authService.regularSignIn(email: email, password: password)
                                            goToAfterLogin=true
                                        }catch{print("login failed")}
                                        }
-                                   }                                   
+                                   }.disabled(email.isEmpty||password.isEmpty)
                                 .controlSize(.large).padding()
                                }
                                Spacer()
@@ -53,6 +54,11 @@ struct WelcomeView: View {
                        }
             }
         }
+    }
+    
+    func emailLookingGood(_ input:String)-> Bool{
+        if(!input.contains("@") && input.contains(".")){return false}
+        return true
     }
 }
 

@@ -34,7 +34,7 @@ struct AfterLogInView: View {
                             }
                         }}}}
                 if (currentMember != nil){
-                    Text("友達とのじゃんけんを開催");NavigationLink("主催"){
+                    Text("友達とのじゃんけんを主催");NavigationLink("主催"){
                         OrganizeView(organiser:currentMember!)
                     }
                 }

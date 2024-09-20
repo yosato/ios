@@ -26,12 +26,12 @@ struct JankenBoutView: View {
                             if(session.winners.isEmpty){
                                 VStack{
                                     Image(session.participantHandPairs[participant]!.rawValue).resizable().frame(width:40,height:40)
-                                    Text(participant.displayName)
+//                                    Text(participant.displayName)
                                 }.scaleEffect(1-scaleOffset)
                             }else{
                                 VStack{
                                     Image(session.participantHandPairs[participant]!.rawValue).resizable().frame(width:40,height:40)
-                                    Text(participant.displayName).padding(3).frame(width:.infinity,height:.infinity).background((session.winners.contains(participant) ? .green : .white)).clipShape(RoundedRectangle(cornerRadius:8))
+                                    Text(participant.displayName).padding(3).frame(maxWidth:50,maxHeight:50).background((session.winners.contains(participant) ? .green : .white)).clipShape(RoundedRectangle(cornerRadius:8))
                                 }.opacity((session.winners.contains(participant) ? 1.0 : 0.4)).scaleEffect(1+scaleOffset)
 
                             }
@@ -47,21 +47,21 @@ struct JankenBoutView: View {
 #Preview {
     JankenBoutView( session:       JankenBout([
  
-        Participant(displayName: "Tim Henmann"): JankenHand.rock,
-        Participant(displayName: "Tam"): JankenHand.scissors,
-        Participant(displayName: "Simon"): JankenHand.rock,
-        Participant(displayName: "Timothy"): JankenHand.scissors,
-        Participant(displayName: "Dan", email: "eee@fff.com"): JankenHand.scissors,
-        Participant(displayName: "Flooooorence", email: "eef@fff.com"): JankenHand.rock,
-        Participant(displayName: "Eric", email: "bbb@ccc.co.uk"): JankenHand.rock
-
 //        Participant(displayName: "Tim Henmann"): JankenHand.rock,
 //        Participant(displayName: "Tam"): JankenHand.scissors,
-//        Participant(displayName: "Simon"): JankenHand.paper,
+//        Participant(displayName: "Simon"): JankenHand.rock,
 //        Participant(displayName: "Timothy"): JankenHand.scissors,
 //        Participant(displayName: "Dan", email: "eee@fff.com"): JankenHand.scissors,
 //        Participant(displayName: "Flooooorence", email: "eef@fff.com"): JankenHand.rock,
 //        Participant(displayName: "Eric", email: "bbb@ccc.co.uk"): JankenHand.rock
+
+        Participant(displayName: "Tim Henmann"): JankenHand.rock,
+        Participant(displayName: "Tam"): JankenHand.scissors,
+        Participant(displayName: "Simon"): JankenHand.paper,
+        Participant(displayName: "Timothy"): JankenHand.scissors,
+        Participant(displayName: "Dan", email: "eee@fff.com"): JankenHand.scissors,
+        Participant(displayName: "Flooooorence", email: "eef@fff.com"): JankenHand.rock,
+        Participant(displayName: "Eric", email: "bbb@ccc.co.uk"): JankenHand.rock
 
     ]))
 }

@@ -472,8 +472,8 @@ func generate_samehand_participant_hand_pairs(_ sessionParticipants:Set<Particip
 //    return participantsHands
 //}
 
-public enum SessionState{
-    case NotStarted,InProgress,Completed
+public enum SessionState:String,Codable{
+    case NotStarted="notStarted",InProgress="inProgress",Completed="completed",Outdated="outdated"
 }
 
 

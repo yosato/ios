@@ -13,20 +13,25 @@ struct SeriesResultViewStatic: View {
     @EnvironmentObject var series:JankenSeriesInGroup
     var sortedRounds:[JankenRound] {Array(series.seriesTree.rounds).sorted{($0.parentAddress.count,$0.parentAddress)<($1.parentAddress.count,$1.parentAddress)}}
     
-    var finalInd:Int {sortedRounds.count-1}
-    @State var showRank=false
     
     var body: some View {
         
     ScrollView{
             VStack{
-                ForEach(0..<finalInd){ind in
-                    address2properText(address:sortedRounds[ind].parentAddress).padding(30)
+                
+                ForEach(sortedRounds){round in
+                    address2properText(address:round.parentAddress).padding(30)
+                    
+                    HStack{
+                        ForEach(Array(round.participants.sorted{$0.displayName<$1.displayName})){participant in
+                            Text(participant.displayName).padding(6)}
+                    }
 
-                    ForEach(sortedRounds[ind].bouts){bout in
+                    
+                    ForEach(round.bouts){bout in
                         JankenBoutView(session:bout)
                     }
-                    get_rank_text(sortedRounds[ind]).padding()
+                    get_rank_text(round).padding()
                     Divider()
 
                 }

@@ -40,6 +40,10 @@ struct SeriesResultView: View {
             //inner round view
             //            Text("\(sortedRounds.map{round in round.bouts.count})")
             address2properText(address:round.parentAddress).padding()
+            HStack{
+                ForEach(Array(round.participants.sorted{$0.displayName<$1.displayName})){participant in
+                    Text(participant.displayName).padding(6)}
+            }
             
             ScrollViewReader{scrollView in
                 ScrollView{
@@ -65,7 +69,9 @@ struct SeriesResultView: View {
                     if(currentNumberMain ==  lastNumber){ DispatchQueue.main.asyncAfter(deadline:DispatchTime.now()+delay){showFinalResult=true}
                     }else{DispatchQueue.main.asyncAfter(deadline:DispatchTime.now()+delay){currentNumberInner=0;currentNumberMain+=1}}
                 }
-                if(showRank){get_rank_text(round).onAppear{DispatchQueue.main.asyncAfter(deadline:DispatchTime.now()+DispatchTimeInterval.seconds(betweenInterval+showRankingDuration+1)){showRank=false}}}
+                if(showRank){
+                    get_rank_text(round).font(.headline).padding(50).onAppear{DispatchQueue.main.asyncAfter(deadline:DispatchTime.now()+DispatchTimeInterval.seconds(betweenInterval+showRankingDuration+1)){showRank=false}}
+                }
             }
             
         }

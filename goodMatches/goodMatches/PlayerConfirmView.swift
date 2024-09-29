@@ -14,10 +14,13 @@ struct PlayerConfirmView: View {
     
    // @Binding var registeredPlayers:[Player]
     @State var courtCount:Int=2
+    var maxCourtCount=10
+//    var defaultCourtCount:Int {}
     @State private var inputInvalid=false
     @State private var calculationDone=false
     @State private var calculating=false
     @State private var liveMode=false
+    //var courtCount:Int {goodMatchSets.courtCount}
     @State var debug:Bool
     var body: some View {
         NavigationStack{
@@ -35,7 +38,7 @@ struct PlayerConfirmView: View {
                 Text("\(myPlayers.players.count) players selected")
                 Spacer()
                 HStack{
-                    Stepper("How many courts?\t\t\t \(courtCount)", value:$courtCount, in:1...10)
+                    Stepper("How many courts?\t\t\t \(courtCount)", value:$courtCount, in:1...maxCourtCount)
                 }.padding()
                 
 

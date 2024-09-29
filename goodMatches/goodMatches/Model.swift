@@ -38,6 +38,8 @@ class Player: Codable, Equatable, Hashable, Identifiable{
     var nameAbbr:String {name.split(separator:" ")[0].lowercased()+(nameLen>1 ? name.split(separator:" ")[1].capitalized : "")}
     var clubAbbr:String {club.split(separator: " ").map{word in word.prefix(1)}.joined(separator:"")}
     var id:String {nameAbbr+"_"+clubAbbr}
+    var preferencesIntraMS:[(Player,MatchSetOnCourt)->Bool]=[]
+    var preferencesInterMS:[(Player,MatchSetOnCourt,MatchSetOnCourt)->Bool]=[]
 
     init(name:String,score:Double,gender:String,club:String){
         self.name=name; self.score=score; self.gender=gender; self.club=club
@@ -52,9 +54,10 @@ struct PlayerSet:Hashable,Equatable,Identifiable {
     static func == (lhs: PlayerSet, rhs: PlayerSet) -> Bool {
         lhs.id==rhs.id
     }
-
     let players:[Player]
     let id:String
+    
+    
     init(_ players:[Player]){
         self.players=players.sorted{$0.name<$1.name}
         self.id=self.players.map{player in player.id}.joined(separator: "_")
@@ -412,18 +415,18 @@ func singlesPlayerShare_rate(_ aMatchSet:MatchSetOnCourt,_ anotherMatchSet:Match
 
 }
 
-func shared_p(_ aMatchSet:MatchSetOnCourt, _ anotherMatchSet:MatchSetOnCourt, shareFnc:(MatchSetOnCourt,MatchSetOnCourt)->Double?)->Bool{
+func shared_p(_ aMatchSet:MatchSetOnCourt, _ anotherMatchSet:MatchSetOnCourt, shareRateFnc:(MatchSetOnCourt,MatchSetOnCourt)->Double?)->Bool{
     assert(aMatchSet.sizedCourtCounts==anotherMatchSet.sizedCourtCounts)
-    return shareFnc(aMatchSet, anotherMatchSet) != 0
+    return shareRateFnc(aMatchSet, anotherMatchSet) != 0
 }
 
-func singlesPlayerShared_p(_ aMatchSet:MatchSetOnCourt, _ anotherMatchSet:MatchSetOnCourt)->Bool{
-    assert(aMatchSet.sizedCourtCounts.keys.contains(2))
-    return shared_p(aMatchSet,anotherMatchSet,shareFnc:singlesPlayerShare_rate)
-}
+//func singlesPlayerShared_p(_ aMatchSet:MatchSetOnCourt, _ anotherMatchSet:MatchSetOnCourt)->Bool{
+//    assert(aMatchSet.sizedCourtCounts.keys.contains(2))
+//    return shared_p(aMatchSet,anotherMatchSet,shareRateFnc:singlesPlayerShare_rate)
+//}
 func singlesPlayerNotShared_p(_ aMatchSet:MatchSetOnCourt, _ anotherMatchSet:MatchSetOnCourt)->Bool{
     assert(aMatchSet.sizedCourtCounts.keys.contains(2))
-    return !shared_p(aMatchSet,anotherMatchSet,shareFnc:singlesPlayerShare_rate)
+    return !shared_p(aMatchSet,anotherMatchSet,shareRateFnc:singlesPlayerShare_rate)
 }
 
 func doublesTeamShare_rate(_ aMatchSet:MatchSetOnCourt, _ anotherMatchSet:MatchSetOnCourt)->Double?{
@@ -441,20 +444,25 @@ func doublesTeamShare_rate(_ aMatchSet:MatchSetOnCourt, _ anotherMatchSet:MatchS
 
 func doublesTeamShared_p(_ aMatchSet:MatchSetOnCourt, _ anotherMatchSet:MatchSetOnCourt)->Bool{
     assert (aMatchSet.sizedCourtCounts.keys.contains(4))
-    return shared_p(aMatchSet, anotherMatchSet, shareFnc:doublesTeamShare_rate)
+    return shared_p(aMatchSet, anotherMatchSet, shareRateFnc:doublesTeamShare_rate)
     
 }
 func doublesTeamNotShared_p(_ aMatchSet:MatchSetOnCourt, _ anotherMatchSet:MatchSetOnCourt)->Bool{
     assert (aMatchSet.sizedCourtCounts.keys.contains(4))
-    return !shared_p(aMatchSet, anotherMatchSet, shareFnc:doublesTeamShare_rate)
+    return !shared_p(aMatchSet, anotherMatchSet, shareRateFnc:doublesTeamShare_rate)
     
 }
 
-func matchset_duplicate_p(_ matchSets:[MatchSetOnCourt])->Bool{
+func matchset_duplicate_p(_ matchSets:[MatchSetOnCourt], doProportion:Double=1.0)->Bool{
     let matchCount=matchSets.count
     for (idx,currentMS) in matchSets.enumerated(){
+        if(idx != 0 && idx%200==0){
+            let doneProp=Double(idx)/Double(matchCount)
+            print("\(idx) MSs out of \(matchCount) (\(doneProp)) checked")
+            if(doProportion < 1.0 && doneProp>doProportion){return false}}
         for anotherMS in matchSets[0..<idx]+matchSets[idx+1..<matchCount]{
             if currentMS.match_identical(anotherMS){
+                print("duplicate at \(idx)")
                 return true
             }
         }
@@ -483,18 +491,27 @@ func assign_courtTeamsize(courtCount:Int,playerCount:Int)-> [Int:Int]{
 
 
 class GoodMatchSetsOnCourt:ObservableObject{
+    
     @Published var orderedMatchSets:[MatchSetOnCourt]=[]
     @Published var courtCount:Int=1
-    let constraintTipWindow=(6,3)
     var restPlayerKeyedOrderedMatchSets:[String:[MatchSetOnCourt]]=[:]
-    
-    // these properties only available after populating orderedmatchsets
-    var playingRestingPlayerCounts:(Int,Int)? {self.orderedMatchSets.isEmpty ? nil : self.orderedMatchSets[0].playingRestingPlayerCounts}
-    var allPlayers:[Player]? { self.orderedMatchSets.isEmpty ? nil : self.orderedMatchSets[0].allPlayers  }
-    
-    var sizedCourtCount:[Int:Int]? {self.orderedMatchSets.isEmpty ? nil : self.orderedMatchSets[0].sizedCourtCounts}
+    let lookForwardProportion=0.5
+    let pruneQuotient=30
+
+    // these properties become available with the main function, get_best_matches
+    var matchSetMaxCountToProduce:Int? = nil
+    var interMatchSetConstraintFncs=[(MatchSetOnCourt,MatchSetOnCourt)->Bool]()
+//    var constraintTipWindow:(Int,Int)? = nil
+    var lookBackDepth:Int? = nil
+    var lookForwardExtent:Int? = nil
+    var matchSetCountPerRestingPlayer:Int?=nil
+    var playingRestingPlayerCounts:(Int,Int)? = nil
+    var allPlayers:[Player]? = nil
+    var sizedCourtCount:[Int:Int]? = nil
+    var frequentResterIDs:Set<String> = Set(["noriko_MWL"])
     var doublesSinglesPs:(Bool,Bool)? {self.sizedCourtCount==nil ? nil : (self.sizedCourtCount!.keys.contains(4),self.sizedCourtCount!.keys.contains(2))}
-    
+    var restingExists:Bool? {playingRestingPlayerCounts == nil ? nil : playingRestingPlayerCounts!.1 != 0 }
+
     
     func all_share_players()->Bool{
         return true
@@ -503,28 +520,46 @@ class GoodMatchSetsOnCourt:ObservableObject{
 
     // THIS IS THE MAIN FUNC
     func get_best_matchsets(_ playersOnCourt:PlayersOnCourt, _ courtCount:Int){
-        let teamsizedCourtCount=assign_courtTeamsize(courtCount: courtCount, playerCount: playersOnCourt.players.count)
-        // get possible balanced pairs, doubles / singles
+        //setting basic vars
+        self.sizedCourtCount=assign_courtTeamsize(courtCount: courtCount, playerCount: playersOnCourt.players.count)
+        let playingPlayerCount:Int=self.sizedCourtCount!.map{(size,count) in size*count}.reduce(0,+)
+        self.allPlayers=playersOnCourt.players
+        self.playingRestingPlayerCounts=(playingPlayerCount,self.allPlayers!.count-playingPlayerCount)
+        if(self.sizedCourtCount!.keys.contains(2)){self.interMatchSetConstraintFncs.append(singlesPlayerNotShared_p)}
+        if(self.sizedCourtCount!.keys.contains(4)){self.interMatchSetConstraintFncs.append(doublesTeamNotShared_p)}
+        
+        let startTime=Date()
+        print(Date())
         print("initial matchsets...")
-        let sizeTeamKeyedMatches=playersOnCourt.get_balanced_matches(Array(teamsizedCourtCount.keys))
+        let sizeTeamKeyedMatches=playersOnCourt.get_balanced_matches(Array(self.sizedCourtCount!.keys))
         print("...prepared")
 
         // get all matchsets, resting-player 'team' classified
-        print("getting possible combinations...")
+        print("getting possible combinations per rest players...")
 
-        let goodMatchSets=get_good_matchsets(teamsizedCourtCount, sizeTeamKeyedMatches, playersOnCourt)
+        var RPKeyedMSs=self.get_good_matchsets(self.sizedCourtCount!, sizeTeamKeyedMatches, playersOnCourt)
         //assert(!matchset_duplicate_p(goodMatchSets))
-        print("... worked out")
-
-        // filtering
-//        let goodMatchSets=filter_matchsets(courtTeamsizeAssignments, combosOfTeamPairsOfCourtCount, playersOnCourt)
-        
+        print("... combinations done")
         // ordering
-        print("ordering...")
-        self.order_matchsets(goodMatchSets)
-       // assert(!matchset_duplicate_p(orderedGoodMatchSets))
-        print("...done")
+        print("ordering matchsets per RP...")
+        for (RP,MSs) in RPKeyedMSs{
+            RPKeyedMSs[RP]=MSs.sorted{$0.totalScoreDiff<$1.totalScoreDiff}
+        }
+        let shortestCnt:Int=RPKeyedMSs.values.map{MS in MS.count}.min() ?? 0
+        self.restPlayerKeyedOrderedMatchSets=RPKeyedMSs.mapValues{val in Array(val[0..<shortestCnt-1])}
         
+        if(shortestCnt<100){self.lookBackDepth=3;self.matchSetMaxCountToProduce=6}else if(shortestCnt<500){self.lookBackDepth=4;self.matchSetMaxCountToProduce=10}else if(shortestCnt<1000){self.lookBackDepth=4;self.matchSetMaxCountToProduce=20}else{self.lookBackDepth=5;self.matchSetMaxCountToProduce=20}
+        self.lookForwardExtent=Int(self.lookForwardProportion*Double(shortestCnt))
+        print("PerRP MS count to be trimmed to \(shortestCnt) (top \(self.lookForwardProportion*100)%, i.e. \(self.lookForwardExtent!) will be searched against \(self.lookBackDepth!))")
+        self.matchSetCountPerRestingPlayer=shortestCnt
+        print("enforcing constraints...")
+        self.orderedMatchSets=self.get_constrained_ordered_matchsets()
+       // assert(!matchset_duplicate_p(orderedGoodMatchSets))
+        print("All done")
+        let endTime=Date()
+        let timeElapsed=endTime.timeIntervalSince(startTime)
+        print(endTime)
+        print(timeElapsed)
 //        let finalMatchSets=apply_intermatchset_constraints(orderedGoodMatchSets,firstPart:6)
         
 //        self.orderedMatchSets=finalMatchSets
@@ -532,10 +567,11 @@ class GoodMatchSetsOnCourt:ObservableObject{
         
     }
     
-    func get_good_matchsets(_ sizedCourtCounts:[Int:Int], _ sizeTeamKeyedMatches:[Int:[PlayerSet:[Match]]], _ playersOnCourt:PlayersOnCourt)->[MatchSetOnCourt]{
+    // all the heavy lifting
+    func get_good_matchsets(_ sizedCourtCounts:[Int:Int], _ sizeTeamKeyedMatches:[Int:[PlayerSet:[Match]]], _ playersOnCourt:PlayersOnCourt)->[String:[MatchSetOnCourt]]{
         // to be returned, a matchSetOnCourt is a set of player-exclusive matches happening at a time on multiple courts
         // flat list of matchSetOnCourts will be returned, with the concurrent match count length
-        var matchSetsOnCourt=[MatchSetOnCourt]()
+        var restingPlayerKeyedMatchSetsOnCourt=[String:[MatchSetOnCourt]]()
         // e.g. for 12 people with 4 courts, we'll have 2singlesx2 + 2doublesx4 = 12. Each element, i.e. a matchSetCourt, will consist of four matches, 2 singles, 2 doubles
                 
         // the trick for efficiency is to first prepare player-exclusive combinations
@@ -545,21 +581,37 @@ class GoodMatchSetsOnCourt:ObservableObject{
         for (size,count) in sizedCourtCounts{
             ints+=Array(repeating:size,count:count)
         }
+        //injecting restplayer count at the top if exists
+        //injecting restplayer count at the top iloof exists
+        if(restingExists!){ints=[self.playingRestingPlayerCounts!.1]+ints}
         
-        let playerPartitions=get_partitions_withIntegers(playersOnCourt.players,ints)
+        let playerPartitions=get_partitions_withIntegers(playersOnCourt.players,ints,pruneQuotient:self.pruneQuotient)
         //let haveRestingPlayers:Bool=(playersOnCourt.players.count==sum(ints) ? false : true)
         // a player partition is a court-count numbered set of mutually excl. player sets e.g. ((p1,p2),(p3,p4),(p5,p6,p7,p8),(p9,p10,p11,p12)) for four courts
-        for playerPartition in playerPartitions{
-            let possibleMatchSets=get_balancedMatches(playerPartition,sizeTeamKeyedMatches)
+        
+        //restingplayer-keyed MSs
+        print("creating key-based MSs...")
+        for (cntr,playerPartition) in playerPartitions.enumerated(){
+            if(cntr != 0 && cntr%2000==0){print(cntr)}
+            var matchSetsOnCourt:[MatchSetOnCourt]=[]
+            let restingPlayers=(restingExists! ? playerPartition[0] : [])
+            let restingPlayersString=restingPlayers.map{player in player.id}.joined(separator:"--")
+            let possibleMatchSets=get_balancedMatches(Array(playerPartition[(restingExists! ? 1 : 0)...]),sizeTeamKeyedMatches)
             if (!possibleMatchSets.isEmpty){
                 for possibleMatchSet in possibleMatchSets{
                     let playingPlayers:[Player]=possibleMatchSet.map{match in match.listOfPlayers}.flatMap{$0}
                     let restingPlayers:[Player]=playersOnCourt.players.filter{player in !playingPlayers.contains(player)}
                     matchSetsOnCourt.append(MatchSetOnCourt(possibleMatchSet, restingPlayers: restingPlayers))
                 }
+                if(restingPlayerKeyedMatchSetsOnCourt[restingPlayersString] != nil){
+                    restingPlayerKeyedMatchSetsOnCourt[restingPlayersString]!+=matchSetsOnCourt}else{
+                    restingPlayerKeyedMatchSetsOnCourt[restingPlayersString]=matchSetsOnCourt}
             }
         }
-        return matchSetsOnCourt
+        if(self.playingRestingPlayerCounts!.1 != 0){
+            assert(restingPlayerKeyedMatchSetsOnCourt.keys.count==self.allPlayers!.count)
+        }else{assert(restingPlayerKeyedMatchSetsOnCourt.keys.count==1)}
+        return restingPlayerKeyedMatchSetsOnCourt
         
         func get_balancedMatches(_ playerPartition:[[Player]], _ twoKeyedMatches:[Int:[PlayerSet:[Match]]])->[[Match]]{
             var matchSets=[[Match]]()
@@ -591,72 +643,125 @@ class GoodMatchSetsOnCourt:ObservableObject{
             }
         }
     }
-        
-    func order_matchsets(_ matchSets:[MatchSetOnCourt]){
-        assert(!matchSets.isEmpty)
-        
-        let orgCount=matchSets.count
-        //stuff to return
-        var orderedGoodMatchSets=[MatchSetOnCourt]()
-        
-        let ourMatchSets=( matchSets.count>20000 ? Array(matchSets[0..<20000]) : matchSets)
-        
-        let players=ourMatchSets[0].allPlayers
-
-        self.get_restplayerkeyed_matchsets(matchSets)
-        // restingplayer-based ordering
-        let tip=(orgCount>28 ? 7 : orgCount/3)
-        let window=tip/2
-        let playingRestingPlayerCounts=matchSets[0].playingRestingPlayerCounts
-
-        //this part enforces constraints
-        self.get_constrained_ordered_matchsets()
-        
-    }
-
-    func get_constrained_ordered_matchsets(headCount:Int=20,from:Int=0){
-        assert(!self.restPlayerKeyedOrderedMatchSets.isEmpty)
-        let headMS=Array(self.restPlayerKeyedOrderedMatchSets.values)[0][0]
-        let allPlayers=headMS.allPlayers
-        let playingRestingPlayerCounts=headMS.playingRestingPlayerCounts
-        //assert(players.count==(playingRestingPlayerCounts.0+playingRestingPlayerCounts.1))
-        let totalCount=playingRestingPlayerCounts.0+playingRestingPlayerCounts.1
-        let repetitionCount:Int=(playingRestingPlayerCounts.1==0 ? 1 : totalCount/playingRestingPlayerCounts.1)
-        
-        let (firstPart,histWindow)=self.constraintTipWindow
-        var orderedKeys:[String]=(playingRestingPlayerCounts.1==0 ? Array(self.restPlayerKeyedOrderedMatchSets.keys) : partition_based_ordering(allPlayers, Array(repeating:playingRestingPlayerCounts.1,count:repetitionCount)))
+    
+    
+    func get_constrained_ordered_matchsets(from:Int=0)->[MatchSetOnCourt]{
+        let totalCount=self.playingRestingPlayerCounts!.0+self.playingRestingPlayerCounts!.1
+        let repetitionCount:Int=(self.playingRestingPlayerCounts!.1==0 ? 1 : totalCount/self.playingRestingPlayerCounts!.1)
+        let (orderedParts,frequentResterParts)=partition_based_ordering(self.allPlayers!, Array(repeating:playingRestingPlayerCounts!.1,count:repetitionCount), frequentResterIDs:frequentResterIDs)
+        var orderedRPIDs:[String]=(playingRestingPlayerCounts!.1==0 ? [""] : orderedParts)
         //orderedKeys=orderedKeys.sorted{$0<$1}
-        let orderedKeyCount=orderedKeys.count
-        
-        var myDict=self.restPlayerKeyedOrderedMatchSets
-        var orderedMatchSets=[MatchSetOnCourt]()
+        //let orderedKeyCount=orderedRPs.count
+        // copy of keyed MSs, trimmed to the shortest to become equi-length, this one will be reduced
+        // we'll be incrementing this and return
+        var finalOrderedMSs=[MatchSetOnCourt]()
         var iterations=0
-        while(!myDict.values.reduce([]){$0+$1}.isEmpty){
-            if(iterations>=1){orderedKeys=orderedKeys.shuffled()}
-            for (cntr,key) in orderedKeys.enumerated(){
-                let currentCount=orderedMatchSets.count
-                var matchSets=myDict[key]!
-                let ind:Int
-                if !matchSets.isEmpty{
-                    if(currentCount<=firstPart){
-                        let historyStartInd=(currentCount>histWindow ? currentCount-histWindow : 0)
-                        ind=(get_next_good_ind(matchSets, histMatchSets:Array(orderedMatchSets[historyStartInd...])) ?? 0)
-                    }else{
-                        ind=0
+        // generally we don't need more than 20... or when we run out of values we stop
+        while(finalOrderedMSs.count<=self.matchSetMaxCountToProduce! ){
+            // the order of rests changes randomly in each iteration.
+               orderedRPIDs = orderedRPIDs.shuffled()
+            
+            //iterate over resting players to increment final list
+            //use a special var for decrementing lists, not sure if this affects the property itself
+            var RPKeyedMSs=self.restPlayerKeyedOrderedMatchSets.mapValues{MSs in Array(MSs[0..<self.lookForwardExtent!])}
+            for restingPlayer in orderedRPIDs{
+                var remainingForwardMSsPerRP=RPKeyedMSs[restingPlayer]!
+                let chosenForwardMSInd:Int
+                let foundDepth:Int?
+                let sourceConstInd:Int?
+                let fromEqui:Bool
+                let historyStartInd=(finalOrderedMSs.count>self.lookBackDepth! ? finalOrderedMSs.count-self.lookBackDepth! : 0)
+                var reversedRecentHistory=Array(finalOrderedMSs[historyStartInd...].reversed())
+                var currentHistLength=reversedRecentHistory.count
+
+                if(finalOrderedMSs.count==0){chosenForwardMSInd=0;foundDepth=nil;sourceConstInd=nil;fromEqui=true}
+                else{
+                        // try to find constraint-satisfying matchset
+                    print("\(finalOrderedMSs.count) history MS(s) to be checked up to depth \(currentHistLength)")
+                    
+                    let indsSet:[Int:[Int?]]=get_next_good_inds_over_history(remainingForwardMSsPerRP, reversedRecentHistMSs: reversedRecentHistory)
+                        
+                    assert(indsSet.count<=currentHistLength)
+                    print(indsSet.sorted(by:{$0.0>$1.0}))
+                        
+                    let (indR,indOfIndR,constIndR,fromEquiR)=pick_ind_from_indsSet(indsSet,constWeights:(self.interMatchSetConstraintFncs.count==2 ? [3.0,1.0] : Array(repeating:1.0, count:self.interMatchSetConstraintFncs.count)))
+                    
+                    if let indOrNil=indR, let indOfIndOrNil=indOfIndR, let constIndOrNil=constIndR, let fromEquiOrNil=fromEquiR{
+                            chosenForwardMSInd=indOrNil;foundDepth=indOfIndOrNil;sourceConstInd=constIndOrNil;fromEqui=fromEquiOrNil
+                        }else{chosenForwardMSInd=0; foundDepth=nil; sourceConstInd=nil; fromEqui=true}
                     }
-                    let extracted=matchSets.remove(at:ind)
-                    myDict[key]=matchSets
-                    orderedMatchSets.append(extracted)
-                    if(orderedMatchSets.count>=headCount){
-                        break
+                let beforeRemovalCount=remainingForwardMSsPerRP.count
+                let chosenForwardMS=remainingForwardMSsPerRP.remove(at:chosenForwardMSInd)
+                assert(beforeRemovalCount-1==remainingForwardMSsPerRP.count)
+                if(finalOrderedMSs.count != 0 && foundDepth != nil){print("chosen forward ind: \(chosenForwardMSInd), equi \(fromEqui)"+(!fromEqui ? " constInd \(sourceConstInd!)" : "")+" found at depth \(foundDepth!) of \(currentHistLength)")
+                    if(fromEqui){
+                        for (constCntr,fnc) in self.interMatchSetConstraintFncs.enumerated(){
+                            for (histCntr,histMS) in Array(reversedRecentHistory[0..<foundDepth!]).enumerated(){
+                                assert(fnc(chosenForwardMS,histMS))
+                                       }
+                        }
                     }
                 }
+                RPKeyedMSs[restingPlayer]=remainingForwardMSsPerRP
+                finalOrderedMSs.append(chosenForwardMS)
             }
             iterations+=1
             if (iterations>50){break}
         }
-        self.orderedMatchSets=orderedMatchSets
+        return finalOrderedMSs
+        
+        func get_first_equiind_ind(_ indsSet:[Int:[Int?]])->(Int?,Int?){
+            var foundInd:Int?=nil
+            var indOfFoundIndsSet:Int?=nil
+            for (depth,anIndSet) in indsSet.sorted(by: {$0.0>$1.0}){
+                    if(!anIndSet.contains(nil)){
+                        if(all_identical(anIndSet)){
+                            return (anIndSet[0],depth)
+                    }
+                }
+            }
+            return (foundInd,indOfFoundIndsSet)
+        }
+        
+        func pick_ind_from_indsSet(_ indsSet:[Int:[Int?]], constWeights:[Double], igoreRecentN:Int=1)->(Int?,Int?,Int?,Bool?){
+            let highestDepth=indsSet.keys.max()
+            var indsSet0=indsSet
+            if(highestDepth! >= 3){indsSet0.removeValue(forKey: 1);print(indsSet0)}
 
+            let (indR,indOfIndR)=get_first_equiind_ind(indsSet0)
+            if let indOrNil=indR, let indOfIndOrNil=indOfIndR{
+                return (indOrNil,indOfIndOrNil,0,true)
+            }
+            var greatestSoFar:Double?=nil
+            var indSoFar:Int?=nil
+            var indOfIndSoFar:Int?=nil
+            var constIndSoFar:Int?=nil
+            var fromEquiind:Bool?=nil
+            for (cntr,anIndSet) in indsSet0.sorted(by:{$0.0>$1.0}){
+                assert(constWeights.count==anIndSet.count)
+                // if all is nil
+                if(anIndSet.filter{el in el != nil}.isEmpty){continue}
+                //here you're left with a non-equi set with at least one el non-nil
+                for (constInd,ind) in anIndSet.enumerated(){
+                    let candScore=(ind==nil ? 0.0 : ind_depth_metric(weightedInd:Double(ind!)*constWeights[constInd],depth:cntr+1))
+                        if(greatestSoFar == nil || candScore>greatestSoFar!){
+                            greatestSoFar=candScore
+                            indSoFar=ind;indOfIndSoFar=cntr;constIndSoFar=constInd;fromEquiind=false
+                    }
+                }
+            }
+            return (indSoFar,indOfIndSoFar,constIndSoFar,fromEquiind)
+        }
+    }
+
+    func ind_depth_metric(weightedInd:Double,depth:Int,weights:(Double,Double)=(1.0,3.0))->Double{
+        ((1.0/weightedInd))*weights.0+(Double(depth)/10.0)*weights.1
+    }
+
+    func all_identical<T:Equatable>(_ anArray:[T])->Bool{
+        if(anArray.count<=1){return true}
+        let firstEl=anArray[0]
+        return anArray[1...].allSatisfy{firstEl==$0}
     }
     
     func get_restplayerkeyed_matchsets(_ matchSets:[MatchSetOnCourt]){
@@ -716,26 +821,7 @@ class GoodMatchSetsOnCourt:ObservableObject{
         if(hit){
             self.restPlayerKeyedOrderedMatchSets[hitKey!]?.remove(at:hitInd!)}
     }
-    // checking methods
-    func check_order_restkeyed_matchsets(){
-        for MSs in self.restPlayerKeyedOrderedMatchSets.values{
-            
-        }
-    }
-    func intermatchset_constraints_observed(tipWindow:(Int,Int))->Bool{
-        var myBool:Bool
-        var fncs=[(MatchSetOnCourt,MatchSetOnCourt)->Bool]()
-        if(self.doublesSinglesPs!.0){fncs.append(doublesTeamNotShared_p)}
-        if(self.doublesSinglesPs!.1){fncs.append(singlesPlayerNotShared_p)}
-        let tip=tipWindow.0; let window=tipWindow.1
-        for ind in (window..<tip){
-            let histMatchSets=Array(self.orderedMatchSets[ind-window..<ind])
-            myBool=satisfy_allconstraints_allmatchsets(self.orderedMatchSets[ind], histMatchSets: histMatchSets, fncs: fncs)
-            if !myBool{return false}
-        }
-        return true
-    }
-        
+
     func restPlayer_fairly_ordered()->Bool{
         let (playingPlayerCount,restPlayerCount)=self.orderedMatchSets[0].playingRestingPlayerCounts
         // if there's no resting player, it's vacuously true
@@ -769,8 +855,83 @@ class GoodMatchSetsOnCourt:ObservableObject{
         
     }
 
+    func get_next_good_inds_over_history(_ forwardMSs:[MatchSetOnCourt], reversedRecentHistMSs:[MatchSetOnCourt],  from:Int=0)->[Int:[Int?]]{
+        assert(!reversedRecentHistMSs.isEmpty)
+        var indsSet:[Int:[Int?]]=[:]
+        let histMSCount=reversedRecentHistMSs.count
+        let endCount=(histMSCount < self.lookBackDepth! ? histMSCount : self.lookBackDepth!)
+            //let startInd=histMSCount<=2 ? 0 : minLen
+        for histRevInd in (0..<endCount).reversed(){
+            let histDepth=histRevInd+1
+            print("checking hist depth \(histDepth)")
+            let histMSsPerDepth=Array(reversedRecentHistMSs[..<histDepth])
+            assert(histMSsPerDepth.count==histDepth)
+            let indsPerHistoryDepth=get_next_good_inds(forwardMSs, reversedRecentHistMSs:histMSsPerDepth)
+            indsSet[histDepth]=indsPerHistoryDepth
+            // if the same ind satisfies all the consts return what we cumulated
+            if(indsPerHistoryDepth.filter{ind in ind == nil}.isEmpty && all_identical(indsPerHistoryDepth)){
+                for (histCntr,histMS) in histMSsPerDepth.enumerated(){
+                    for (constCntr,const) in self.interMatchSetConstraintFncs.enumerated(){
+                        assert(const(histMS,forwardMSs[indsPerHistoryDepth[0]!]))
+                    }
+                }
+                return indsSet}
+        }
+        return indsSet
+    }
+
+    //returns an equi-value inds if there is a MS satisfying all consts, if not, first position satisfying each
+    func get_next_good_inds(_ forwardMSs:[MatchSetOnCourt], reversedRecentHistMSs:[MatchSetOnCourt], from:Int=0)->[Int?]{
+        let fncCount:Int=self.interMatchSetConstraintFncs.count
+        //this is the initial attempt, return the first indices as it automatically satisfies consts
+        if(reversedRecentHistMSs.isEmpty){return Array(repeating: 0, count: fncCount)}
+        
+        // will record successful inds for all consts, initialised with nil's
+        var indsSoFar:[Int?]=Array(repeating:nil, count:fncCount)
+
+        //iterate over forward MSs, checking which constraint each satisfies against all the history MSs
+        for (forwardMSCntr, forwardMS) in forwardMSs[from...].enumerated(){
+            //print("Forward ind \(forwardMSCntr)")
+            for (constCntr,const) in self.interMatchSetConstraintFncs.enumerated(){
+                if(binaryConst_satisfied_with_anEl_against_allElsInList(fnc: const, with: forwardMS, againstList: reversedRecentHistMSs)){
+                    //print("success on const \(constCntr)")
+                    indsSoFar[constCntr]=forwardMSCntr
+                }//else{print("failed on const \(constCntr)")}
+            }
+            //returning when equi-ind, otherwise do more iteration
+            if(indsSoFar.filter{ind in ind == nil}.isEmpty && all_identical(indsSoFar)){
+                for (histCntr,histMS) in reversedRecentHistMSs.enumerated(){
+                    for (constCntr,const) in self.interMatchSetConstraintFncs.enumerated(){
+                        assert(const(histMS,forwardMSs[indsSoFar[0]!]))
+                    }
+                }
+                return indsSoFar}
+        }
+        return indsSoFar
+    }
+
     
-    
+//    func get_next_good_ind_strong(_ matchSets:[MatchSetOnCourt], reversedRecentHistMSs:[MatchSetOnCourt], from:Int=0)->Int?{
+//
+//        var fncs=[(MatchSetOnCourt,MatchSetOnCourt)->Bool]()
+//        let lastInd = matchSets.count-1
+//        var searchExtent:Int {Int(Double(lastInd)*self.constraintApplicationProportion)}
+////        var satisfiedInd:Int?=nil
+//
+//        var searchUpTo:Int {(from+searchExtent <= lastInd ? from+searchExtent : lastInd)}
+//        
+//        if matchSets[0].sizedCourtCounts.keys.contains(2){fncs.append(singlesPlayerNotShared_p)}
+//        if matchSets[0].sizedCourtCounts.keys.contains(4){fncs.append(doublesTeamNotShared_p)}
+//        for (cntr, matchSet) in matchSets[from..<searchUpTo].enumerated(){
+//            if(satisfy_allconstraints_allmatchsets(matchSet,histMatchSets:reversedRecentHistMSs,fncs:fncs)){
+//               // print("constraints satisfied at \(from+cntr)")
+//                return from+cntr
+//            }
+//        }
+//        return nil
+//        }
+// 
+
     func find_shareRates_atIntervals0(_ matchSets:[MatchSetOnCourt])->[(Int,(Double,Double))]{
         var prevSet=matchSets[0]
         var indsShares=[(Int,(Double,Double))]()
@@ -788,6 +949,13 @@ class GoodMatchSetsOnCourt:ObservableObject{
         }
         return indsShares
     }
+}
+
+func binaryConst_satisfied_with_anEl_against_allElsInList<U:Equatable>(fnc:(U,U)->Bool,with:U,againstList:[U])->Bool{
+    for el in againstList{
+        if(!fnc(with,el)){return false}
+    }
+    return true
 }
 
 func find_shareRates_atIntervals(_ matchSets:[MatchSetOnCourt], shareFncs:[ (MatchSetOnCourt,MatchSetOnCourt)->Double? ]  ) ->[[Double]]{
@@ -846,82 +1014,76 @@ func apply_intermatchset_constraints_loop(_ matchSets:[MatchSetOnCourt])->[Match
     return orderedGoodMatchSets
 }
 
-//func get_constrained_ordered_matchsets(_ aDict:[String:[MatchSetOnCourt]], _ totalRestingPlayerCounts:(Int,Int), _ players:[Player], constraintTipWindow:(Int,Int), headCount:Int=20)->[MatchSetOnCourt]{
-//    let repetitionCount:Int=(totalRestingPlayerCounts.1==0 ? 1 : totalRestingPlayerCounts.0/totalRestingPlayerCounts.1)
-//    let playingCount=totalRestingPlayerCounts.0
-//    let (firstPart,histWindow)=constraintTipWindow
-//    var orderedKeys=(totalRestingPlayerCounts.0==0 ? Array(aDict.keys) : partition_based_ordering(players,Array(repeating:totalRestingPlayerCounts.1,count:repetitionCount)))
-//    let orderedKeyCount=orderedKeys.count
-//    
-//    var myDict=aDict
-//    var orderedMatchSets=[MatchSetOnCourt]()
-//    var iterations=0
-//    while(!myDict.values.reduce([]){$0+$1}.isEmpty){
-//        if(iterations>=1){orderedKeys=orderedKeys.shuffled()}
-//        for (cntr,key) in orderedKeys.enumerated(){
-//            let currentCount=orderedMatchSets.count
-//            var matchSets=myDict[key]!
-//            let ind:Int
-//            if !matchSets.isEmpty{
-//                if(currentCount<=firstPart){
-//                    let historyStartInd=(currentCount>histWindow ? currentCount-histWindow : 0)
-//                    ind=(get_next_good_ind(matchSets, histMatchSets:Array(orderedMatchSets[historyStartInd...])) ?? 0)
-//                }else{
-//                    ind=0
-//                }
-//                let extracted=matchSets.remove(at:ind)
-//                myDict[key]=matchSets
-//                orderedMatchSets.append(extracted)
-//                if(orderedMatchSets.count>=headCount){
-//                    break
-//                }
-//            }
-//        }
-//        iterations+=1
-//        if (iterations>50){break}
-//    }
-//        return orderedMatchSets
-//    }
         
-func partition_based_ordering(_ players:[Player], _ repeatedRestCounts:[Int])->[String]{
+func partition_based_ordering(_ players:[Player], _ repeatedRestCounts:[Int], frequentResterIDs:Set<String>)->([String],[String]){
     assert(players.count>=sum(repeatedRestCounts))
         print("resting players being ordered...")
         let partitions=get_partitions_withIntegers_generative(players, repeatedRestCounts)
         var orderedPlayerKeys:[String]=[]
-        
+    var frequentResterKeys:[String]=[]
     for partition in partitions{//.shuffled(){
             for part in partition{
-                if part.count==repeatedRestCounts[0]{
+                if(!Set(part.map{player in player.id}).intersection(frequentResterIDs).isEmpty){frequentResterKeys.append(PlayerSet(part).id)}
+                else if part.count==repeatedRestCounts[0]{
                     orderedPlayerKeys.append(PlayerSet(part).id)
                 }
             }
         }
-        return orderedPlayerKeys
-        
+        return (orderedPlayerKeys,frequentResterKeys)
+     
     }
         
-func get_next_good_ind(_ matchSets:[MatchSetOnCourt], histMatchSets:[MatchSetOnCourt], from:Int=0)->Int?{
-    var fncs=[(MatchSetOnCourt,MatchSetOnCourt)->Bool]()
-    if matchSets[0].sizedCourtCounts.keys.contains(2){fncs.append(singlesPlayerNotShared_p)}
-    if matchSets[0].sizedCourtCounts.keys.contains(4){fncs.append(doublesTeamNotShared_p)}
-    for (cntr, matchSet) in matchSets[from...].enumerated(){
-        if satisfy_allconstraints_allmatchsets(matchSet,histMatchSets:histMatchSets,fncs:fncs){
-            return from+cntr
+func satisfied_constraints_allmatchsets(_ matchSet:MatchSetOnCourt, histMatchSets:[MatchSetOnCourt], fncs:[(MatchSetOnCourt,MatchSetOnCourt)->Bool])->[[Bool]]{
+    var satisBoolSets=[[Bool]]()
+    for histMatchSet in histMatchSets{
+        var bools=[Bool]()
+        for fnc in fncs{
+            bools.append(fnc(matchSet,histMatchSet))
         }
+        satisBoolSets.append(bools)
     }
-    return nil
+    return satisBoolSets
 }
 
-func satisfy_allconstraints_allmatchsets(_ matchSet:MatchSetOnCourt, histMatchSets:[MatchSetOnCourt], fncs:[(MatchSetOnCourt,MatchSetOnCourt)->Bool])->Bool{
-    for histMatchSet in histMatchSets{
-        for fnc in fncs{
-            if !fnc(matchSet,histMatchSet){
-                return false
-            }
-        }
-    }
-    return true
-}
+//func singleMS_satisfies_which_interMSconstraints_againstOtherMSs(_ matchSet:MatchSetOnCourt, againstList:[MatchSetOnCourt], fncs:[(MatchSetOnCourt,MatchSetOnCourt)->Bool])->[Bool]{
+//    var constBools:[Bool]=[]
+//    for fnc in fncs{
+//        constBools.append(binaryConst_satisfied_with_anEl_against_setOfEls(fnc: fnc, with: matchSet, againstList:againstList ))
+//    }
+//    return constBools
+//}
+
+//enum BoolMixture{
+//    case Mixed
+//    case AllTrue
+//    case AllFalse
+//}
+
+
+//func singleMS_satisfies_multipleInterMSconstraints_againstOtherMSs(_ matchSet:MatchSetOnCourt, against:[MatchSetOnCourt], fncs:[(MatchSetOnCourt,MatchSetOnCourt)->Bool)]->[Bool]{
+//    var constBools=[Bool]()
+//    for histMatchSet in against{
+//        let histBools=fncs.map{fnc in fnc(matchSet,histMatchSet)}
+//        let mixtureType=get_bool_mixture(histBools)
+//        if(mixtureType==BoolMixture.AllTrue){return constBools}
+//        if(mixtureType==BoolMixture.mixed){
+//            fnc(matchSet,histMatchSet){
+//                 false
+//            }
+//        }
+//    return true
+//}
+
+//func satisfy_allconstraints_allmatchsets(_ matchSet:MatchSetOnCourt, histMatchSets:[MatchSetOnCourt], fncs:[(MatchSetOnCourt,MatchSetOnCourt)->Bool])->Bool{
+//    for histMatchSet in histMatchSets{
+//        for fnc in fncs{
+//            if !fnc(matchSet,histMatchSet){
+//                return false
+//            }
+//        }
+//    }
+//    return true
+//}
 
 func get_partitions_withIntegers_generative<T:Hashable>(_ myList:[T], _ ints:[Int], stopCount:Int=10)-> [[[T]]]{
     assert(myList.count>=sum(ints))
@@ -954,70 +1116,70 @@ func generate_partition_randomly<T:Hashable>(_ myList:[T], _ ints:[Int])->[[T]]{
 }
 
 
-func get_partitions_withIntegers<T:Hashable>(_ myList:[T],_ ints:[Int])-> [[[T]]]{
-    var partitions=[[[T]]]()
-    //    assert(sum(ints)==aList.count)
+func get_partitions_withIntegers<T:Hashable>(_ orgList:[T],_ ints:[Int],pruneQuotient:Int)-> [[[T]]]{
+    var partitions=[[[T]]]()//to be returned
+    assert(sum(ints)==orgList.count)
     let ints=ints.sorted()
     let intLen=ints.count
     var prevInt:Int=0
     var prevCombs=[[T]]()
     var sameAsLast=false
-    var lastItem=false
-    let remainderExists=(myList.count != sum(ints) ? true : false)
-    
+    var isLastItem=false
+    let remainderExists=(orgList.count != sum(ints) ? true : false)
+    let lastInd=ints.count-1
     //    let myList=aList
     //    let needToFilter:Bool=duplicate_exists_inList(ints)
-    for (cntr,myInt) in ints.enumerated(){
-        print("partition \(cntr+1) out of \(intLen) being done")
-        sameAsLast=(prevInt==myInt)
-        lastItem=(cntr==ints.count-1)
-        let combs=(sameAsLast ? prevCombs : combos(elements:myList,k:myInt))
-        //        if (cntr+1<intLen && ints[cntr+1]==myInt){
-        //            combs=combs.filter{el in el[0]==1}
-        //        }
-        prevInt=myInt
-        prevCombs=combs
-        if cntr==0{
-            partitions+=combs.map{comb in [comb]}
-            continue
-        }
-        partitions=extend_product(partitions,combs,myList,myInt,sameAsLast:sameAsLast,lastItem:lastItem,remainderExists:remainderExists)
-        //        if needToFilter{
-        //            parts=filter_order_variant_partitions(parts)
-        //        }
+    for (cntr,currentInt) in ints.enumerated(){
+        print("partition index \(cntr) in \(ints) to be done...")
+        sameAsLast=(prevInt==currentInt)
+        isLastItem=(cntr==lastInd)
+        let prevPartCnt=partitions.count
+        let doPrune=(cntr != 0 && !isLastItem && partitions.count>50)
+        if(doPrune){print("pruning at the rate of \(pruneQuotient-1) / \(pruneQuotient)")}
+
+        partitions=extend_partitions(partitions, orgList, currentInt, sameAsLast:sameAsLast, isLastItem:isLastItem, pruneQuotient: pruneQuotient, doPrune:doPrune)
+        print("partitions now number \(partitions.count) after \(cntr) extensions")
+        
+        if(!isLastItem){assert(partitions.count>prevPartCnt)}else{assert(partitions.count==prevPartCnt)}
     }
     
     return partitions
     
     
-    func extend_product<U:Hashable>(_ cumProducts:[[[U]]],_ combs:[[U]],_ base:[U],_ anInt:Int, sameAsLast:Bool=false, lastItem:Bool=false, remainderExists:Bool=false)-> [[[U]]]{
+    func extend_partitions<U:Hashable>(_ partitions:[[[U]]],_ baseElements:[U],_ anInt:Int, sameAsLast:Bool=false, isLastItem:Bool=false, pruneQuotient:Int, doPrune:Bool)-> [[[U]]]{
+        if(partitions.isEmpty){
+            let combs=combos(elements:baseElements,k:anInt)
+            return combs.map{comb in [comb]}
+        }
+
+        let partitionCount=partitions.count
         var newTupCands=[[[U]]]()
-        let count=cumProducts.count
-        let many=count>5000
-        let lastSkip = (!remainderExists && lastItem && !sameAsLast)
-        for (cntr,orgArrays) in cumProducts.enumerated(){
-            if (count>1000 && cntr != 0 && cntr%1000==0){print("\(cntr) out of \(count)")}
-            if (!lastSkip && many && cntr%4 != 0){
-                if cntr==0{print("will do some random pruning")}
-                continue
-            }
-            let genUnion=orgArrays.reduce(Set()){Set($0).union(Set($1))}
-            let complement=base.filter{el in !genUnion.contains(el)}
+        let lastSkip =  (isLastItem && !sameAsLast)
+        let comboCount:Int? = (doPrune ? combo_count(n: baseElements.count, k: anInt) : nil)
+        
+        for (cntr,orgPart) in partitions.enumerated(){
+            if (cntr != 0 && cntr%100==0){print("\(cntr) done")}
+            // this is els already in the partition
+            let doneElements=orgPart.reduce(Set()){Set($0).union(Set($1))}
+            // this will be used for extension
+            let remainingElements=baseElements.filter{el in !doneElements.contains(el)}
             if(lastSkip){
-                let cand:[[U]]=orgArrays+[complement]
+                let cand:[[U]]=orgPart+[remainingElements]
                 newTupCands.append(cand)
             }else{
-                for comb in combos(elements:complement,k:anInt){
-                    let cand:[[U]]=orgArrays+[comb]
-                    if !newTupCands.contains(cand){
+                for (comboCntr,comb) in combos(elements:remainingElements,k:anInt).enumerated(){
+                    if(doPrune && comboCntr%pruneQuotient != 0){
+                        continue}
+//                    newTupCands.append(orgPart+[comb])
+                    let cand:[[U]]=orgPart+[comb]
+                    //if newTupCands.contains(cand){print("aaa")}else{
                         if (!sameAsLast){
                             newTupCands.append(cand)
                         }else{
                             if (newTupCands.filter{aPart in order_variants_partition(aPart,cand)}.isEmpty){
-                                newTupCands.append(cand)}//else{print("duplicate found")}
+                                newTupCands.append(cand)}else{print("duplicate found")}
                         }
-                        //else{print("skipped due to dup")}
-                    }
+                    
                 }
             }
         }

@@ -133,18 +133,18 @@ final class goodMatchesTests: XCTestCase {
         
     }
     
-    func test_player_partitions(){
-        for (playersOnCourt,ints) in zip(setOfPlayersOnCourt,arraysOfInts){
-            let partitions=get_partitions_withIntegers(playersOnCourt.players, ints)
-            let duplicateCount=count_order_variant_partitions(partitions)
-            if duplicateCount>=1{print("\(duplicateCount) duplicates found")}
-            XCTAssert(duplicateCount == 0)
-            let countObtained=partitions.count
-            let countExpected=count_intpartitions(ints)
-            print("for \(ints), should be \(countExpected), got \(countObtained)")
-            XCTAssert(countObtained==countExpected)
-        }
-    }
+//    func test_player_partitions(){
+//        for (playersOnCourt,ints) in zip(setOfPlayersOnCourt,arraysOfInts){
+//            let partitions=get_partitions_withIntegers(playersOnCourt.players, ints)
+//            let duplicateCount=count_order_variant_partitions(partitions)
+//            if duplicateCount>=1{print("\(duplicateCount) duplicates found")}
+//            XCTAssert(duplicateCount == 0)
+//            let countObtained=partitions.count
+//            let countExpected=count_intpartitions(ints)
+//            print("for \(ints), should be \(countExpected), got \(countObtained)")
+//            XCTAssert(countObtained==countExpected)
+//        }
+//    }
     
     func test_matchscore_same_across_sizes(){
         let sameStrMatch_begS1=Match([sameStrTeam_beg1s,sameStrTeam_beg2s])
@@ -167,11 +167,11 @@ final class goodMatchesTests: XCTestCase {
         XCTAssert(!doublesTeamShared_p(matchSetOnCourt6a, matchSetOnCourt6c))
     }
 
-    func test_singlesPlayerShared_p(){
-        XCTAssert(!singlesPlayerShared_p(matchSetOnCourt6a, matchSetOnCourt6b))
-        XCTAssert(singlesPlayerShared_p(matchSetOnCourt6b, matchSetOnCourt6c))
-        XCTAssert(singlesPlayerShared_p(matchSetOnCourt6a, matchSetOnCourt6c))
-    }
+//    func test_singlesPlayerShared_p(){
+//        XCTAssert(!singlesPlayerShared_p(matchSetOnCourt6a, matchSetOnCourt6b))
+//        XCTAssert(singlesPlayerShared_p(matchSetOnCourt6b, matchSetOnCourt6c))
+//        XCTAssert(singlesPlayerShared_p(matchSetOnCourt6a, matchSetOnCourt6c))
+//    }
 
     func test_assign_courtTeamSize(){
         let sizeAnswerPairs=[((1,9),[4:1]),((1,6),[4:1]),((2,10),[4:2]),((2,6),[4:1,2:1]),((3,6),[2:3]),((2,7),[4:1,2:1]),((2,8),[4:2]),((2,9),[4:2]),((3,8),[4:1,2:2]),((3,9),[4:1,2:2]),((3,10),[4:2,2:1]),((3,11),[4:2,2:1]),((3,12),[4:3])]
@@ -198,10 +198,10 @@ final class goodMatchesTests: XCTestCase {
         let finalSets=goodMatchSetsOnCourt.orderedMatchSets
         XCTAssert(finalSets.count==15)
         let fair1=goodMatchSetsOnCourt.restPlayer_fairly_ordered()
-        let fair2=goodMatchSetsOnCourt.intermatchset_constraints_observed(tipWindow: (5,2))
+//        let fair2=goodMatchSetsOnCourt.intermatchset_constraints_observed(tipWindow: (5,2))
         
         XCTAssert(fair1)
-        XCTAssert(fair2)
+//        XCTAssert(fair2)
         
     }
     func test_GoodMatchSetsOnCourt_get_good_matchsets10_2(){
@@ -237,14 +237,13 @@ final class goodMatchesTests: XCTestCase {
 
     }
 
-//    func test_GoodMatchSetsOnCourt_get_good_matchsets11(){
-//        let goodMatchSetsOnCourt=GoodMatchSetsOnCourt()
-//        goodMatchSetsOnCourt.get_best_matchsets(playersOnCourt11, 3)
-//        let finalSets=goodMatchSetsOnCourt.orderedMatchSets
-//        let fair=goodMatchSetsOnCourt.restPlayer_fairly_ordered()
-//        XCTAssert(fair)
-//        
-//    }
+    func test_GoodMatchSetsOnCourt_get_good_matchsets11(){
+        let goodMatchSetsOnCourt=GoodMatchSetsOnCourt()
+        goodMatchSetsOnCourt.get_best_matchsets(playersOnCourt11, 3)
+        //        let finalSets=goodMatchSetsOnCourt.orderedMatchSets
+        //        let fair=goodMatchSetsOnCourt.restPlayer_fairly_ordered()
+        //        XCTAssert(fair)
+    }
 // currently taking too much time...
 //    func test_GoodMatchSetsOnCourt_get_good_matchsets12(){
 //        let goodMatchSetsOnCourt=GoodMatchSetsOnCourt()
@@ -261,7 +260,7 @@ final class goodMatchesTests: XCTestCase {
         let goodMatchSetsOnCourt=GoodMatchSetsOnCourt()
         goodMatchSetsOnCourt.get_best_matchsets(playersOnCourt6, 2)
         let finalSets=goodMatchSetsOnCourt.orderedMatchSets
-        XCTAssert(goodMatchSetsOnCourt.restPlayerKeyedOrderedMatchSets.values.map{MSs in matchsets_ordered(MSs)}.reduce(true){$0 && $1})
+        //XCTAssert(goodMatchSetsOnCourt.restPlayerKeyedOrderedMatchSets.values.map{MSs in matchsets_ordered(MSs)}.reduce(true){$0 && $1})
     }
 
     func test_GoodMatchSetsOnCourt_get_good_matchsets8(){

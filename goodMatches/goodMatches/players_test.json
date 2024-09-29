@@ -119,6 +119,13 @@
     "club": "MY Wimbledon London"
   },
   {
+    "id": "nishio_MWL",
+    "name": "Nishio",
+    "score": 60,
+    "gender": "female",
+    "club": "MY Wimbledon London"
+  },
+  {
     "id": "tomoko_MWL",
     "name": "Tomoko",
     "score": 47,
@@ -128,8 +135,16 @@
   {
     "id": "juri_MWL",
     "name": "Juri",
-    "score": 48,
+    "score": 43,
     "gender": "female",
+    "club": "MY Wimbledon London"
+  },
+
+  {
+    "id": "nishijima_MWL",
+    "name": "Nishijima",
+    "score": 60,
+    "gender": "male",
     "club": "MY Wimbledon London"
   }
 

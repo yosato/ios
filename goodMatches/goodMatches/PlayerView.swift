@@ -23,7 +23,8 @@ struct PlayerView: View {
     @Binding var debug:Bool
     
     
-    var likelyCourtCount:Int { myPlayers.players.count/3 }
+    var likelyCourtCount:Int { selectedPlayers.count/3 }
+    var maxCourtCount:Int {selectedPlayers.count/2}
 
     //    private var isEditing: Bool {
     //      if editMode?.wrappedValue.isEditing == true {
@@ -59,7 +60,7 @@ struct PlayerView: View {
                 .navigationBarTitleDisplayMode(.inline)
             Text("\(selectedPlayers.count) players selected")
             
-            NavigationLink(destination:PlayerConfirmView(registeredPlayers:$registeredPlayers,debug:debug).environmentObject(myPlayers).onAppear{
+            NavigationLink(destination:PlayerConfirmView(registeredPlayers:$registeredPlayers,courtCount:likelyCourtCount,maxCourtCount:maxCourtCount,debug:debug).environmentObject(myPlayers).onAppear{
                 myPlayers.delete_all_players()
                 myPlayers.add_players(Array(selectedPlayers))
             }){

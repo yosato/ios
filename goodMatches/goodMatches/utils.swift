@@ -115,8 +115,30 @@ func combos<T:Hashable>(elements: ArraySlice<T>, k: Int) -> [[T]] {
     }
     return ret
 }
+
+
 func combos<T:Hashable>(elements: Array<T>, k: Int) -> [[T]] {
     return combos(elements: ArraySlice(elements), k: k).filter{$0.isDistinct()}
+}
+
+extension Collection {
+    func pick_random_n_elements(n: Int) -> ArraySlice<Element> { shuffled().prefix(n) }
+}
+
+func random_combos<T:Hashable>(elements:Array<T>,k:Int,proportionUpTo:Double)->[[T]]{
+    var combosGenerated=[[T]]()
+    var setsDone=Set<Set<T>>()
+    let upperBound=combo_count(n:elements.count,k:k)
+    let comboCountUpTo=Int(Double(upperBound)*proportionUpTo)
+    let n_els=elements.pick_random_n_elements(n:k)
+    while(combosGenerated.count < comboCountUpTo){
+        if(!setsDone.contains(Set(n_els))){
+            for combo in combos(elements:n_els, k:k){
+                if([true,false].randomElement()!){combosGenerated.append(combo)}
+            }
+        }
+    }
+    return combosGenerated
 }
 
 func no_duplicate_p<T:Hashable>(_ anArray:Array<T>)-> Bool{

@@ -47,8 +47,8 @@ struct ContentView: View {
                     
                     if(false){showReachabilityAlert.toggle()}else{
                         //dataLoading=true
-                        //Task{registeredPlayers=try! await playerDataHandler.loadData_remote(); dataLoaded=true}
-                        registeredPlayers=playerDataHandler.loadData_local();
+                        Task{registeredPlayers=try! await playerDataHandler.loadData_remote(); dataLoaded=true}
+                        //registeredPlayers=playerDataHandler.loadData_local()
                             dataLoaded=true
 
                         //dataLoading=false

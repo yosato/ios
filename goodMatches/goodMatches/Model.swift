@@ -150,6 +150,11 @@ class Match:Identifiable, Equatable, Hashable {
     
 }
 
+enum Strength:String{
+   case Strong="strong"
+    case Weak="weak"
+    case Medium="medium"
+}
 
 //@MainActor
 class PlayersOnCourt:ObservableObject{
@@ -161,53 +166,61 @@ class PlayersOnCourt:ObservableObject{
     var mean:Double {sum(sortedScores)/Double(sortedScores.count)}
     var stddev:Double {goodMatches.stddev(nums:sortedScores.map{Double($0)},mean:mean)}
     var thresholds:(Double,Double) {(self.mean+self.stddev,self.mean-self.stddev)}
-    var classifiedTeams:[Int:[String:[Team]]] {
-        var myDict:[Int:[String:[Team]]]=[1:["s":[],"m":[],"w":[]],2:["s":[],"m":[],"w":[]]]
-        for n in 1...2{
-            for playerSet in goodMatches.combos(elements:self.sortedPlayers,k:n){
-                if (playerSet.count==2 && playerSet[0]==playerSet[1]){continue}
-                let aTeam=Team(playerSet)
-                let combinedStrengthUnsorted=self.get_relativestrength_team(aTeam)
-                let combinedStrength=String(combinedStrengthUnsorted.sorted())
-                myDict[n]![combinedStrength]!.append(aTeam)
-            }}
-        return myDict
-    }
+    //var sizedStrengthClassifiedTeams:[Int:[Strength:[Team]]]=[:]
     
-
-    
-    func get_balanced_matches(_ perCourtPlayerCounts:[Int])-> [Int:[PlayerSet:[Match]]]{
-        let orderedLevelCombos=[["s","s"],["m","m"],["w","w"],["m","s"],["m","w"],["s","w"]]
-        
-        var sizedTeamedMatches=[Int:[PlayerSet:[Match]]]()
-        for perCourtPlayerCount in perCourtPlayerCounts {
-            sizedTeamedMatches[perCourtPlayerCount]=[:]
-        }
-        for perCourtPlayerCount in perCourtPlayerCounts{
-            //            var teamedMatchesPerTeamsize=[PlayerSet:[Match]]()
-            //            var oppositionPairsToAdd=[[Team]]()
-            for levelCombo in orderedLevelCombos{
-                //              if(oppositionPairsToAdd.count>500){break}
-                let teamSet1:[Team]=classifiedTeams[perCourtPlayerCount/2]![levelCombo[0]]!
-                let teamSet2:[Team]=classifiedTeams[perCourtPlayerCount/2]![levelCombo[1]]!;                if((teamSet1.isEmpty||teamSet2.isEmpty)){continue}
-                
-                var oppositionPairsToAdd=[[Team]]()
-                if(levelCombo[0]==levelCombo[1]){
-                    oppositionPairsToAdd=combos(elements:teamSet1,k:2)
-                    oppositionPairsToAdd=oppositionPairsToAdd.filter{ teams_nooverlap_p($0) }
-                } else{
-                    oppositionPairsToAdd=product(teamSet1,teamSet2)
-                    oppositionPairsToAdd=oppositionPairsToAdd.filter{ teams_nooverlap_p($0) }
-                }
-                for teams in oppositionPairsToAdd{
-                    let playerSet=PlayerSet(teams[0].players+teams[1].players)
-                    let match=Match(teams)
-                    if let _teamedMatches = sizedTeamedMatches[perCourtPlayerCount]![playerSet]{
-                        sizedTeamedMatches[perCourtPlayerCount]![playerSet]!.append(match)}else{sizedTeamedMatches[perCourtPlayerCount]![playerSet]=[match]}
-                }
+    func get_two_equalsized_disjunct_combos<U:Hashable>(_ anArray:[U],anInt:Int)->[([U],[U])]{
+        var listOfPairs:[([U],[U])]=[]
+        for firstCombo in combos(elements:anArray,k:anInt){
+            let complement=anArray.filter{el in !firstCombo.contains(el)}
+            for secondCombo in combos(elements:complement,k:anInt){
+                listOfPairs.append((firstCombo,secondCombo))
             }
         }
-        return sizedTeamedMatches
+        return listOfPairs
+    }
+    
+    func get_balanced_matches(matchSizes:[Int]=[2,4],coeff:Double=1.0)-> [Int:[PlayerSet:[Match]]]{
+            var sizedPlayerSetKeyedMatches=[Int:[PlayerSet:[Match]]]()
+            var chosenCount=0; var notChosenCount=0
+            for matchSize in matchSizes{
+                let teamSize=matchSize/2
+                var playerSetKeyedMatches=[PlayerSet:[Match]]()
+                for (playerSet1,playerSet2) in get_two_equalsized_disjunct_combos(self.sortedPlayers,anInt:teamSize){
+                    let team1=Team(playerSet1); let team2=Team(playerSet2)
+                    if(abs(team1.meanScore-team2.meanScore)<self.stddev*coeff){
+                        let mergedPlayerSet=PlayerSet(playerSet1+playerSet2)
+                        if(!playerSetKeyedMatches.keys.contains(mergedPlayerSet)){
+                            playerSetKeyedMatches[mergedPlayerSet]=[Match([team1,team2])]}else{
+                                playerSetKeyedMatches[mergedPlayerSet]!.append(Match([team1,team2]))
+                            }
+                        chosenCount+=1
+                    }else{
+                        notChosenCount+=1
+                        }
+                }
+                sizedPlayerSetKeyedMatches[matchSize]=playerSetKeyedMatches
+            }
+            print("\(chosenCount) chosen out of \(notChosenCount+chosenCount)")
+            return sizedPlayerSetKeyedMatches
+            
+        }
+
+    func get_sized_strengthClassified_teams(matchSizes:[Int]=[2,4])->[Int:[Strength:[Team]]]{
+        var sizedStrengthClassifiedTeams:[Int:[Strength:[Team]]]=[2:[Strength.Strong:[],Strength.Medium:[],Strength.Weak:[]],4:[Strength.Strong:[],Strength.Medium:[],Strength.Weak:[]]]
+        for n in matchSizes{
+            for playerSet in goodMatches.combos(elements:self.sortedPlayers,k:n/2){
+                if (playerSet.count==2 && playerSet[0]==playerSet[1]){continue}
+                let aTeam=Team(playerSet)
+                let strength:Strength
+                if(aTeam.meanScore<self.thresholds.0){
+                    strength=Strength.Weak
+                }else if(aTeam.meanScore>self.thresholds.1){
+                    strength=Strength.Strong}
+                    else{strength=Strength.Medium}
+                sizedStrengthClassifiedTeams[n]![strength]!.append(aTeam)
+            }}
+        return sizedStrengthClassifiedTeams
+    
     }
     //    init(_ players:[Player]){
     //      self.players=players
@@ -516,6 +529,7 @@ class GoodMatchSetsOnCourt:ObservableObject{
     func all_share_players()->Bool{
         return true
     }
+    
 
 
     // THIS IS THE MAIN FUNC
@@ -531,18 +545,20 @@ class GoodMatchSetsOnCourt:ObservableObject{
         let startTime=Date()
         print(Date())
         print("initial matchsets...")
-        let sizeTeamKeyedMatches=playersOnCourt.get_balanced_matches(Array(self.sizedCourtCount!.keys))
-        print("...prepared")
+        let sizePlayerSetKeyedMatches=playersOnCourt.get_balanced_matches(matchSizes:Array(self.sizedCourtCount!.keys))
+       // let sizesCounts=sizeTeamKeyedMatches.map{(size,matches) in (size,matches.count)}
+       // print("...prepared, there are \(sizesCounts) matches to choose from out of total")
 
         // get all matchsets, resting-player 'team' classified
         print("getting possible combinations per rest players...")
 
-        var RPKeyedMSs=self.get_good_matchsets(self.sizedCourtCount!, sizeTeamKeyedMatches, playersOnCourt)
+        var RPKeyedMSs=self.get_good_matchsets(self.sizedCourtCount!, sizePlayerSetKeyedMatches, playersOnCourt)
         //assert(!matchset_duplicate_p(goodMatchSets))
         print("... combinations done")
         // ordering
         print("ordering matchsets per RP...")
         for (RP,MSs) in RPKeyedMSs{
+            print("ordering for RP \(RP) done")
             RPKeyedMSs[RP]=MSs.sorted{$0.totalScoreDiff<$1.totalScoreDiff}
         }
         let shortestCnt:Int=RPKeyedMSs.values.map{MS in MS.count}.min() ?? 0

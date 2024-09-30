@@ -27,7 +27,7 @@ final class goodMatchesTests: XCTestCase {
     var sameStrengthPlayers_beg:[Player]!; var sameStrengthPlayers_adv:[Player]!
     var playersOnCourt5:PlayersOnCourt!;  var playersOnCourt6:PlayersOnCourt!; var playersOnCourt7:PlayersOnCourt!
     var playersOnCourt8:PlayersOnCourt!;  var playersOnCourt9:PlayersOnCourt!; var playersOnCourt10:PlayersOnCourt!
-    var playersOnCourt11:PlayersOnCourt!;  var playersOnCourt12:PlayersOnCourt!;
+    var playersOnCourt11:PlayersOnCourt!;  var playersOnCourt12:PlayersOnCourt!; var playersOnCourt13:PlayersOnCourt!; var playersOnCourt15:PlayersOnCourt!
     var aMatch:Match!
     var begTeam:Team!; var begTeam0:Team!; var intTeam:Team!; var advTeam:Team!
     var begIntTeam:Team!; var intAdvTeam:Team!; var begAdvTeam:Team!
@@ -73,6 +73,8 @@ final class goodMatchesTests: XCTestCase {
         playersOnCourt10=PlayersOnCourt(); let players10=players9+[upperIntPlayers[2]]; playersOnCourt10.add_players(players10)
         playersOnCourt11=PlayersOnCourt(); let players11=players10+[advPlayers[2]]; playersOnCourt11.add_players(players11)
         playersOnCourt12=PlayersOnCourt(); let players12=players11+[lowerIntPlayers[3]]; playersOnCourt12.add_players(players12)
+        playersOnCourt13=PlayersOnCourt(); let players13=players11+[begPlayers[2]]; playersOnCourt13.add_players(players13)
+        playersOnCourt15=PlayersOnCourt(); let players15=players13+Array(upperIntPlayers[3..<5]); playersOnCourt15.add_players(players15)
         //
         setOfPlayersOnCourt=[playersOnCourt5,playersOnCourt6,playersOnCourt7,playersOnCourt7,playersOnCourt8,playersOnCourt9,playersOnCourt10]
         //
@@ -244,7 +246,23 @@ final class goodMatchesTests: XCTestCase {
         //        let fair=goodMatchSetsOnCourt.restPlayer_fairly_ordered()
         //        XCTAssert(fair)
     }
-// currently taking too much time...
+
+    func test_GoodMatchSetsOnCourt_get_good_matchsets13(){
+        let goodMatchSetsOnCourt=GoodMatchSetsOnCourt()
+        goodMatchSetsOnCourt.get_best_matchsets(playersOnCourt13, 4)
+        //        let finalSets=goodMatchSetsOnCourt.orderedMatchSets
+        //        let fair=goodMatchSetsOnCourt.restPlayer_fairly_ordered()
+        //        XCTAssert(fair)
+    }
+    func test_GoodMatchSetsOnCourt_get_good_matchsets15(){
+        let goodMatchSetsOnCourt=GoodMatchSetsOnCourt()
+        goodMatchSetsOnCourt.get_best_matchsets(playersOnCourt15, 4)
+        //        let finalSets=goodMatchSetsOnCourt.orderedMatchSets
+        //        let fair=goodMatchSetsOnCourt.restPlayer_fairly_ordered()
+        //        XCTAssert(fair)
+    }
+
+    // currently taking too much time...
 //    func test_GoodMatchSetsOnCourt_get_good_matchsets12(){
 //        let goodMatchSetsOnCourt=GoodMatchSetsOnCourt()
 //        goodMatchSetsOnCourt.get_best_matchsets(playersOnCourt12, 3)

@@ -168,39 +168,30 @@ class PlayersOnCourt:ObservableObject{
     var thresholds:(Double,Double) {(self.mean+self.stddev,self.mean-self.stddev)}
     //var sizedStrengthClassifiedTeams:[Int:[Strength:[Team]]]=[:]
     
-    func get_two_equalsized_disjunct_combos<U:Hashable>(_ anArray:[U],anInt:Int)->[([U],[U])]{
-        var listOfPairs:[([U],[U])]=[]
-        for firstCombo in combos(elements:anArray,k:anInt){
-            let complement=anArray.filter{el in !firstCombo.contains(el)}
-            for secondCombo in combos(elements:complement,k:anInt){
-                listOfPairs.append((firstCombo,secondCombo))
-            }
-        }
-        return listOfPairs
-    }
-    
-    func get_balanced_matches(matchSizes:[Int]=[2,4],coeff:Double=1.0)-> [Int:[PlayerSet:[Match]]]{
+    func get_balanced_matches(matchSizes:[Int]=[2,4],coeff:Double=1.2)-> [Int:[PlayerSet:[Match]]]{
             var sizedPlayerSetKeyedMatches=[Int:[PlayerSet:[Match]]]()
-            var chosenCount=0; var notChosenCount=0
             for matchSize in matchSizes{
-                let teamSize=matchSize/2
+                var chosenCount=0
+                var totalCount:Int=0
                 var playerSetKeyedMatches=[PlayerSet:[Match]]()
-                for (playerSet1,playerSet2) in get_two_equalsized_disjunct_combos(self.sortedPlayers,anInt:teamSize){
-                    let team1=Team(playerSet1); let team2=Team(playerSet2)
-                    if(abs(team1.meanScore-team2.meanScore)<self.stddev*coeff){
-                        let mergedPlayerSet=PlayerSet(playerSet1+playerSet2)
-                        if(!playerSetKeyedMatches.keys.contains(mergedPlayerSet)){
-                            playerSetKeyedMatches[mergedPlayerSet]=[Match([team1,team2])]}else{
-                                playerSetKeyedMatches[mergedPlayerSet]!.append(Match([team1,team2]))
-                            }
-                        chosenCount+=1
-                    }else{
-                        notChosenCount+=1
-                        }
+                for (cntr,playersPerMatch) in combos(elements:self.sortedPlayers,k:matchSize).enumerated(){
+                    let mergedPlayerSet=PlayerSet(playersPerMatch)
+                    playerSetKeyedMatches[mergedPlayerSet]=[]
+                    var matches=[Match]()
+                    let teamSize=matchSize/2
+                    let partitionsWithRemainder=get_partitions_withIntegers(playersPerMatch,Array(repeating:teamSize, count:2),doPotentiallyPrune: false)
+                    for (partCntr,(partition,_)) in partitionsWithRemainder.enumerated(){
+                        assert(partition.count==2)
+                        let team1=Team(partition[0]); let team2=Team(partition[1])
+                        if(abs(team1.meanScore-team2.meanScore)<self.stddev*(coeff/Double(teamSize))){
+                            playerSetKeyedMatches[mergedPlayerSet]!.append(Match([team1,team2]))
+                            chosenCount+=1}
+                        totalCount+=1
+                    }
                 }
+                print("\(chosenCount) chosen out of \(totalCount) for matchsize \(matchSize) ")
                 sizedPlayerSetKeyedMatches[matchSize]=playerSetKeyedMatches
             }
-            print("\(chosenCount) chosen out of \(notChosenCount+chosenCount)")
             return sizedPlayerSetKeyedMatches
             
         }
@@ -509,7 +500,7 @@ class GoodMatchSetsOnCourt:ObservableObject{
     @Published var courtCount:Int=1
     var restPlayerKeyedOrderedMatchSets:[String:[MatchSetOnCourt]]=[:]
     let lookForwardProportion=0.5
-    let pruneQuotient=30
+    let pruneQuotient=20
 
     // these properties become available with the main function, get_best_matches
     var matchSetMaxCountToProduce:Int? = nil
@@ -532,7 +523,7 @@ class GoodMatchSetsOnCourt:ObservableObject{
     
 
 
-    // THIS IS THE MAIN FUNC
+    // THIS IS THE MAIN FUNC!
     func get_best_matchsets(_ playersOnCourt:PlayersOnCourt, _ courtCount:Int){
         //setting basic vars
         self.sizedCourtCount=assign_courtTeamsize(courtCount: courtCount, playerCount: playersOnCourt.players.count)
@@ -545,14 +536,14 @@ class GoodMatchSetsOnCourt:ObservableObject{
         let startTime=Date()
         print(Date())
         print("initial matchsets...")
-        let sizePlayerSetKeyedMatches=playersOnCourt.get_balanced_matches(matchSizes:Array(self.sizedCourtCount!.keys))
+        let sizePlayerKeyedMatches=playersOnCourt.get_balanced_matches(matchSizes:Array(self.sizedCourtCount!.keys))
        // let sizesCounts=sizeTeamKeyedMatches.map{(size,matches) in (size,matches.count)}
        // print("...prepared, there are \(sizesCounts) matches to choose from out of total")
 
         // get all matchsets, resting-player 'team' classified
         print("getting possible combinations per rest players...")
 
-        var RPKeyedMSs=self.get_good_matchsets(self.sizedCourtCount!, sizePlayerSetKeyedMatches, playersOnCourt)
+        var RPKeyedMSs=self.get_good_matchsets(self.sizedCourtCount!, sizePlayerKeyedMatches, playersOnCourt)
         //assert(!matchset_duplicate_p(goodMatchSets))
         print("... combinations done")
         // ordering
@@ -584,7 +575,7 @@ class GoodMatchSetsOnCourt:ObservableObject{
     }
     
     // all the heavy lifting
-    func get_good_matchsets(_ sizedCourtCounts:[Int:Int], _ sizeTeamKeyedMatches:[Int:[PlayerSet:[Match]]], _ playersOnCourt:PlayersOnCourt)->[String:[MatchSetOnCourt]]{
+    func get_good_matchsets(_ sizedCourtCounts:[Int:Int], _ sizePlayerKeyedMatches:[Int:[PlayerSet:[Match]]], _ playersOnCourt:PlayersOnCourt)->[String:[MatchSetOnCourt]]{
         // to be returned, a matchSetOnCourt is a set of player-exclusive matches happening at a time on multiple courts
         // flat list of matchSetOnCourts will be returned, with the concurrent match count length
         var restingPlayerKeyedMatchSetsOnCourt=[String:[MatchSetOnCourt]]()
@@ -599,20 +590,26 @@ class GoodMatchSetsOnCourt:ObservableObject{
         }
         //injecting restplayer count at the top if exists
         //injecting restplayer count at the top iloof exists
-        if(restingExists!){ints=[self.playingRestingPlayerCounts!.1]+ints}
+//        if(restingExists!){ints=[self.playingRestingPlayerCounts!.1]+ints}
+        var playerSetsToExclude=Set<Player>()
+        for playerKeyedMatches in sizePlayerKeyedMatches.values{
+            for (playerSet,matches) in playerKeyedMatches{
+                if(matches.isEmpty){playerSetsToExclude=playerSetsToExclude.union(Set(playerSet.players))}
+            }
+        }
         
-        let playerPartitions=get_partitions_withIntegers(playersOnCourt.players,ints,pruneQuotient:self.pruneQuotient)
+        let playingPlayerPartitionsWithRemainder=get_partitions_withIntegers(playersOnCourt.players, ints, setsToExclude:playerSetsToExclude, pruneQuotient:self.pruneQuotient, doPotentiallyPrune:true, debug:true)
         //let haveRestingPlayers:Bool=(playersOnCourt.players.count==sum(ints) ? false : true)
         // a player partition is a court-count numbered set of mutually excl. player sets e.g. ((p1,p2),(p3,p4),(p5,p6,p7,p8),(p9,p10,p11,p12)) for four courts
         
         //restingplayer-keyed MSs
-        print("creating key-based MSs...")
-        for (cntr,playerPartition) in playerPartitions.enumerated(){
+        print("creating RP key-based MSs...")
+        for (cntr,(playingPlayerPartition,restingPlayers)) in playingPlayerPartitionsWithRemainder.enumerated(){
             if(cntr != 0 && cntr%2000==0){print(cntr)}
             var matchSetsOnCourt:[MatchSetOnCourt]=[]
-            let restingPlayers=(restingExists! ? playerPartition[0] : [])
+//            let restingPlayers=(restingExists! ? playerPartition[0] : [])
             let restingPlayersString=restingPlayers.map{player in player.id}.joined(separator:"--")
-            let possibleMatchSets=get_balancedMatches(Array(playerPartition[(restingExists! ? 1 : 0)...]),sizeTeamKeyedMatches)
+            let possibleMatchSets=get_balancedMatches(playingPlayerPartition,sizePlayerKeyedMatches)
             if (!possibleMatchSets.isEmpty){
                 for possibleMatchSet in possibleMatchSets{
                     let playingPlayers:[Player]=possibleMatchSet.map{match in match.listOfPlayers}.flatMap{$0}
@@ -626,6 +623,7 @@ class GoodMatchSetsOnCourt:ObservableObject{
         }
         if(self.playingRestingPlayerCounts!.1 != 0){
             assert(restingPlayerKeyedMatchSetsOnCourt.keys.count==self.allPlayers!.count)
+            print(restingPlayerKeyedMatchSetsOnCourt.values.map{key in key.count})
         }else{assert(restingPlayerKeyedMatchSetsOnCourt.keys.count==1)}
         return restingPlayerKeyedMatchSetsOnCourt
         
@@ -1060,47 +1058,6 @@ func satisfied_constraints_allmatchsets(_ matchSet:MatchSetOnCourt, histMatchSet
     }
     return satisBoolSets
 }
-
-//func singleMS_satisfies_which_interMSconstraints_againstOtherMSs(_ matchSet:MatchSetOnCourt, againstList:[MatchSetOnCourt], fncs:[(MatchSetOnCourt,MatchSetOnCourt)->Bool])->[Bool]{
-//    var constBools:[Bool]=[]
-//    for fnc in fncs{
-//        constBools.append(binaryConst_satisfied_with_anEl_against_setOfEls(fnc: fnc, with: matchSet, againstList:againstList ))
-//    }
-//    return constBools
-//}
-
-//enum BoolMixture{
-//    case Mixed
-//    case AllTrue
-//    case AllFalse
-//}
-
-
-//func singleMS_satisfies_multipleInterMSconstraints_againstOtherMSs(_ matchSet:MatchSetOnCourt, against:[MatchSetOnCourt], fncs:[(MatchSetOnCourt,MatchSetOnCourt)->Bool)]->[Bool]{
-//    var constBools=[Bool]()
-//    for histMatchSet in against{
-//        let histBools=fncs.map{fnc in fnc(matchSet,histMatchSet)}
-//        let mixtureType=get_bool_mixture(histBools)
-//        if(mixtureType==BoolMixture.AllTrue){return constBools}
-//        if(mixtureType==BoolMixture.mixed){
-//            fnc(matchSet,histMatchSet){
-//                 false
-//            }
-//        }
-//    return true
-//}
-
-//func satisfy_allconstraints_allmatchsets(_ matchSet:MatchSetOnCourt, histMatchSets:[MatchSetOnCourt], fncs:[(MatchSetOnCourt,MatchSetOnCourt)->Bool])->Bool{
-//    for histMatchSet in histMatchSets{
-//        for fnc in fncs{
-//            if !fnc(matchSet,histMatchSet){
-//                return false
-//            }
-//        }
-//    }
-//    return true
-//}
-
 func get_partitions_withIntegers_generative<T:Hashable>(_ myList:[T], _ ints:[Int], stopCount:Int=10)-> [[[T]]]{
     assert(myList.count>=sum(ints))
     var partitions=[[[T]]]()
@@ -1132,74 +1089,85 @@ func generate_partition_randomly<T:Hashable>(_ myList:[T], _ ints:[Int])->[[T]]{
 }
 
 
-func get_partitions_withIntegers<T:Hashable>(_ orgList:[T],_ ints:[Int],pruneQuotient:Int)-> [[[T]]]{
-    var partitions=[[[T]]]()//to be returned
-    assert(sum(ints)==orgList.count)
+func get_partitions_withIntegers<T:Hashable>(_ orgList:[T],_ ints:[Int], setsToExclude:Set<Set<T>>=Set(), pruneQuotient:Int=0, doPotentiallyPrune:Bool, debug:Bool=false)-> [([[T]],[T])]{
+    let doPrune=(!setsToExclude.isEmpty || doPotentiallyPrune)
+    var partitionsWithRemainder:[([[T]],[T])]=[([],orgList)]//to be returned
+    //assert(sum(ints)==orgList.count)
     let ints=ints.sorted()
     let intLen=ints.count
     var prevInt:Int=0
     var prevCombs=[[T]]()
-    var sameAsLast=false
-    var isLastItem=false
+    // this is for duplicate checking efficiency, we skip checking if the current int is the same as the last one
+    //var sameAsPreviousInt=false
+//    var isLastItem=false
     let remainderExists=(orgList.count != sum(ints) ? true : false)
     let lastInd=ints.count-1
     //    let myList=aList
     //    let needToFilter:Bool=duplicate_exists_inList(ints)
     for (cntr,currentInt) in ints.enumerated(){
-        print("partition index \(cntr) in \(ints) to be done...")
-        sameAsLast=(prevInt==currentInt)
-        isLastItem=(cntr==lastInd)
-        let prevPartCnt=partitions.count
-        let doPrune=(cntr != 0 && !isLastItem && partitions.count>50)
-        if(doPrune){print("pruning at the rate of \(pruneQuotient-1) / \(pruneQuotient)")}
-
-        partitions=extend_partitions(partitions, orgList, currentInt, sameAsLast:sameAsLast, isLastItem:isLastItem, pruneQuotient: pruneQuotient, doPrune:doPrune)
-        print("partitions now number \(partitions.count) after \(cntr) extensions")
-        
-        if(!isLastItem){assert(partitions.count>prevPartCnt)}else{assert(partitions.count==prevPartCnt)}
+        if(debug){print("partition index \(cntr) in \(ints) to be done...")}
+        let isLastItem=(cntr==lastInd)
+        let sameAsPreviousInt=(currentInt==prevInt)
+        let lastSkip = !remainderExists && isLastItem && !sameAsPreviousInt
+        let prevPartCnt=partitionsWithRemainder.count
+//        let doPrune=(cntr != 0 && !isLastItem && partitions.count>50)
+//        if(doPrune){print("pruning at the rate of \(pruneQuotient-1) / \(pruneQuotient)")}
+        //we skip the last int comb gen if there's no remainder for efficiency
+        if(lastSkip){if(debug){print("skipping last int extension")};partitionsWithRemainder=partitionsWithRemainder.map{(part,rem) in (part+[rem], [])} }else{
+            partitionsWithRemainder=extend_partitions(partitionsWithRemainder, currentInt, setsToExclude:setsToExclude ,sameAsPreviousInt: sameAsPreviousInt, pruneQuotient: pruneQuotient, doPotentiallyPrune:doPotentiallyPrune, debug:debug)}
+        if(debug){print("partitions now number \(partitionsWithRemainder.count) after \(cntr) extensions")}
+        let remainderVariety=partitionsWithRemainder.map{(_part,rem) in Set(rem) }.reduce(Set()){$0.union($1)}
+ //       assert(remainderVariety.count==orgList.count)
+        prevInt=currentInt
+        if(!isLastItem){assert(partitionsWithRemainder.count>prevPartCnt)}
+    }
+    if(!doPrune){
+        assert(count_intpartitions(ints)==partitionsWithRemainder.count)
     }
     
-    return partitions
+    return partitionsWithRemainder
     
     
-    func extend_partitions<U:Hashable>(_ partitions:[[[U]]],_ baseElements:[U],_ anInt:Int, sameAsLast:Bool=false, isLastItem:Bool=false, pruneQuotient:Int, doPrune:Bool)-> [[[U]]]{
-        if(partitions.isEmpty){
-            let combs=combos(elements:baseElements,k:anInt)
-            return combs.map{comb in [comb]}
+    func extend_partitions<U:Hashable>(_ partitionsWithRemainder:[([[U]],[U])],_ anInt:Int, setsToExclude:Set<Set<U>>, sameAsPreviousInt:Bool=false, pruneQuotient:Int, doPotentiallyPrune:Bool,debug:Bool=false)-> [([[U]],[U])]{
+        var combsWithRemainder=[([[U]],[U])]()
+        if(partitionsWithRemainder.count==1 && partitionsWithRemainder[0].0.isEmpty){
+            for (comb,newRemainder) in combos_withRemainder(elements:Array(partitionsWithRemainder[0].1),k:anInt){
+             //   let newRemainder=get_remainder(comb, superArray: partitionsWithRemainder[0].1)
+                combsWithRemainder.append(([comb],newRemainder))
+            }
+            return combsWithRemainder
         }
 
-        let partitionCount=partitions.count
-        var newTupCands=[[[U]]]()
-        let lastSkip =  (isLastItem && !sameAsLast)
-        let comboCount:Int? = (doPrune ? combo_count(n: baseElements.count, k: anInt) : nil)
+        let partitionCount=partitionsWithRemainder.count
+        let partCountTotal=partitionsWithRemainder[0].0.map{part in part.count}.reduce(0,+)
+//        let remainingEls=baseElements.count-partCountTotal
+        let remainderCount=partitionsWithRemainder[0].1.count
+        let complexityScale=partitionCount*remainderCount
+        let thresh=1000
+        let doPrune=doPotentiallyPrune && (complexityScale>thresh ? true : false)
         
-        for (cntr,orgPart) in partitions.enumerated(){
-            if (cntr != 0 && cntr%100==0){print("\(cntr) done")}
-            // this is els already in the partition
-            let doneElements=orgPart.reduce(Set()){Set($0).union(Set($1))}
-            // this will be used for extension
-            let remainingElements=baseElements.filter{el in !doneElements.contains(el)}
-            if(lastSkip){
-                let cand:[[U]]=orgPart+[remainingElements]
-                newTupCands.append(cand)
-            }else{
-                for (comboCntr,comb) in combos(elements:remainingElements,k:anInt).enumerated(){
-                    if(doPrune && comboCntr%pruneQuotient != 0){
-                        continue}
-//                    newTupCands.append(orgPart+[comb])
-                    let cand:[[U]]=orgPart+[comb]
-                    //if newTupCands.contains(cand){print("aaa")}else{
-                        if (!sameAsLast){
-                            newTupCands.append(cand)
+//        var newTupCands=[([[U]],[U])]()
+//        let lastSkip =  (isLastItem && !sameAsLast)
+//        let comboCount:Int? = (doPrune ? combo_count(n: baseElements.count, k: anInt) : nil)
+        if(debug){print("complexity scale \(complexityScale)"+(complexityScale<thresh ? "": ", larger than the thresh \(thresh)"))}
+        for (cntr,(orgPart,remainingElements)) in partitionsWithRemainder.enumerated(){
+            if (cntr != 0 && cntr%500==0){if(debug){print("\(cntr) done")}}
+                for (comboCntr,(comb,remainder)) in (doPrune ? randomly_generate_disjunct_combos(elements: remainingElements, k: anInt, proportionUpTo: 0.5) : combos_withRemainder(elements:Array(remainingElements),k:anInt)).enumerated(){
+                    //if(complexityScale<=thresh && doPrune && comboCntr%pruneQuotient != 0){
+                      //  continue}
+                    if(!setsToExclude.isEmpty && setsToExclude.contains(Set(comb))){continue}
+                    let candPart=orgPart+[comb]
+                    let candPartWithRem=(candPart, get_remainder(comb, superArray: remainder))
+                        if (!sameAsPreviousInt){
+                            combsWithRemainder.append(candPartWithRem)
                         }else{
-                            if (newTupCands.filter{aPart in order_variants_partition(aPart,cand)}.isEmpty){
-                                newTupCands.append(cand)}else{print("duplicate found")}
+                            if (combsWithRemainder.filter{aPart in order_variants_partition(aPart.0,candPartWithRem.0)}.isEmpty){
+                                combsWithRemainder.append(candPartWithRem)}else{if(debug){print("duplicate found")}}
                         }
-                    
                 }
-            }
+            
         }
-            return newTupCands
+            return combsWithRemainder
         }
         
     }

@@ -73,7 +73,7 @@ final class goodMatchesTests: XCTestCase {
         playersOnCourt10=PlayersOnCourt(); let players10=players9+[upperIntPlayers[2]]; playersOnCourt10.add_players(players10)
         playersOnCourt11=PlayersOnCourt(); let players11=players10+[advPlayers[2]]; playersOnCourt11.add_players(players11)
         playersOnCourt12=PlayersOnCourt(); let players12=players11+[lowerIntPlayers[3]]; playersOnCourt12.add_players(players12)
-        playersOnCourt13=PlayersOnCourt(); let players13=players11+[begPlayers[2]]; playersOnCourt13.add_players(players13)
+        playersOnCourt13=PlayersOnCourt(); let players13=players12+[begPlayers[2]]; playersOnCourt13.add_players(players13)
         playersOnCourt15=PlayersOnCourt(); let players15=players13+Array(upperIntPlayers[3..<5]); playersOnCourt15.add_players(players15)
         //
         setOfPlayersOnCourt=[playersOnCourt5,playersOnCourt6,playersOnCourt7,playersOnCourt7,playersOnCourt8,playersOnCourt9,playersOnCourt10]

@@ -97,6 +97,10 @@ func stddev(nums:[Double],mean:Double)-> Double{
     return sqrt(nums.map{pow($0-mean,2)/n}.reduce(0){$0+$1})
 }
 
+func get_remainder<U:Hashable>(_ subArray:[U],superArray:[U])->[U]{
+    superArray.filter{el in !subArray.contains(el)}
+}
+
 func combos<T:Hashable>(elements: ArraySlice<T>, k: Int) -> [[T]] {
     if k == 0 {
         return [[]]
@@ -116,7 +120,9 @@ func combos<T:Hashable>(elements: ArraySlice<T>, k: Int) -> [[T]] {
     return ret
 }
 
-
+func combos_withRemainder<T:Hashable>(elements: Array<T>, k: Int) -> [([T],[T])] {
+    return combos(elements: ArraySlice(elements), k: k).filter{$0.isDistinct()}.map{combo in (combo,get_remainder(combo,superArray:elements))}
+}
 func combos<T:Hashable>(elements: Array<T>, k: Int) -> [[T]] {
     return combos(elements: ArraySlice(elements), k: k).filter{$0.isDistinct()}
 }
@@ -125,16 +131,17 @@ extension Collection {
     func pick_random_n_elements(n: Int) -> ArraySlice<Element> { shuffled().prefix(n) }
 }
 
-func random_combos<T:Hashable>(elements:Array<T>,k:Int,proportionUpTo:Double)->[[T]]{
-    var combosGenerated=[[T]]()
+func randomly_generate_disjunct_combos<T:Hashable>(elements:Array<T>,k:Int,proportionUpTo:Double)->[([T],[T])]{
+    var combosGenerated=[([T],[T])]()
     var setsDone=Set<Set<T>>()
     let upperBound=combo_count(n:elements.count,k:k)
     let comboCountUpTo=Int(Double(upperBound)*proportionUpTo)
     let n_els=elements.pick_random_n_elements(n:k)
     while(combosGenerated.count < comboCountUpTo){
         if(!setsDone.contains(Set(n_els))){
-            for combo in combos(elements:n_els, k:k){
-                if([true,false].randomElement()!){combosGenerated.append(combo)}
+            let shuffledCombos=combos(elements:n_els, k:k).shuffled()
+            for combo in shuffledCombos[..<Int(shuffledCombos.count/2)]{
+                combosGenerated.append((combo,get_remainder(combo, superArray: elements)))
             }
         }
     }

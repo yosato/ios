@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		BC05D9D02C0DF92E001AFE8E /* TabViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC05D9CF2C0DF92E001AFE8E /* TabViews.swift */; };
+		BC0EA0322CC26F16004B78F6 /* utilsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0EA0312CC26F16004B78F6 /* utilsTest.swift */; };
 		BC4512DC2C085FA60058BE51 /* PlayerDataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4512DB2C085FA60058BE51 /* PlayerDataHandler.swift */; };
 		BC4512DE2C085FB70058BE51 /* ResultHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4512DD2C085FB70058BE51 /* ResultHistoryView.swift */; };
 		BC4512E02C085FC90058BE51 /* ResultModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4512DF2C085FC90058BE51 /* ResultModel.swift */; };
@@ -51,6 +52,7 @@
 
 /* Begin PBXFileReference section */
 		BC05D9CF2C0DF92E001AFE8E /* TabViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabViews.swift; sourceTree = "<group>"; };
+		BC0EA0312CC26F16004B78F6 /* utilsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = utilsTest.swift; sourceTree = "<group>"; };
 		BC4512DB2C085FA60058BE51 /* PlayerDataHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerDataHandler.swift; sourceTree = "<group>"; };
 		BC4512DD2C085FB70058BE51 /* ResultHistoryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultHistoryView.swift; sourceTree = "<group>"; };
 		BC4512DF2C085FC90058BE51 /* ResultModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultModel.swift; sourceTree = "<group>"; };
@@ -75,6 +77,7 @@
 		BCB39C552BC7743C00DD37C8 /* PickerComponent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerComponent.swift; sourceTree = "<group>"; };
 		BCB39CC72BCF700700DD37C8 /* InputResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputResultView.swift; sourceTree = "<group>"; };
 		BCC4A2402C7B424B000028C9 /* players_test.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = players_test.json; sourceTree = "<group>"; };
+		BCED9F732CBD7B7300667CAE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +106,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BC0EA0372CC54708004B78F6 /* oldAndTests */ = {
+			isa = PBXGroup;
+			children = (
+				BCB39CC72BCF700700DD37C8 /* InputResultView.swift */,
+				BCB39C512BC7738D00DD37C8 /* MultiPicker.swift */,
+			);
+			path = oldAndTests;
+			sourceTree = "<group>";
+		};
 		BCAA1DE42B8A2D09005221E6 = {
 			isa = PBXGroup;
 			children = (
@@ -126,6 +138,8 @@
 		BCAA1DEF2B8A2D09005221E6 /* goodMatches */ = {
 			isa = PBXGroup;
 			children = (
+				BC0EA0372CC54708004B78F6 /* oldAndTests */,
+				BCED9F732CBD7B7300667CAE /* Info.plist */,
 				BCAA1DF02B8A2D09005221E6 /* goodMatchesApp.swift */,
 				BC7CDADE2B8A303A00A3F3CF /* Model.swift */,
 				BC7CDB9F2B90D10000A3F3CF /* utils.swift */,
@@ -135,11 +149,9 @@
 				BCAA1DF22B8A2D09005221E6 /* ContentView.swift */,
 				BC4512DB2C085FA60058BE51 /* PlayerDataHandler.swift */,
 				BC7CDADC2B8A2FCA00A3F3CF /* MatchView.swift */,
-				BCB39CC72BCF700700DD37C8 /* InputResultView.swift */,
 				BC6CE0562BA4A1E000B05A24 /* PlayerRegisterView.swift */,
 				BC4512DF2C085FC90058BE51 /* ResultModel.swift */,
 				BCB39C552BC7743C00DD37C8 /* PickerComponent.swift */,
-				BCB39C512BC7738D00DD37C8 /* MultiPicker.swift */,
 				BC4512DD2C085FB70058BE51 /* ResultHistoryView.swift */,
 				BCAA1DF42B8A2D0A005221E6 /* Assets.xcassets */,
 				BC7CDAED2B8BB3EA00A3F3CF /* players.json */,
@@ -161,6 +173,7 @@
 			isa = PBXGroup;
 			children = (
 				BCAA1E012B8A2D0A005221E6 /* goodMatchesTests.swift */,
+				BC0EA0312CC26F16004B78F6 /* utilsTest.swift */,
 			);
 			path = goodMatchesTests;
 			sourceTree = "<group>";
@@ -335,6 +348,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BCAA1E022B8A2D0A005221E6 /* goodMatchesTests.swift in Sources */,
+				BC0EA0322CC26F16004B78F6 /* utilsTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -493,6 +507,7 @@
 				DEVELOPMENT_TEAM = N44DR7594Z;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = goodMatches/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -523,6 +538,7 @@
 				DEVELOPMENT_TEAM = N44DR7594Z;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = goodMatches/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -549,6 +565,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N44DR7594Z;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
@@ -568,6 +585,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N44DR7594Z;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
@@ -586,6 +604,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N44DR7594Z;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = uk.co.satoama.goodMatchesUITests;
@@ -603,6 +622,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N44DR7594Z;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = uk.co.satoama.goodMatchesUITests;

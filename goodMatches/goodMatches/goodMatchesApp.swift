@@ -11,8 +11,8 @@ import SwiftUI
 struct goodMatchesApp: App {
     @StateObject var myPlayers=PlayersOnCourt()
     @StateObject var goodMatchSets=GoodMatchSetsOnCourt()
-    @StateObject var matchResults=MatchResults()
-    @StateObject var playerDataHandler=PlayerDataHandler(urlString_remote:"http://127.0.0.1:5000/players")
+    @StateObject var matchResults=MatchSetHistory()
+    @StateObject var playerDataHandler=PlayerDataHandler(urlString_remote:"http://satoama.co.uk:5000/players")
     var body: some Scene {
         WindowGroup {
             ContentView().environmentObject(myPlayers).environmentObject(goodMatchSets).environmentObject(matchResults).environmentObject(playerDataHandler)

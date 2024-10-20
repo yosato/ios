@@ -13,7 +13,7 @@ struct PlayerView: View {
     @EnvironmentObject var playerDataHandler:PlayerDataHandler
     @EnvironmentObject var myPlayers:PlayersOnCourt
     @EnvironmentObject var goodMatches:GoodMatchSetsOnCourt
-    @EnvironmentObject var matchResults:MatchResults
+    @EnvironmentObject var matchResults:MatchSetHistory
     @State private var playersConfirmedP=false
     @State private var inputInvalid=false
     @State private var selectedPlayers=Set<Player>()

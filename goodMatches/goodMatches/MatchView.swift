@@ -12,7 +12,7 @@ struct MatchView: View {
     let liveMode: Bool
     @EnvironmentObject var myPlayers:PlayersOnCourt
     @EnvironmentObject var goodMatchSets:GoodMatchSetsOnCourt
-    @EnvironmentObject var matchResults:MatchResults
+    @EnvironmentObject var matchResults:MatchSetHistory
     @State var currentMatchSetInd:Int=0
     @State var result:Int=0
     var values1d:[Int]=Array(0...6)
@@ -55,12 +55,12 @@ struct MatchView: View {
             List{
                 ForEach(indexedBestMatchSetsOnCourt,id:\.1){ (matchSetInd, matchSet) in
                     VStack{
-                        Text("goodMatches \(matchSetInd+1)"+(!debug ? "" : "  "+String(format:"%.2f",matchSet.totalScoreDiff)))
+                        Text("goodMatch \(matchSetInd+1)"+(!debug ? "" : "  "+String(format:"%.2f",matchSet.totalScoreDiff)))
                         MatchUp(matchSetInd: matchSetInd, debug:debug)
-                        if (matchSet.restingPlayers.count != 0){
+                        if (matchSet.restingPlayerSet.players.count != 0){
                             HStack{
                                 Text("Resting: ").font(.headline.smallCaps())
-                                ForEach(matchSet.restingPlayers, id:\.self){Text($0.name)}
+                                ForEach(matchSet.restingPlayerSet.players, id:\.self){Text($0.name)}
                             }
                         }
                     }.brightness(matchSetInd==currentMatchSetInd ? 0 : 0.5).padding()              .overlay(RoundedRectangle(cornerRadius: 10, style: .circular).stroke(Color(uiColor: (matchSetInd==currentMatchSetInd ? .green : .tertiaryLabel)), lineWidth: 3))
@@ -70,15 +70,14 @@ struct MatchView: View {
             }.listStyle(InsetGroupedListStyle()).ignoresSafeArea()//list
             Button(action:{
                 if(liveMode){
-                    gainsLosses=myPlayers.update_playerscores_matchSetResult(matchResults.results.last!)
+                    gainsLosses=myPlayers.update_playerscores_matchSetResult(matchResults.results.first!)
                     showGains=true
-                    goodMatchSets.reorder_matchsets(from:currentMatchSetInd+1)
-                    Task{await myPlayers.update_playerscores_remote(urlStr:"http://127.0.0.1:5000/players")}
+                    goodMatchSets.update_matchsets_onResult()
+                    Task{await myPlayers.update_playerscores_remote(urlStr:"http://satoama.co.uk:5000/players")}
                 }
                 currentMatchSetInd=(currentMatchSetInd+1<comboCount ? currentMatchSetInd+1 : 0)
                 
             },label:{Text(liveMode ? "Update and go next" : "Next Match")}).padding().disabled(liveMode && (matchResults.results.count < currentMatchSetInd+1 || !matchResults.results.last!.completed))
-//            Text("There are \(comboCount) combinations (currently no. \(currentMatchSetInd+1))")
         }.alert("\(gainsLosses2string(gainsLosses))",isPresented:$showGains){}
         
     }
@@ -98,55 +97,95 @@ struct MatchUp:View{
     @EnvironmentObject var goodMatchSets:GoodMatchSetsOnCourt
     var matchSetOnCourt:MatchSetOnCourt {goodMatchSets.orderedMatchSets[matchSetInd]}
     var matchSet:[Match] { matchSetOnCourt.matchesOnCourt }
-    @EnvironmentObject var matchResults:MatchResults
+    @EnvironmentObject var matchSetHistory:MatchSetHistory
     @State var currentMatch:Match? = nil
     @State var matchInd:Int=0
     var debug:Bool
-    //        @State var showInputResult=false
-    
+    @State var resultInputs:[(Int,Int)]=[]
+    @State var hasAppeared:Bool=false
+//    @State var stuff0:[Int]
+//    init(){
+//        self.stuff=Array(repeating:(0,0),count:goodMatchSets.orderedMatchSets[matchSetInd].matchesOnCourt.count)
+//    }
+
     var body: some View{
+        VStack{
         NavigationStack{
-            ForEach(Array(zip(matchSet.indices,matchSet)),id:\.0){ (index, match) in
-                let team1=match.teams.0
-                let team2=match.teams.1
-                let isDoubles=(team1.players.count==2 ? true : false)
-                HStack(alignment: .top){    Text((isDoubles ? "D" : "S")).font(.headline.smallCaps()).padding(0.5)
-                    
-                    VStack{
-                        HStack{
-                            VStack{ForEach(match.pairOfPlayers.0,id:\.self){Text($0.name+(!debug ? "" : " \($0.score)"))}}
+
+                ForEach(Array(zip(matchSet.indices,matchSet)),id:\.0){ (index, match) in
+                    let team1=match.teams.0
+                    let team2=match.teams.1
+                    let isDoubles=(team1.players.count==2 ? true : false)
+                    HStack(alignment: .top){    Text((isDoubles ? "D" : "S")).font(.headline.smallCaps()).padding()
+                        Spacer()
+                        VStack{
+                            HStack{
+                                VStack{ForEach(match.pairOfPlayers.0,id:\.self){Text($0.name+(!debug ? "" : " \($0.score)"))}}
                                 Spacer()
                                 Text("vs")
                                 Spacer()
                                 VStack{ForEach(match.pairOfPlayers.1,id:\.self){Text($0.name+(!debug ? "" : " \($0.score)"))}}
-                            if(debug){Text(String(format:"%.2f",match.scoreDiff))}
-                        }.padding()
-                        HStack{
-                            Spacer()
-                            if (!matchResults.results.isEmpty){
-                                let matchID=match.id+"__"+String(matchSetInd)
-                                if let matchResult=matchResults.get_matchresult_byID(matchID){
-                                    Text("\(matchResult.scores.0)-\(matchResult.scores.1)")
-                                }
+                                if(debug){Text(String(format:"%.2f",match.scoreDiff))}
                             }
-                            Spacer()
-                            Button("Input/correct result"){
-                                //showInputResult=true
-                                currentMatch=match
-                                matchInd=index
+                            HStack{
+                                Spacer()
+                                HStack{
+                                    if(!resultInputs.isEmpty){
+                                        Spacer()
+                                        Picker("",selection:$resultInputs[index].0){
+                                            if(resultInputs[index].1==6||resultInputs[index].1==5){ForEach(0..<8){Text("\($0)")}}else{ForEach(0..<7){Text("\($0)")}}
+                                        }.frame(width:60).pickerStyle(WheelPickerStyle())
+                                        Spacer()
+                                        Picker("",selection:$resultInputs[index].1){
+                                            if(resultInputs[index].0==6||resultInputs[index].0==5){ForEach(0..<8){Text("\($0)")}}else{ForEach(0..<7){Text("\($0)")}}
+                                        }.frame(width:60).pickerStyle(WheelPickerStyle())
+                                        Spacer()
+                                    }
+                                }.frame(height:40)
+                                if (!matchSetHistory.results.isEmpty){
+                                    let matchID=match.id+"__"+String(matchSetInd)
+                                    if let matchResult=matchSetHistory.get_first_matchResult_byMatchID(matchID){
+                                        Text("\(matchResult.scores.0)-\(matchResult.scores.1)")
+                                    }
+                                }
                             }
                         }
                     }
                 }
+            if(matchSetInd==goodMatchSets.orderedMatchSets.count-1){
+                Button("Save/correct results"){
+                    var matchResults=[MatchResult]()
+                    for (cntr,result) in resultInputs.enumerated(){
+                        matchResults.append(get_matchresult(matchSetInd: matchSetInd, match: matchSet[cntr], scores: result))
+                    }
+                    let matchSetResult=MatchSetResult(matchResults:matchResults)
+                    matchSetHistory.add_replace_matchSetResult(matchSetResult,sizedCourtCounts:matchSetOnCourt.sizedCourtCounts)
+                    
+                }.disabled(both_zero_exists(resultInputs))
             }
-            
-            .sheet(item:$currentMatch){aMatch in
-                InputResultView(matchSetInd:matchSetInd, sizedCourtCounts:matchSetOnCourt.sizedCourtCounts, match:matchSet[matchInd]).environmentObject(matchResults)
             }
-        }//ForEach
-        
+        }.onAppear{
+            guard !hasAppeared else {return}
+            resultInputs=Array(repeating:(0,0),count:matchSet.count)
+            hasAppeared=true
+            print(resultInputs)
+        }
+//        .sheet(item:$currentMatch){aMatch in
+//            InputResultView(matchSetInd:matchSetInd, sizedCourtCounts:matchSetOnCourt.sizedCourtCounts, match:matchSet[matchInd]).environmentObject(matchResults)
+//        }
+//        .sheet(isPresented:$showInputResult){
+//            
+//            //InputResultView(matchSetInd:matchSetInd, sizedCourtCounts:matchSetOnCourt.sizedCourtCounts, match:matchSet[0]).environmentObject(matchResults)
+//            InputResultView(matchSetInd:matchSetInd, sizedCourtCounts:matchSetOnCourt.sizedCourtCounts, match:matchSet[0]).environmentObject(matchResults)
+//        }
+
     }//NavStack
-    
+    func both_zero_exists(_ resultInputs:[(Int,Int)])->Bool{
+        for (int1,int2) in resultInputs{
+            if(int1 == 0 && int2 == 0){return true}
+        }
+        return false
+    }
 }
 
 
@@ -172,5 +211,5 @@ struct MatchUp_sub:View{
 
 #Preview {
     MatchView(liveMode:true,debug:false).environmentObject(PlayersOnCourt()).environmentObject(GoodMatchSetsOnCourt())
-        .environmentObject(MatchResults())
+        .environmentObject(MatchSetHistory())
 }

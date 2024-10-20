@@ -19,7 +19,7 @@ struct PlayerConfirmView: View {
     @State private var inputInvalid=false
     @State private var calculationDone=false
     @State private var calculating=false
-    @State private var liveMode=false
+    @State private var liveMode=true
     //var courtCount:Int {goodMatchSets.courtCount}
     @State var debug:Bool
     var body: some View {
@@ -51,7 +51,7 @@ struct PlayerConfirmView: View {
                         if(Double(myPlayers.players.count)/Double(2)<Double(courtCount)){inputInvalid=true}else{
                             //                            calculating=true
                             //DispatchQueue.global(qos: .background).async {
-                                goodMatchSets.get_best_matchsets(myPlayers,courtCount);calculating=false;calculationDone=true
+                                goodMatchSets.get_best_new_matchset(myPlayers,courtCount);calculating=false;calculationDone=true
                             //}
                         }
                     },label:{Text("Get good matches")}).padding().alert("Too many courts for the player",isPresented: $inputInvalid){

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ResultHistoryView: View {
-    @EnvironmentObject var  matchResults:MatchResults
+    @EnvironmentObject var  matchResults:MatchSetHistory
     var body: some View {
         List {
             ForEach(matchResults.results){matchSetResult in

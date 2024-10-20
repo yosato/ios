@@ -11,7 +11,6 @@ import SwiftUI
 struct ContentView: View {
     @State var debug=false
   
-//    @StateObject var playerDataHandler=PlayerDataHandler(urlString_remote:"http://127.0.0.1:5000/players")
     @EnvironmentObject var playerDataHandler:PlayerDataHandler
     @StateObject var networkMonitor=NetworkMonitor()
     @EnvironmentObject var myPlayers:PlayersOnCourt
@@ -40,16 +39,16 @@ struct ContentView: View {
             }
             
             Button{
+                // internet connection
                 if(!networkMonitor.isConnected){
                     showInternetAlert.toggle()
                 }else{
-                    //networkMonitor.checkConnection(urlString:"http://127.0.0.1:5000/players")
-                    
-                    if(false){showReachabilityAlert.toggle()}else{
+                    //then server connection
+                    if(networkMonitor.reachable){showReachabilityAlert.toggle()}else{
                         //dataLoading=true
                         Task{registeredPlayers=try! await playerDataHandler.loadData_remote(); dataLoaded=true}
                         //registeredPlayers=playerDataHandler.loadData_local()
-                            dataLoaded=true
+                            //dataLoaded=true
 
                         //dataLoading=false
                                          }

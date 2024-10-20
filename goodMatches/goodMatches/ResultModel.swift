@@ -31,11 +31,11 @@ func get_elo_update_value(winningTeam:Team, against:Team, result:(Int,Int), k:In
 
 }
 
-class MatchResults:ObservableObject{
+class MatchSetHistory:ObservableObject{
     @Published var results=[MatchSetResult]()
     var lastCompleted:Bool? {!self.results.isEmpty ? self.results.last!.completed : nil}
     
-    func get_matchresult_byID(_ matchID:String)-> MatchResult?{
+    func get_first_matchResult_byMatchID(_ matchID:String)-> MatchResult?{
         for matchSetResult in self.results{
             for matchResult in matchSetResult.matchResults{
                 if matchResult.id==matchID{
@@ -46,13 +46,14 @@ class MatchResults:ObservableObject{
         return nil
     }
     
-    func add_matchResult(_ matchResult:MatchResult, sizedCourtCounts:[Int:Int]){
-        if let resultInd=get_rightMatchResultInd(matchResult.matchSetInd){
-            self.results[resultInd].matchResults.append(matchResult)
+    func add_replace_matchSetResult(_ matchSetResult:MatchSetResult, sizedCourtCounts:[Int:Int]){
+        // if the MSR does not exist already add it, if it does replace it
+        if let hitInd=results.firstIndex(where:{$0.matchSetInd==matchSetResult.matchSetInd}){
+            // case of replacing
+            self.results[hitInd]=matchSetResult
         }else{
-            var matchSetResult=MatchSetResult(sizedCourtCounts:sizedCourtCounts)
-            matchSetResult.matchResults.append(matchResult)
-            self.results.append(matchSetResult)
+            // case of adding
+            self.results=[matchSetResult]+self.results
         }
     }
     
@@ -67,9 +68,15 @@ class MatchResults:ObservableObject{
 }
 
 struct MatchSetResult:Identifiable{
-    let sizedCourtCounts:[Int:Int]
     var matchResults=[MatchResult]()
    //  assert(matchResults.map{matchResult in matchResult.matchSetInd})
+    var sizedCourtCounts:[Int:Int] {
+        var sizedCourtCounts=[Int:Int]()
+        for matchResult in matchResults{
+            sizedCourtCounts[matchResult.matchSize,default:0]+=1
+        }
+        return sizedCourtCounts
+    }
     var matchSetInd:Int? {!matchResults.isEmpty ? matchResults[0].matchSetInd : nil}
     var id:String {matchResults.map{matchResult in matchResult.id}.joined(separator:"--")}
     var completed:Bool {matchResults.count==sizedCourtCounts.values.reduce(0){$0+$1}}
@@ -85,6 +92,8 @@ struct MatchResult:Identifiable,Equatable{
     let match:Match
     // needs to be aligned with match.teams.0/1
     var scores:(Int,Int)
+    var matchSize:Int {match.teamsize*2}
+    // match result id is the combo of match id (who plays against whom) and match set ind
     var id:String {match.id+"__"+String(matchSetInd)}
     var drawnP:Bool {scores.0==scores.1}
     var winningInd:Int? {drawnP ? nil : (scores.0>scores.1 ? 0 : 1)}

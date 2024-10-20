@@ -11,7 +11,7 @@ struct TabViews: View {
     var liveMode:Bool
     @Binding var registeredPlayers:[Player]
     var debug:Bool
-    @EnvironmentObject var matchResults:MatchResults
+    @EnvironmentObject var matchResults:MatchSetHistory
 //    @EnvironmentObject var matchResults:MatchResults
     var body: some View {
         TabView{ 

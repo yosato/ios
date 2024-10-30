@@ -8,88 +8,46 @@
 import Foundation
 
 
-enum Gender:String{
-    case male="male"
-    case female="female"
-}
-
-class Player: Codable, Equatable, Hashable, Identifiable{
-    static func == (lhs: Player, rhs: Player) -> Bool {
-        lhs.id==rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher){
-        hasher.combine(self.id)
-    }
-
-    enum CodingKeys:String,CodingKey{
-        case name
-        case score
-        case gender
-        case club
-        //case id
-
-    }
-    var name: String
-    var score: Double
-    var gender: String
-    var club:String
-    var nameLen:Int {name.split(separator:" ").count}
-    var nameAbbr:String {name.split(separator:" ")[0].lowercased()+(nameLen>1 ? name.split(separator:" ")[1].capitalized : "")}
-    var clubAbbr:String {club.split(separator: " ").map{word in word.prefix(1)}.joined(separator:"")}
-    var id:String {nameAbbr+"_"+clubAbbr}
-    var preferencesIntraMS:[(Player,MatchSetOnCourt)->Bool]=[]
-    var preferencesInterMS:[(Player,MatchSetOnCourt,MatchSetOnCourt)->Bool]=[]
-
-    init(name:String,score:Double,gender:String,club:String){
-        self.name=name; self.score=score; self.gender=gender; self.club=club
-    }
-    
-    func update_score(_ increment: Double){
-        self.score+=increment
-    }
-}
-
 struct PlayerSet:Hashable,Equatable,Identifiable {
     static func == (lhs: PlayerSet, rhs: PlayerSet) -> Bool {
         lhs.id==rhs.id
     }
-    let players:[Player]
+    let players:[PlayerInClub]
     let id:String
     
-    init(_ players:[Player]){
+    init(_ players:[PlayerInClub]){
         self.players=players.sorted{$0.name<$1.name}
         self.id=self.players.map{player in player.id}.joined(separator: "--")
     }
-    init(_ players:Set<Player>){
+    init(_ players:Set<PlayerInClub>){
         self.players=players.sorted{$0.name<$1.name}
         self.id=self.players.map{player in player.id}.joined(separator: "--")
     }
 }
 struct Team:Hashable,Equatable,Identifiable {
-    var players:[Player]
+    var players:[PlayerInClub]
     var id:String
     var playersString:String {players.map{player in player.name}.joined(separator: " / ")}
-    var playerSet:Set<Player> {Set(self.players)}
+    var playerSet:Set<PlayerInClub> {Set(self.players)}
     var scores:[Double] {players.map{$0.score}}
     var totalScore:Double {sum(scores)}
     var meanScore:Double {self.totalScore/Double(self.players.count)}
-    init(_ players:[Player]){
+    init(_ players:[PlayerInClub]){
         self.players=players.sorted{$0.name>$1.name}
         self.id=players.map{player in player.id}.joined(separator: "/")
     }
-    init(_ players:Set<Player>){
+    init(_ players:Set<PlayerInClub>){
         self.players=players.sorted{$0.name>$1.name}
         self.id=players.map{player in player.id}.joined(separator: "/")
     }
-    mutating func update_playerscores(_ playersScores:[Player:Double]){
+    mutating func update_playerscores(_ playersScores:[PlayerInClub:Double]){
         for (playerToUpdate,newScore) in playersScores{
             if let index=players.firstIndex(where:{$0.id==playerToUpdate.id}){
                 players[index].score=newScore
             }
         }
     }
-    func updated_playerscores(_ players:[Player])->Team{
+    func updated_playerscores(_ players:[PlayerInClub])->Team{
         var myTeam:Team=self
         for playerToUpdate in players{
             if let index=myTeam.players.firstIndex(where:{playerToUpdate.id==$0.id}){
@@ -98,7 +56,7 @@ struct Team:Hashable,Equatable,Identifiable {
         }
         return myTeam
     }
-    func updated_playerscore(player:Player)->Team{
+    func updated_playerscore(player:PlayerInClub)->Team{
         var myTeam:Team=self
         if let index=players.firstIndex(where:{player.id==$0.id}){
             myTeam.players[index].score=player.score
@@ -118,10 +76,10 @@ class Match:Identifiable, Equatable, Hashable {
     func hash(into hasher: inout Hasher){
         hasher.combine([teams.0,teams.1])
     }
-        //    var playerSets:([Player],[Player]) { (self.teams.0.players, self.teams.1.players) }
-    var pairOfPlayers:([Player],[Player]) { (self.teams.0.players, self.teams.1.players) }
-    //var players:[Player] { playerSets.0+playerSets.1 }
-    var listOfPlayers:[Player] { pairOfPlayers.0+pairOfPlayers.1.sorted{$0.score>$1.score} }
+        //    var playerSets:([PlayerInClub],[PlayerInClub]) { (self.teams.0.players, self.teams.1.players) }
+    var pairOfPlayers:([PlayerInClub],[PlayerInClub]) { (self.teams.0.players, self.teams.1.players) }
+    //var players:[PlayerInClub] { playerSets.0+playerSets.1 }
+    var listOfPlayers:[PlayerInClub] { pairOfPlayers.0+pairOfPlayers.1.sorted{$0.score>$1.score} }
     var teamsize:Int { pairOfPlayers.0.count }
     var playerStringSets:([String],[String]) {(self.pairOfPlayers.0.map{$0.name},self.pairOfPlayers.1.map{$0.name})}
     var scoreDiff:Double {(teams.0.totalScore-teams.1.totalScore)/(teamsize==4 ? 2 : 1)}
@@ -135,7 +93,7 @@ class Match:Identifiable, Equatable, Hashable {
         self.id=[teamA.id,teamB.id].sorted{$0<$1}.joined(separator:":")
     }
     
-    func update_playerscores(players:[Player]){
+    func update_playerscores(players:[PlayerInClub]){
         var newTeams:[Team]=[]
         for team in [teams.0,teams.1]{
             newTeams.append(team.updated_playerscores(players))
@@ -143,7 +101,7 @@ class Match:Identifiable, Equatable, Hashable {
         teams=newTeams[0].totalScore>newTeams[1].totalScore ?(newTeams[0],newTeams[1]):(newTeams[1],newTeams[0])
     }
     
-    func updated_playerscore(player:Player)-> Match{
+    func updated_playerscore(player:PlayerInClub)-> Match{
             var newMatch=self
         var newTeams:[Team]=[]
         for team in [teams.0,teams.1]{
@@ -165,8 +123,8 @@ enum Strength:String{
 
 //@MainActor
 class PlayersOnCourt:ObservableObject{
-    @Published var players:[Player]=[]
-    var sortedPlayers:[Player] {players.sorted(by:{$0.score>$1.score})}
+    @Published var players:[PlayerInClub]=[]
+    var sortedPlayers:[PlayerInClub] {players.sorted(by:{$0.score>$1.score})}
     var sortedScores:[Double] {sortedPlayers.map{$0.score}}
     var maxScore:Double {sortedScores.max() ?? 100}
     var minScore:Double {sortedScores.min() ?? 0}
@@ -221,7 +179,7 @@ class PlayersOnCourt:ObservableObject{
         return sizedStrengthClassifiedTeams
     
     }
-    //    init(_ players:[Player]){
+    //    init(_ players:[PlayerInClub]){
     //      self.players=players
     //}
     func get_relativestrength_team(_ team:Team)-> String{
@@ -233,11 +191,11 @@ class PlayersOnCourt:ObservableObject{
     func delete_all_players(){
         self.players=[]
     }
-    func add_player(_ player:Player){
+    func add_player(_ player:PlayerInClub){
         if !self.players.contains(player)
         {self.players=[player]+self.players}
     }
-    func add_players(_ players:[Player]){
+    func add_players(_ players:[PlayerInClub]){
         for player in players{
             self.add_player(player)
         }
@@ -285,7 +243,7 @@ class PlayersOnCourt:ObservableObject{
 
     func update_playerscores_remote(urlStr:String) async {
         for player in self.players{
-            if let request=get_url_request(urlStr: urlStr, requestType: "PUT"){
+            if let request=try await get_url_request(urlStr: urlStr, requestType: "PUT"){
                 guard let encodedPlayer=try? JSONEncoder().encode(player) else{return}
                 do{let (data, _) = try await URLSession.shared.upload(for:request,from:encodedPlayer)}catch{print()}
             }
@@ -322,8 +280,8 @@ struct MatchSetOnCourt:Hashable,Equatable{
     
     var matchesOnCourt:[Match] {(sizedMatchesOnCourt[4] ?? [])+(sizedMatchesOnCourt[2] ?? [])}
 
-    var playingPlayers:[Player]  {matchesOnCourt.map{match in match.listOfPlayers}.flatMap{$0}}
-    var allPlayers:[Player]  {playingPlayers+restingPlayerSet.players}
+    var playingPlayers:[PlayerInClub]  {matchesOnCourt.map{match in match.listOfPlayers}.flatMap{$0}}
+    var allPlayers:[PlayerInClub]  {playingPlayers+restingPlayerSet.players}
     
     var allTeamOppositions:[(Team,Team)] {matchesOnCourt.map{$0.teams}}
     var playingRestingPlayerCounts:(Int,Int) {(self.playingPlayers.count, self.restingPlayerSet.players.count)}
@@ -494,9 +452,10 @@ func matchset_duplicate_p(_ matchSets:[MatchSetOnCourt], doProportion:Double=1.0
     return false
 }
 
-func assign_courtTeamsize(courtCount:Int,playerCount:Int)-> [Int:Int]{
+func assign_courtCount_perMatchSize(courtCount:Int,playerCount:Int,singlesOnly:Bool=false)-> [Int:Int]{
 //    let maxPlayers=courtCount*4
     assert(courtCount>=1 && playerCount>=2)
+    if(singlesOnly){return [2:courtCount]}
     var count4:Int = courtCount
     var count2:Int = 0
     var playingPlayerCount=courtCount*4
@@ -536,10 +495,10 @@ class RestingPlayerKeyedMatchSetsOnCourt{
         assert(all_identical(restingPlayerCounts))
         let restingPlayerCount=restingPlayerCounts[0]
         self.restingPlayerKeyedMatchSets = restingPlayerKeyedMatchSetsOnCourt
-        let allPlayers:Set<Player>=restingPlayerKeyedMatchSetsOnCourt.keys.map{playerSet in Set(playerSet.players)}.reduce(Set()){$0.union($1)}
+        let allPlayers:Set<PlayerInClub>=restingPlayerKeyedMatchSetsOnCourt.keys.map{playerSet in Set(playerSet.players)}.reduce(Set()){$0.union($1)}
         
         let playingPlayerCounts=allPlayers.count-restingPlayerCount
-        self.partitionBasedRestingPlayerSetList=(restingPlayerCount==0 ? [PlayerSet([])] : partition_based_ordering(Array(allPlayers), Array(repeating:restingPlayerCount, count:allPlayers.count/restingPlayerCount)).map{players in PlayerSet(players)})
+        self.partitionBasedRestingPlayerSetList=(restingPlayerCount==0 ? [PlayerSet([])] : order_remainders_onPartition(elements: Array(allPlayers), remainderCount:restingPlayerCount)!.map{players in PlayerSet(players)})
 
     }
     func update_onResult()->Bool?{
@@ -591,7 +550,7 @@ class GoodMatchSetsOnCourt:ObservableObject{
     var lookForwardExtent:Int? = nil
     var matchSetCountPerRestingPlayer:Int?=nil
     var playingRestingPlayerCounts:(Int,Int)? = nil
-    var allPlayers:[Player]? = nil
+    var allPlayers:[PlayerInClub]? = nil
     var sizedCourtCount:[Int:Int]? = nil
     var frequentResterIDs:Set<String> = Set(["noriko_MWL"])
     var doublesSinglesPs:(Bool,Bool)? {self.sizedCourtCount==nil ? nil : (self.sizedCourtCount!.keys.contains(4),self.sizedCourtCount!.keys.contains(2))}
@@ -604,9 +563,9 @@ class GoodMatchSetsOnCourt:ObservableObject{
 
 
     // THIS IS THE MAIN FUNC!
-    func get_best_new_matchset(_ playersOnCourt:PlayersOnCourt, _ courtCount:Int){
+    func get_best_new_matchset(_ playersOnCourt:PlayersOnCourt, _ courtCount:Int, singlesOnly:Bool=false){
         //setting basic vars
-        self.sizedCourtCount=assign_courtTeamsize(courtCount: courtCount, playerCount: playersOnCourt.players.count)
+        self.sizedCourtCount=assign_courtCount_perMatchSize(courtCount: courtCount, playerCount: playersOnCourt.players.count, singlesOnly:singlesOnly)
         self.courtCount=sizedCourtCount!.values.reduce(0,+)
         let playingPlayerCount:Int=self.sizedCourtCount!.map{(size,count) in size*count}.reduce(0,+)
         self.allPlayers=playersOnCourt.players
@@ -652,7 +611,7 @@ class GoodMatchSetsOnCourt:ObservableObject{
         // all the heavy lifting
         func get_good_matchsets(_ sizedCourtCounts:[Int:Int], _ sizePlayerKeyedMatches:[Int:[PlayerSet:([Match],[Match])]], _ playersOnCourt:PlayersOnCourt, debug:Bool=false)-> RestingPlayerKeyedMatchSetsOnCourt{
             
-            func construct_matchsetsOnCourt_from_partition(_ playerPartition:Set<Set<Player>>, restingPlayerSet:PlayerSet, potentialMatches:[Int:[PlayerSet:([Match],[Match])]],debug:Bool=false)->[MatchSetOnCourt]{
+            func construct_matchsetsOnCourt_from_partition(_ playerPartition:Set<Set<PlayerInClub>>, restingPlayerSet:PlayerSet, potentialMatches:[Int:[PlayerSet:([Match],[Match])]],debug:Bool=false)->[MatchSetOnCourt]{
                 // e.g. a partition could be <a,b>, <c,d,e,f>, <g,h,i,j>
                 // then the max matchgroups will be < match(a/b) >, < match(cd/ef), match(ce/df), match(cf/de) >, < match(gh/ij), match(gi/hj), match(gj/hi) >
                 
@@ -684,15 +643,15 @@ class GoodMatchSetsOnCourt:ObservableObject{
             for (size,count) in sizedCourtCounts{
                 ints+=Array(repeating:size,count:count)
             }
-            var sizedPlayerSetsToExclude=[Int:Set<Set<Player>>]()
-            var sizedPlayerSetsToInclude=[Int:Set<Set<Player>>]()
-            //var sizedPlayerSetsToAdd=[Int:Set<Set<Player>>]()
+            var sizedPlayerSetsToExclude=[Int:Set<Set<PlayerInClub>>]()
+            var sizedPlayerSetsToInclude=[Int:Set<Set<PlayerInClub>>]()
+            //var sizedPlayerSetsToAdd=[Int:Set<Set<PlayerInClub>>]()
             for (size,playerKeyedMatches) in sizePlayerKeyedMatches{
                 for (playerSet,matches) in playerKeyedMatches{
                     if(matches.0.isEmpty){
-                        sizedPlayerSetsToExclude[size, default:Set<Set<Player>>()].insert(Set(playerSet.players))
+                        sizedPlayerSetsToExclude[size, default:Set<Set<PlayerInClub>>()].insert(Set(playerSet.players))
                     }else{
-                        sizedPlayerSetsToInclude[size, default:Set<Set<Player>>()].insert(Set(playerSet.players))
+                        sizedPlayerSetsToInclude[size, default:Set<Set<PlayerInClub>>()].insert(Set(playerSet.players))
                     }
                 }
             }
@@ -706,11 +665,11 @@ class GoodMatchSetsOnCourt:ObservableObject{
             let remCombos=Set(playingPlayerPartitionsWithRemainder.map{(_partition,rem) in rem})
             
             print("creating RP key-based MSs...")
-            var RPKeyedPartitionSets=[PlayerSet:Set<Set<Set<Player>>>]()
+            var RPKeyedPartitionSets=[PlayerSet:Set<Set<Set<PlayerInClub>>>]()
             for (playingPlayerPartition,restingPlayers) in playingPlayerPartitionsWithRemainder{
                 assert(!playingPlayerPartition.isEmpty)
                 assert(Set(playingPlayerPartition.flatMap{$0}).intersection(restingPlayers).isEmpty)
-                RPKeyedPartitionSets[PlayerSet(restingPlayers),default: Set<Set<Set<Player>>>()].insert(playingPlayerPartition)
+                RPKeyedPartitionSets[PlayerSet(restingPlayers),default: Set<Set<Set<PlayerInClub>>>()].insert(playingPlayerPartition)
             }
             
             assert(RPKeyedPartitionSets.keys.count==combo_count(n:self.allPlayers!.count, k:playingRestingPlayerCounts!.1))
@@ -1040,7 +999,7 @@ class GoodMatchSetsOnCourt:ObservableObject{
             return false
         }
         // then the average interval should be more than only a bit less than expected interval
-        var restPlayersIndices=[Player:[Int]]()
+        var restPlayersIndices=[PlayerInClub:[Int]]()
         for (idx,matchSet) in self.orderedMatchSets.enumerated(){
             let restPlayers=matchSet.restingPlayerSet
             for player in restPlayers.players{
@@ -1218,21 +1177,29 @@ func apply_intermatchset_constraints_loop(_ matchSets:[MatchSetOnCourt])->[Match
 }
 
 //used for ordering RP sets
-func partition_based_ordering<U:Hashable>(_ elements:[U], _ repeatCounts:[Int])->[[U]]{
+func order_remainders_onPartition<U:Hashable>(elements:[U],  remainderCount:Int)->[Set<U>]?{
+    
+    let repeatCounts=Array(repeating:remainderCount, count:elements.count/remainderCount)
     assert(!repeatCounts.isEmpty)
     assert(!repeatCounts.contains(0))
     assert(elements.count>=sum(repeatCounts))
+    let isDivisible=elements.count == repeatCounts.reduce(0,+)
         print("resting players being ordered...")
-        let partitions=get_partitions_withIntegers_generative(elements, repeatCounts)
-        var orderedPartitions:[[U]]=[]
-    for partition in partitions{//.shuffled(){
-            for part in partition{
-                    orderedPartitions.append(part)
+    if let partitions=get_partitions_withIntegers_generative(Set(elements), repeatCounts,avoidSeqDup:(isDivisible ? false : true)){
+        var orderedParts:[Set<U>]=[]
+        //flattening
+        for (cntr,partition) in partitions.enumerated(){//.shuffled(){
+            var partitionArr=Array(partition)
+            if(cntr>1 && !orderedParts.last!.intersection(partitionArr[0]).isEmpty){
+                partitionArr.append(partitionArr.remove(at:0))
+            }
+            for part in partitionArr{
+                orderedParts.append(part)
             }
         }
-        return orderedPartitions
-     
+        return orderedParts}else{return nil}
     }
+
         
 func satisfied_constraints_allmatchsets(_ matchSet:MatchSetOnCourt, histMatchSets:[MatchSetOnCourt], fncs:[(MatchSetOnCourt,MatchSetOnCourt)->Bool])->[[Bool]]{
     var satisBoolSets=[[Bool]]()
@@ -1245,35 +1212,7 @@ func satisfied_constraints_allmatchsets(_ matchSet:MatchSetOnCourt, histMatchSet
     }
     return satisBoolSets
 }
-func get_partitions_withIntegers_generative<T:Hashable>(_ myList:[T], _ ints:[Int], stopCount:Int=10)-> [[[T]]]{
-    assert(myList.count>=sum(ints))
-    var partitions=[[[T]]]()
-    let upperBound=count_intpartitions(ints)
-    let limit=(stopCount>upperBound ? upperBound : stopCount)
-    var cntr=0
-    while (partitions.count<limit || cntr>100){
-        let cand=generate_partition_randomly(myList, ints)
-        if !partitions.contains(cand){
-            partitions.append(cand)
-        }
-        cntr+=1
-    }
-    return partitions
-}
 
-func generate_partition_randomly<T:Hashable>(_ myList:[T], _ ints:[Int])->[[T]]{
-    var complement=myList
-    var newPartition=[[T]]()
-    for int in ints{
-        var part=[T]()
-        for _ in (0..<int){
-            let pickedEl=complement.randomElement()!
-            part.append(pickedEl)
-            complement=complement.filter{$0 != pickedEl}}
-        newPartition.append(part)
-    }
-    return newPartition
-}
 
 //// there could be a remainder left afterwards, i.e. there can be more orgList els than the sum of ints
 //func get_partitions_withIntegers<T:Hashable>(_ orgList:[T], _ ints:[Int], setsToExclude:Set<Set<T>>=Set(), doPotentiallyRandomPrune:Bool=false, debug:Bool=false)-> [([[T]],[T])]{
@@ -1399,8 +1338,8 @@ func generate_partition_randomly<T:Hashable>(_ myList:[T], _ ints:[Int])->[[T]]{
 
     
 func teams_nooverlap_p(_ teams:[Team])-> Bool{
-    var seenPlayers=Set<Player>()
-    var playersInTeam:Set<Player>
+    var seenPlayers=Set<PlayerInClub>()
+    var playersInTeam:Set<PlayerInClub>
     for team in teams{
         playersInTeam=Set(team.players.flatMap{$0})
         if !seenPlayers.intersection(playersInTeam).isEmpty{
@@ -1412,8 +1351,8 @@ func teams_nooverlap_p(_ teams:[Team])-> Bool{
 }
 
 func matches_nooverlap_p(_ matches:[Match])-> Bool{
-    var seenPlayers=Set<Player>()
-    var playersInTeam:Set<Player>
+    var seenPlayers=Set<PlayerInClub>()
+    var playersInTeam:Set<PlayerInClub>
     for match in matches{
         playersInTeam=Set(match.listOfPlayers.flatMap{$0})
         if !seenPlayers.intersection(playersInTeam).isEmpty{

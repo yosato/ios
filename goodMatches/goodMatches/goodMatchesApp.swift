@@ -6,16 +6,25 @@
 //
 
 import SwiftUI
+import FirebaseCore
 
 @main
 struct goodMatchesApp: App {
     @StateObject var myPlayers=PlayersOnCourt()
     @StateObject var goodMatchSets=GoodMatchSetsOnCourt()
     @StateObject var matchResults=MatchSetHistory()
-    @StateObject var playerDataHandler=PlayerDataHandler(urlString_remote:"http://satoama.co.uk:5000/players")
+    @StateObject var authService=AuthService()
+    @StateObject var playerDataHandler=PlayerDataHandler()
+    @StateObject var playerViewModel=PlayerViewModel()
+    
+    init(){
+        FirebaseApp.configure()
+    }
+
+    
     var body: some Scene {
         WindowGroup {
-            ContentView().environmentObject(myPlayers).environmentObject(goodMatchSets).environmentObject(matchResults).environmentObject(playerDataHandler)
+            ContentView().environmentObject(playerDataHandler).environmentObject(playerViewModel).environmentObject(myPlayers).environmentObject(goodMatchSets).environmentObject(matchResults).environmentObject(authService)
         }
     }
 }

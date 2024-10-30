@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PlayerConfirmView: View {
-    @Binding var registeredPlayers:[Player]
+    @Binding var registeredPlayers:[PlayerInClub]
     @EnvironmentObject var myPlayers:PlayersOnCourt
     @EnvironmentObject var goodMatchSets: GoodMatchSetsOnCourt
     
@@ -20,6 +20,7 @@ struct PlayerConfirmView: View {
     @State private var calculationDone=false
     @State private var calculating=false
     @State private var liveMode=true
+    @State private var singlesOnly=false
     //var courtCount:Int {goodMatchSets.courtCount}
     @State var debug:Bool
     var body: some View {
@@ -42,6 +43,7 @@ struct PlayerConfirmView: View {
                 }.padding()
                 
 
+                Toggle("Singles only",isOn:$singlesOnly)
                 
                 VStack{              Toggle("Live update",isOn:$liveMode)
 
@@ -49,9 +51,9 @@ struct PlayerConfirmView: View {
 //                VStack{
                     Button(action:{calculating=true
                         if(Double(myPlayers.players.count)/Double(2)<Double(courtCount)){inputInvalid=true}else{
-                            //                            calculating=true
+                                                        calculating=true
                             //DispatchQueue.global(qos: .background).async {
-                                goodMatchSets.get_best_new_matchset(myPlayers,courtCount);calculating=false;calculationDone=true
+                            goodMatchSets.get_best_new_matchset(myPlayers,courtCount,singlesOnly:singlesOnly);calculating=false;calculationDone=true
                             //}
                         }
                     },label:{Text("Get good matches")}).padding().alert("Too many courts for the player",isPresented: $inputInvalid){

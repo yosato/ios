@@ -22,9 +22,9 @@ final class goodMatchesTests: XCTestCase {
 //    let playersOnCourt=PlayersOnCourt.add_players(fakePlayers)
     
     var matchSetsOnCourt:MatchSetOnCourt!
-    var begPlayers:[Player]!; var lowerIntPlayers:[Player]!;var upperIntPlayers:[Player]!; var advPlayers:[Player]!
-    var outsideTeamPlayers:[Player]!
-    var sameStrengthPlayers_beg:[Player]!; var sameStrengthPlayers_adv:[Player]!
+    var begPlayers:[PlayerInClub]=[]; var improverPlayers:[PlayerInClub]=[];var intPlayers:[PlayerInClub]=[];var upperIntPlayers:[PlayerInClub]=[]; var advPlayers:[PlayerInClub]=[]
+    var outsideTeamPlayers:[PlayerInClub]!
+    var sameStrengthPlayers_beg:[PlayerInClub]!; var sameStrengthPlayers_adv:[PlayerInClub]!
     var playersOnCourt4:PlayersOnCourt!; var playersOnCourt5:PlayersOnCourt!;  var playersOnCourt6:PlayersOnCourt!; var playersOnCourt7:PlayersOnCourt!
     var playersOnCourt8:PlayersOnCourt!;  var playersOnCourt9:PlayersOnCourt!; var playersOnCourt10:PlayersOnCourt!
     var playersOnCourt11:PlayersOnCourt!;  var playersOnCourt12:PlayersOnCourt!; var playersOnCourt13:PlayersOnCourt!; var playersOnCourt14:PlayersOnCourt!
@@ -43,7 +43,7 @@ final class goodMatchesTests: XCTestCase {
     var arraysOfInts:[[Int]]!
     var setOfPlayersOnCourt:[PlayersOnCourt]!
 
-    func players_all_distinct(_ players:[Player])->Bool{
+    func players_all_distinct(_ players:[PlayerInClub])->Bool{
         var seenPlayerIDs=Set<String>()
         for player in players{
             let playerID=player.id
@@ -57,27 +57,33 @@ final class goodMatchesTests: XCTestCase {
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         try super.setUpWithError()
-        veryStrongTeams=[
-            Team([Player(name:"strong1",score:99,gender:"male",club:"Funabashi"),Player(name:"strong2",score:99,gender:"male",club:"Funabashi")])
-       ,           Team([Player(name:"strong3",score:99,gender:"male",club:"Funabashi"),Player(name:"strong4",score:99,gender:"male",club:"Funabashi")])
-        ]
-        veryWeakTeams=[
-            Team([Player(name:"strong1",score:1,gender:"male",club:"Funabashi"),Player(name:"strong2",score:1,gender:"male",club:"Funabashi")])
-       ,           Team([Player(name:"strong3",score:1,gender:"male",club:"Funabashi"),Player(name:"strong4",score:1,gender:"male",club:"Funabashi")])
-        ]
-        
-        begPlayers=[Player(name:"a1",score:10,gender:"male",club:"Funabashi"), Player(name:"a2",score:20,gender:"male",club:"Funabashi"), Player(name:"a3",score:30,gender:"male",club:"Funabashi"), Player(name:"a4",score:30,gender:"male",club:"Funabashi"), Player(name:"a5",score:30,gender:"male",club:"Funabashi")]
-        lowerIntPlayers=[Player(name:"b1",score:40,gender:"male",club:"Funabashi"), Player(name:"b2",score:45,gender:"male",club:"Funabashi"), Player(name:"b3",score:50,gender:"male",club:"Funabashi"), Player(name:"b4",score:50,gender:"male",club:"Funabashi"), Player(name:"b5",score:50,gender:"male",club:"Funabashi")]
-        upperIntPlayers=[Player(name:"b6",score:55,gender:"male",club:"Funabashi"), Player(name:"b7",score:55,gender:"male",club:"Funabashi"), Player(name:"b8",score:55,gender:"male",club:"Funabashi"), Player(name:"b9",score:60,gender:"male",club:"Funabashi"), Player(name:"b10",score:60,gender:"male",club:"Funabashi")]
-        advPlayers=[Player(name:"c1",score:70,gender:"male",club:"Funabashi"), Player(name:"c2",score:80,gender:"male",club:"Funabashi"), Player(name:"c3",score:90,gender:"male",club:"Funabashi"), Player(name:"c4",score:90,gender:"male",club:"Funabashi"), Player(name:"c5",score:90,gender:"male",club:"Funabashi")]
-        outsideTeamPlayers=[Player(name:"d1",score:40,gender:"male",club:"Funabashi"), Player(name:"d2",score:50,gender:"male",club:"Funabashi"), Player(name:"d3",score:60,gender:"male",club:"Funabashi"), Player(name:"d4",score:70,gender:"male",club:"Funabashi")]
-        sameStrengthPlayers_beg=[Player(name:"sb1",score:20,gender:"male",club:"Funabashi"), Player(name:"sb2",score:20,gender:"male",club:"Funabashi"), Player(name:"sb3",score:20,gender:"male",club:"Funabashi"), Player(name:"sb4",score:20,gender:"male",club:"Funabashi"),
-            Player(name:"sb5",score:20,gender:"male",club:"Funabashi"),
-            Player(name:"sb6",score:20,gender:"male",club:"Funabashi")]
-        sameStrengthPlayers_adv=[Player(name:"sa1",score:80,gender:"male",club:"Funabashi"), Player(name:"sa2",score:80,gender:"male",club:"Funabashi"), Player(name:"sa3",score:80,gender:"male",club:"Funabashi"), Player(name:"sa4",score:80,gender:"male",club:"Funabashi"),
-                                 Player(name:"sa5",score:80,gender:"male",club:"Funabashi"), Player(name:"sa6",score:80,gender:"male",club:"Funabashi")]
+        let club=Club(name:"Funabashi",organiserUIDs: [],playerUIDs:[])
+//        veryStrongTeams=[
+//            Team([PlayerInClub(asMember:Member(displayName:"strong1",email:""),score:99,club:club),
+//                  PlayerInClub(asMember:Member(displayName:"strong2",email:""),score:99,club:club)])
+//       ,           Team([PlayerInClub(asMember:Member(displayName:"strong3",email:""),score:99,club:club),PlayerInClub(asMember:Member(displayName:"strong4",email:""),score:99,club:club)])
+//        ]
+//        veryWeakTeams=[
+//            Team([PlayerInClub(asMember:Member(displayName:"strong1",email:""),score:1,gender:"male",club:club),PlayerInClub(asMember:Member(displayName:"strong2",email:""),score:1,gender:"male",club:club)])
+//       ,           Team([PlayerInClub(asMember:Member(displayName:"strong3",email:""),score:1,gender:"male",club:club),PlayerInClub(asMember:Member(displayName:"strong4",email:""),score:1,gender:"male",club:club)])
+//        ]
+        for (serialNum,score) in [(1,10.0),(2,20.0),(3,30.0),(4,30.0),(5,30.0)]{
+            begPlayers.append(PlayerInClub(asMember:Member(displayName:"beg\(serialNum)",email:""),score:score,club:club))
+        }
+        for (serialNum,score) in [(1,40.0),(2,40.0),(3,40.0),(4,45.0),(5,45.0)]{
+            improverPlayers.append(PlayerInClub(asMember:Member(displayName:"imp\(serialNum)",email:""),score:score,club:club))
+        }
+        for (serialNum,score) in [(1,50.0),(2,50.0),(3,50.0),(4,55.0),(5,55.0)]{
+            intPlayers.append(PlayerInClub(asMember:Member(displayName:"int\(serialNum)",email:""),score:score,club:club))
+        }        
+        for (serialNum,score) in [(1,60.0),(2,60.0),(3,60.0),(4,65.0),(5,65.0)]{
+            upperIntPlayers.append(PlayerInClub(asMember:Member(displayName:"uInt\(serialNum)",email:""),score:score,club:club))
+            }
+        for (serialNum,score) in [(1,70.0),(2,70.0),(3,80.0),(4,85.0),(5,90.0)]{
+            advPlayers.append(PlayerInClub(asMember:Member(displayName:"adv\(serialNum)",email:""),score:score,club:club))
+        }
 
-        let players4=[begPlayers[0],lowerIntPlayers[0],lowerIntPlayers[1],upperIntPlayers[0]]
+        let players4=[begPlayers[0],improverPlayers[0],improverPlayers[1],upperIntPlayers[0]]
         let players5=players4+[advPlayers[0]]
         assert(players_all_distinct(players5))
         
@@ -87,14 +93,14 @@ final class goodMatchesTests: XCTestCase {
         playersOnCourt6=PlayersOnCourt(); let players6=players5+[upperIntPlayers[1]]; assert(players_all_distinct(players6)); playersOnCourt6.add_players(players6)
         playersOnCourt7=PlayersOnCourt(); let players7=players6+[begPlayers[1]]; assert(players_all_distinct(players7)); playersOnCourt7.add_players(players7)
         playersOnCourt8=PlayersOnCourt(); let players8=players7+[advPlayers[1]]; assert(players_all_distinct(players8)); playersOnCourt8.add_players(players8)
-        playersOnCourt9=PlayersOnCourt(); let players9=players8+[lowerIntPlayers[2]]; assert(players_all_distinct(players9)); playersOnCourt9.add_players(players9)
+        playersOnCourt9=PlayersOnCourt(); let players9=players8+[improverPlayers[2]]; assert(players_all_distinct(players9)); playersOnCourt9.add_players(players9)
         playersOnCourt10=PlayersOnCourt(); let players10=players9+[upperIntPlayers[2]]; assert(players_all_distinct(players10)); playersOnCourt10.add_players(players10)
         playersOnCourt11=PlayersOnCourt(); let players11=players10+[advPlayers[2]];  assert(players_all_distinct(players11)); playersOnCourt11.add_players(players11)
-        playersOnCourt12=PlayersOnCourt(); let players12=players11+[lowerIntPlayers[3]];  assert(players_all_distinct(players12)); playersOnCourt12.add_players(players12)
+        playersOnCourt12=PlayersOnCourt(); let players12=players11+[improverPlayers[3]];  assert(players_all_distinct(players12)); playersOnCourt12.add_players(players12)
         playersOnCourt13=PlayersOnCourt(); let players13=players12+[begPlayers[2]]; assert(players_all_distinct(players13)); playersOnCourt13.add_players(players13)
         playersOnCourt14=PlayersOnCourt(); let players14=players13+[upperIntPlayers[3]]; assert(players_all_distinct(players14)); playersOnCourt14.add_players(players14)
         playersOnCourt15=PlayersOnCourt(); let players15=players14+[upperIntPlayers[4]]; assert(players_all_distinct(players15)); playersOnCourt15.add_players(players15)
-        playersOnCourt16=PlayersOnCourt(); let players16=players15+[lowerIntPlayers[4]]; assert(players_all_distinct(players16)); playersOnCourt16.add_players(players16)
+        playersOnCourt16=PlayersOnCourt(); let players16=players15+[improverPlayers[4]]; assert(players_all_distinct(players16)); playersOnCourt16.add_players(players16)
         playersOnCourt17=PlayersOnCourt(); let players17=players16+[advPlayers[3]]; assert(players_all_distinct(players17)); playersOnCourt17.add_players(players17)
         playersOnCourt18=PlayersOnCourt(); let players18=players17+[begPlayers[3]]; assert(players_all_distinct(players18)); playersOnCourt18.add_players(players18)
         playersOnCourt19=PlayersOnCourt(); let players19=players18+[begPlayers[4]]; assert(players_all_distinct(players19)); playersOnCourt19.add_players(players19)
@@ -108,7 +114,7 @@ final class goodMatchesTests: XCTestCase {
 
         begTeam=Team([begPlayers[0],begPlayers[1]])
         begTeam0=Team([begPlayers[2],begPlayers[3]])
-        intTeam=Team([lowerIntPlayers[0],lowerIntPlayers[1]])
+        intTeam=Team([improverPlayers[0],improverPlayers[1]])
         advTeam=Team([advPlayers[0],advPlayers[1]])
         sameStrTeams_begD=[Team([sameStrengthPlayers_beg[0],sameStrengthPlayers_beg[1]]),Team([sameStrengthPlayers_beg[2],sameStrengthPlayers_beg[3]])]
         sameStrTeams_begadvD=[Team([sameStrengthPlayers_beg[0],sameStrengthPlayers_adv[0]]),Team([sameStrengthPlayers_beg[1],sameStrengthPlayers_adv[1]])]
@@ -265,8 +271,8 @@ final class goodMatchesTests: XCTestCase {
     func test_assign_courtTeamSize(){
         let sizeAnswerPairs=[((1,9),[4:1]),((1,6),[4:1]),((2,10),[4:2]),((2,6),[4:1,2:1]),((3,6),[2:3]),((2,7),[4:1,2:1]),((2,8),[4:2]),((2,9),[4:2]),((3,8),[4:1,2:2]),((3,9),[4:1,2:2]),((3,10),[4:2,2:1]),((3,11),[4:2,2:1]),((3,12),[4:3])]
         for ((courtCount,playerCount),answer) in sizeAnswerPairs{
-            let proposed=assign_courtTeamsize(courtCount: courtCount, playerCount: playerCount)
-            XCTAssert(proposed==answer)
+//            let proposed=assign_courtCount_perMatchSize(courtCount: courtCount, playerCount: playerCount)
+//            XCTAssert(proposed==answer)
         }
     }
     

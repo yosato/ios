@@ -9,14 +9,15 @@ import SwiftUI
 
 struct PlayerView: View {
     //    @Environment(\.editMode) var editMode
-    @State var registeredPlayers:[Player]
+    @State var club:Club
+//    @State var registeredPlayers:[PlayerInClub]
     @EnvironmentObject var playerDataHandler:PlayerDataHandler
     @EnvironmentObject var myPlayers:PlayersOnCourt
     @EnvironmentObject var goodMatches:GoodMatchSetsOnCourt
     @EnvironmentObject var matchResults:MatchSetHistory
     @State private var playersConfirmedP=false
     @State private var inputInvalid=false
-    @State private var selectedPlayers=Set<Player>()
+    @State private var selectedPlayers=Set<PlayerInClub>()
     @State var currentClub="MY Wimbledon London"
     @State var clubs=["MY Wimbledon London","MY Wimbledon Tokyo","Funabashi Tennis Freaks"]
     @State var registerSheet=false
@@ -42,7 +43,7 @@ struct PlayerView: View {
             Text("Pick players and confirm").padding(0.2)
             Button("Register a new player"){registerSheet=true}
             List{
-                ForEach(registeredPlayers){player in
+                ForEach(club.players){player in
                     MultipleSelection(name:player.name, club:$currentClub, clubs:$clubs, isSelected:self.selectedPlayers.contains(player)){
                         if self.selectedPlayers.contains(player){
                             self.selectedPlayers.remove(player)
@@ -54,13 +55,13 @@ struct PlayerView: View {
                 
                 //                )
             }.sheet(isPresented:$registerSheet){
-                PlayerRegisterView(registeredPlayersForClub:$registeredPlayers, currentClub:$currentClub, clubs: $clubs)
+                PlayerRegisterView(registeredPlayersForClub:$club.players, currentClub:$currentClub, clubs: $clubs)
             }
                 //.navigationTitle("Registered players")
                 .navigationBarTitleDisplayMode(.inline)
             Text("\(selectedPlayers.count) players selected")
             
-            NavigationLink(destination:PlayerConfirmView(registeredPlayers:$registeredPlayers,courtCount:likelyCourtCount,maxCourtCount:maxCourtCount,debug:debug).environmentObject(myPlayers).onAppear{
+            NavigationLink(destination:PlayerConfirmView(registeredPlayers:$club.players, courtCount:likelyCourtCount,maxCourtCount:maxCourtCount,debug:debug).environmentObject(myPlayers).onAppear{
                 myPlayers.delete_all_players()
                 myPlayers.add_players(Array(selectedPlayers))
             }){
@@ -72,14 +73,14 @@ struct PlayerView: View {
     }
     
     func delete(at offsets: IndexSet) {
-        var players2remove:[Player]=[]
+        var players2remove:[PlayerInClub]=[]
         for offset in offsets{
-            players2remove.append(registeredPlayers[offset])
+            players2remove.append(club.players[offset])
         }
         Task{
             await playerDataHandler.delete_players_remote(players2remove)
         }
-        registeredPlayers.remove(atOffsets: offsets)
+        club.players.remove(atOffsets: offsets)
     }
     
 
@@ -115,6 +116,6 @@ struct MultipleSelection: View {
 
 
 
-#Preview {
-    PlayerView(registeredPlayers:[], debug: .constant(false)).environmentObject(PlayerDataHandler(urlString_remote: "")).environmentObject(PlayersOnCourt())
-}
+//#Preview {
+//    PlayerView(club:Club(), debug: .constant(false)).environmentObject(PlayerDataHandler()).environmentObject(PlayersOnCourt())
+//}

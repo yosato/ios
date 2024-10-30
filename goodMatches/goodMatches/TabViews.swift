@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TabViews: View {
     var liveMode:Bool
-    @Binding var registeredPlayers:[Player]
+    @Binding var registeredPlayers:[PlayerInClub]
     var debug:Bool
     @EnvironmentObject var matchResults:MatchSetHistory
 //    @EnvironmentObject var matchResults:MatchResults

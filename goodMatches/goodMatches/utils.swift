@@ -131,6 +131,8 @@ extension Collection {
     func pick_random_n_elements(n: Int) -> ArraySlice<Element> { shuffled().prefix(n) }
 }
 
+
+
 func duplicate_in_partition<U:Hashable>(_ partition:[[U]])->Bool{
     var seen=Set<U>()
     var duplicateP=false
@@ -480,6 +482,48 @@ func get_repetition_counts<T:Hashable>(_ anArray:[T])->[T:Int]{
         }else{dictToReturn[el]=1}
     }
     return dictToReturn
+}
+
+func get_partitions_withIntegers_generative<T:Hashable>(_ mySet:Set<T>, _ ints:[Int], stopCount:Int=10,avoidSeqDup:Bool=false)-> [Set<Set<T>>]?{
+    let intSum=ints.reduce(0,+)
+    let remainderCount=mySet.count-intSum
+    let elCountDiff=mySet.count-sum(ints)
+    assert(elCountDiff>=0)
+    var partitions=[Set<Set<T>>]()
+    var remainders=[Set<T>]()
+    let remThresh=(elCountDiff<=intSum ? 0 : elCountDiff-intSum)
+    let upperBound=count_intpartitions(ints, remainder:remainderCount)
+    let limit=(stopCount>upperBound ? upperBound : stopCount)
+    var cand=Set<Set<T>>(); var rem=Set<T>()
+    while(partitions.count<limit){
+        var cntr=0
+        while(true){
+            (cand,rem)=generate_partition_randomly(mySet, ints)
+            cntr+=1; if(cntr>100){return nil}
+            let dupPartition = partitions.contains(cand)
+            let dupRemainder = avoidSeqDup && partitions.last != nil && rem.intersection(remainders.last!).count>remThresh
+            if(!dupPartition && !dupRemainder){break}
+            }
+        partitions.append(cand)
+        remainders.append(rem)
+    
+    }
+    return partitions
+}
+
+
+func generate_partition_randomly<T:Hashable>(_ mySet:Set<T>, _ ints:[Int])->(Set<Set<T>>,Set<T>){
+    var complement=mySet
+    var newPartition=Set<Set<T>>()
+    for int in ints{
+        var part=Set<T>()
+        for _ in (0..<int){
+            let pickedEl=complement.randomElement()!
+            part.insert(pickedEl)
+            complement=complement.filter{$0 != pickedEl}}
+        newPartition.insert(part)
+    }
+    return (newPartition,complement)
 }
 
 func count_intpartitions(_ ints:[Int], remainder:Int=0, sizedSetCounts:[Int:Int]=[:])->Int{

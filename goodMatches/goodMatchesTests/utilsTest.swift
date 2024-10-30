@@ -27,6 +27,22 @@ final class utilsTest: XCTestCase {
         // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
     }
     
+    func test_partitionBasedOrdering(){
+        let listsOfEls=[([1,2,3,4,5],2)//one court, singles, two resting
+                        ,([1,2,3,4,5],3)//one court, singles, three resting
+                        ,([1,2,3,4,5,6],4)//one court, singles, four resting
+                        ,([1,2,3,4,5],1)//one court, doubles, one resting
+                        ,([1,2,3,4,5,6],2)//one court, doubles, two resting
+                        ,([1,2,3,4,5,6,7],1)//two court, 1s1d, one resting
+                        ,([1,2,3,4,5,6,7,8,9,10],2)// two courts, 2d, two resting
+                        ,([1,2,3,4,5,6,7,8,9,10,11],3)// two courts, 2d, 3 resting
+                        ]
+        for (els,remainderCount) in listsOfEls{
+//            let orderedParts=order_remainders_onPartition(elements:els, remainderCount:remainderCount)
+            
+        }
+    }
+    
     func testNetworkReachability(){
         let networkMonitor=NetworkMonitor()
         let realURLBool=networkMonitor.checkConnection(urlString:"http://satoama.co.uk")

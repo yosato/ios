@@ -9,7 +9,8 @@ import SwiftUI
 
 struct PlayerRegisterView: View {
     @Environment(\.dismiss) var dismiss
-    @Binding var registeredPlayersForClub:[Player]
+    
+    @Binding var registeredPlayersForClub:[PlayerInClub]
     @EnvironmentObject var playerDataHandler:PlayerDataHandler
  //   @EnvironmentObject var myPlayers:PlayersOnCourt
     @State var playerName:String=""
@@ -62,7 +63,7 @@ struct PlayerRegisterView: View {
     }
 
     
-    func register_player() async -> Player{
+    func register_player() async -> PlayerInClub{
         let score:Double
         switch initLevel{
         case "Advanced": score=70.0
@@ -72,7 +73,7 @@ struct PlayerRegisterView: View {
         case "Beginner": score=30.0
         default: score=45.0
         }
-        let player=Player(name:playerName, score:score, gender:gender.rawValue, club:currentClub)
+        let player=PlayerInClub(asMember:Member(displayName:"",email:""),score:score,clubUID:"")
         //await playerDataHandler.add_player_remote(player)
         await playerDataHandler.add_player_remote(player)
         return player

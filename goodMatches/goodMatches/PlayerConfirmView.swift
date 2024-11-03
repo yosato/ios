@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PlayerConfirmView: View {
     @Binding var registeredPlayers:[PlayerInClub]
+    @EnvironmentObject var playerViewModel:PlayerViewModel
     @EnvironmentObject var myPlayers:PlayersOnCourt
     @EnvironmentObject var goodMatchSets: GoodMatchSetsOnCourt
     
@@ -29,7 +30,7 @@ struct PlayerConfirmView: View {
                 Spacer()
                 VStack{
                     HStack{Spacer();Text("Players to be matched").font(.headline);Spacer();Spacer();Spacer()}
-                    HStack{Spacer();NavigationLink(destination:PlayerView(registeredPlayers:registeredPlayers,debug:$debug)){
+                    HStack{Spacer();NavigationLink(destination:PlayerView(club:playerViewModel.currentClub!, debug:$debug)){
                         Text("Change players")
                     }}
                 }

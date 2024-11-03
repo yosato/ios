@@ -28,7 +28,7 @@ struct WelcomeView: View {
                            VStack {
                                Spacer()
                                NavigationLink("Create account") {
-                                   AccountCreationView()}
+                                   AccountCreationUpdateView()}
                                Spacer()
                                
                                Text("For existing members").padding()

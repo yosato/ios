@@ -14,20 +14,20 @@
 		BC4512DC2C085FA60058BE51 /* PlayerDataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4512DB2C085FA60058BE51 /* PlayerDataHandler.swift */; };
 		BC4512DE2C085FB70058BE51 /* ResultHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4512DD2C085FB70058BE51 /* ResultHistoryView.swift */; };
 		BC4512E02C085FC90058BE51 /* ResultModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4512DF2C085FC90058BE51 /* ResultModel.swift */; };
-		BC4568362CCC06BB00AF2E6F /* ClubRegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4568352CCC06BB00AF2E6F /* ClubRegisterView.swift */; };
+		BC4568362CCC06BB00AF2E6F /* ClubCreationUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4568352CCC06BB00AF2E6F /* ClubCreationUpdateView.swift */; };
 		BC4568392CCC0BFE00AF2E6F /* peopleAndOrgs.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4568382CCC0BFE00AF2E6F /* peopleAndOrgs.swift */; };
 		BC4568402CCE66FF00AF2E6F /* ClubSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC45683F2CCE66FF00AF2E6F /* ClubSelectView.swift */; };
 		BC4568422CCE673500AF2E6F /* ClubDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4568412CCE673500AF2E6F /* ClubDetailView.swift */; };
 		BC45684E2CD12EE500AF2E6F /* JoinApprovalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC45684D2CD12EE500AF2E6F /* JoinApprovalView.swift */; };
+		BC45686B2CD7D09C00AF2E6F /* authenticationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC45686A2CD7D09C00AF2E6F /* authenticationHandler.swift */; };
 		BC6CE0572BA4A1E000B05A24 /* PlayerRegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6CE0562BA4A1E000B05A24 /* PlayerRegisterView.swift */; };
-		BC73A72E2CCAB3BC002170CA /* authenticationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC73A72D2CCAB3BC002170CA /* authenticationHandler.swift */; };
 		BC73A7342CCAB61A002170CA /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC73A7332CCAB61A002170CA /* WelcomeView.swift */; };
 		BC73A7392CCAB8A0002170CA /* InputResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC73A7382CCAB8A0002170CA /* InputResultView.swift */; };
 		BC73A73B2CCAB8A6002170CA /* MultiPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC73A73A2CCAB8A6002170CA /* MultiPicker.swift */; };
 		BC73A7402CCABC5E002170CA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC73A73F2CCABC5E002170CA /* GoogleService-Info.plist */; };
 		BC73A7452CCBA471002170CA /* LogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC73A7442CCBA471002170CA /* LogoView.swift */; };
 		BC73A7492CCBA968002170CA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC73A7482CCBA968002170CA /* ContentView.swift */; };
-		BC73A74B2CCBADB7002170CA /* AccountCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC73A74A2CCBADB7002170CA /* AccountCreationView.swift */; };
+		BC73A74B2CCBADB7002170CA /* AccountCreationUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC73A74A2CCBADB7002170CA /* AccountCreationUpdateView.swift */; };
 		BC7CDADD2B8A2FCA00A3F3CF /* MatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC7CDADC2B8A2FCA00A3F3CF /* MatchView.swift */; };
 		BC7CDAE12B8B2B8200A3F3CF /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC7CDAE02B8B2B8200A3F3CF /* PlayerView.swift */; };
 		BC7CDAEE2B8BB3EA00A3F3CF /* players.json in Resources */ = {isa = PBXBuildFile; fileRef = BC7CDAED2B8BB3EA00A3F3CF /* players.json */; };
@@ -70,20 +70,20 @@
 		BC4512DB2C085FA60058BE51 /* PlayerDataHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerDataHandler.swift; sourceTree = "<group>"; };
 		BC4512DD2C085FB70058BE51 /* ResultHistoryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultHistoryView.swift; sourceTree = "<group>"; };
 		BC4512DF2C085FC90058BE51 /* ResultModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultModel.swift; sourceTree = "<group>"; };
-		BC4568352CCC06BB00AF2E6F /* ClubRegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClubRegisterView.swift; sourceTree = "<group>"; };
+		BC4568352CCC06BB00AF2E6F /* ClubCreationUpdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClubCreationUpdateView.swift; sourceTree = "<group>"; };
 		BC4568382CCC0BFE00AF2E6F /* peopleAndOrgs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = peopleAndOrgs.swift; sourceTree = "<group>"; };
 		BC45683F2CCE66FF00AF2E6F /* ClubSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClubSelectView.swift; sourceTree = "<group>"; };
 		BC4568412CCE673500AF2E6F /* ClubDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClubDetailView.swift; sourceTree = "<group>"; };
 		BC45684D2CD12EE500AF2E6F /* JoinApprovalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinApprovalView.swift; sourceTree = "<group>"; };
+		BC45686A2CD7D09C00AF2E6F /* authenticationHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = authenticationHandler.swift; sourceTree = "<group>"; };
 		BC6CE0562BA4A1E000B05A24 /* PlayerRegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerRegisterView.swift; sourceTree = "<group>"; };
-		BC73A72D2CCAB3BC002170CA /* authenticationHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = authenticationHandler.swift; path = ../../../onlineJanken/onlineJanken/models/authenticationHandler.swift; sourceTree = "<group>"; };
 		BC73A7332CCAB61A002170CA /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		BC73A7382CCAB8A0002170CA /* InputResultView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputResultView.swift; sourceTree = "<group>"; };
 		BC73A73A2CCAB8A6002170CA /* MultiPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultiPicker.swift; sourceTree = "<group>"; };
 		BC73A73F2CCABC5E002170CA /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		BC73A7442CCBA471002170CA /* LogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoView.swift; sourceTree = "<group>"; };
 		BC73A7482CCBA968002170CA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		BC73A74A2CCBADB7002170CA /* AccountCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCreationView.swift; sourceTree = "<group>"; };
+		BC73A74A2CCBADB7002170CA /* AccountCreationUpdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCreationUpdateView.swift; sourceTree = "<group>"; };
 		BC7CDADC2B8A2FCA00A3F3CF /* MatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchView.swift; sourceTree = "<group>"; };
 		BC7CDAE02B8B2B8200A3F3CF /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		BC7CDAED2B8BB3EA00A3F3CF /* players.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = players.json; sourceTree = "<group>"; };
@@ -158,8 +158,8 @@
 			isa = PBXGroup;
 			children = (
 				BC73A7442CCBA471002170CA /* LogoView.swift */,
-				BC73A74A2CCBADB7002170CA /* AccountCreationView.swift */,
-				BC4568352CCC06BB00AF2E6F /* ClubRegisterView.swift */,
+				BC73A74A2CCBADB7002170CA /* AccountCreationUpdateView.swift */,
+				BC4568352CCC06BB00AF2E6F /* ClubCreationUpdateView.swift */,
 				BC7CDAE02B8B2B8200A3F3CF /* PlayerView.swift */,
 				BC45683F2CCE66FF00AF2E6F /* ClubSelectView.swift */,
 				BC4568412CCE673500AF2E6F /* ClubDetailView.swift */,
@@ -171,7 +171,7 @@
 		BC73A72C2CCAB39B002170CA /* dataHandler */ = {
 			isa = PBXGroup;
 			children = (
-				BC73A72D2CCAB3BC002170CA /* authenticationHandler.swift */,
+				BC45686A2CD7D09C00AF2E6F /* authenticationHandler.swift */,
 				BC4512DB2C085FA60058BE51 /* PlayerDataHandler.swift */,
 			);
 			path = dataHandler;
@@ -390,7 +390,7 @@
 				BC73A7452CCBA471002170CA /* LogoView.swift in Sources */,
 				BCAA1DF32B8A2D09005221E6 /* AfterLoginView.swift in Sources */,
 				BC73A73B2CCAB8A6002170CA /* MultiPicker.swift in Sources */,
-				BC4568362CCC06BB00AF2E6F /* ClubRegisterView.swift in Sources */,
+				BC4568362CCC06BB00AF2E6F /* ClubCreationUpdateView.swift in Sources */,
 				BC73A7342CCAB61A002170CA /* WelcomeView.swift in Sources */,
 				BC45684E2CD12EE500AF2E6F /* JoinApprovalView.swift in Sources */,
 				BC7CDADD2B8A2FCA00A3F3CF /* MatchView.swift in Sources */,
@@ -400,16 +400,16 @@
 				BC4512E02C085FC90058BE51 /* ResultModel.swift in Sources */,
 				BC73A7492CCBA968002170CA /* ContentView.swift in Sources */,
 				BCB39C562BC7743C00DD37C8 /* PickerComponent.swift in Sources */,
-				BC73A74B2CCBADB7002170CA /* AccountCreationView.swift in Sources */,
+				BC73A74B2CCBADB7002170CA /* AccountCreationUpdateView.swift in Sources */,
 				BC98B0D42CCBBC97003A420F /* Model.swift in Sources */,
 				BC4568402CCE66FF00AF2E6F /* ClubSelectView.swift in Sources */,
 				BCAA1DF12B8A2D09005221E6 /* goodMatchesApp.swift in Sources */,
+				BC45686B2CD7D09C00AF2E6F /* authenticationHandler.swift in Sources */,
 				BC4568422CCE673500AF2E6F /* ClubDetailView.swift in Sources */,
 				BC7CDAE12B8B2B8200A3F3CF /* PlayerView.swift in Sources */,
 				BCB39CC82BCF700700DD37C8 /* InputResultView.swift in Sources */,
 				BC6CE0572BA4A1E000B05A24 /* PlayerRegisterView.swift in Sources */,
 				BC4512DC2C085FA60058BE51 /* PlayerDataHandler.swift in Sources */,
-				BC73A72E2CCAB3BC002170CA /* authenticationHandler.swift in Sources */,
 				BC7CDBA02B90D10000A3F3CF /* utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

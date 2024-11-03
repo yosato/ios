@@ -81,7 +81,7 @@ struct AfterLoginView: View {
                     }.padding(5)
                 Button("Create a new club"){showClubRegisterView=true}
                     .sheet(isPresented: $showClubRegisterView) {
-                        ClubRegisterView()
+                        ClubCreationUpdateView()
                     }.padding(5)
 
             }

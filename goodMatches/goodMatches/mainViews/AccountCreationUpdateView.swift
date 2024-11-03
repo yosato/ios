@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AccountCreationView: View {
+struct AccountCreationUpdateView: View {
     @EnvironmentObject var authService:AuthService
    // @EnvironmentObject var dataService:DataService
     @State private var email:String=""
@@ -75,5 +75,5 @@ struct AccountCreationView: View {
 }
 
 #Preview {
-    AccountCreationView().environmentObject(AuthService())
+    AccountCreationUpdateView().environmentObject(AuthService())
 }

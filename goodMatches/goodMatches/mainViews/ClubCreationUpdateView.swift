@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ClubRegisterView: View {
+struct ClubCreationUpdateView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var authService:AuthService
 //    @EnvironmentObject var playerDataHandler:PlayerDataHandler
@@ -55,5 +55,5 @@ struct ClubRegisterView: View {
 }
 
 #Preview {
-    ClubRegisterView()
+    ClubCreationUpdateView()
 }
